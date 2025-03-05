@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
 	"github.com/pocketix/pocketix-go/src/parser"
@@ -14,9 +13,10 @@ func main() {
 	flag.Parse()
 
 	data := services.OpenFile("programs/" + *path)
-	if program, err := parser.Parse(data); err != nil {
+	if _, err := parser.Parse(data); err != nil {
 		log.Fatalln(err)
-	} else {
-		fmt.Println(program)
 	}
+	// else {
+	// 	fmt.Println(program)
+	// }
 }
