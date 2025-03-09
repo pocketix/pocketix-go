@@ -9,7 +9,7 @@ import (
 )
 
 func CheckMissingBlock(data []byte) error {
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
@@ -35,9 +35,8 @@ func Parse(data []byte) (*models.Program, error) {
 		if err != nil {
 			return nil, err
 		}
-		// program.Blocks = append(program.Blocks, cmd)
-		// log.Println("Command: ", cmd)
 		services.Logger.Println("Command: ", cmd)
+		cmd.Execute()
 	}
 	return &program, nil
 }

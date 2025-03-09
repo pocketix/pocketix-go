@@ -7,6 +7,11 @@ import (
 )
 
 func ParseBlocks(block models.Block) (interfaces.Command, error) {
+	args, err := ParseArguments(block.Arguments[0])
+	if err != nil {
+		return nil, err
+	}
+
 	var parsedCommands []interfaces.Command
 	for _, block := range block.Body {
 		cmd, err := ParseBlocks(block)
@@ -15,5 +20,5 @@ func ParseBlocks(block models.Block) (interfaces.Command, error) {
 		}
 		parsedCommands = append(parsedCommands, cmd)
 	}
-	return factories.CommandFactory(block.Id, parsedCommands, block.Arguments)
+	return factories.CommandFactory(block.Id, parsedCommands, models.InitTree(block.Arguments[0].Type, args))
 }

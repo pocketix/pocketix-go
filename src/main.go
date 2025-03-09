@@ -16,7 +16,4 @@ func main() {
 	if _, err := parser.Parse(data); err != nil {
 		log.Fatalln(err)
 	}
-	// else {
-	// 	fmt.Println(program)
-	// }
 }
