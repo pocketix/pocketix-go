@@ -7,17 +7,7 @@
         {
             "id": "if",
             "block": [],
-            "arguments": [
-                {
-                    "type": "boolean_expression",
-                    "value": [
-                        {
-                            "type": "string",
-                            "value": "x"
-                        }
-                    ]
-                }
-            ]
+            "arguments": []
         }
     ]
 }

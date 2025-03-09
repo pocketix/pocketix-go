@@ -1,0 +1,32 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "if",
+            "block": [],
+            "arguments": [
+                {
+                    "type": "boolean_expression",
+                    "value": [
+                        {
+                            "value": [
+                                {
+                                    "type": "string",
+                                    "value": "a"
+                                },
+                                {
+                                    "type": "string",
+                                    "value": "a"
+                                }
+                            ],
+                            "type": "==="
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
