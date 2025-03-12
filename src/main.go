@@ -12,7 +12,7 @@ func main() {
 	path := flag.String("path", "programs/basic/empty_block.json", "path to the program file")
 	flag.Parse()
 
-	data := services.OpenFile("programs/" + *path)
+	data := services.OpenFile(*path)
 	if _, err := parser.Parse(data); err != nil {
 		log.Fatalln(err)
 	}

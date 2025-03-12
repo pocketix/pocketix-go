@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"github.com/pocketix/pocketix-go/src/factories"
 	"github.com/pocketix/pocketix-go/src/interfaces"
 	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/tree"
 )
 
 func ParseBlocks(block models.Block) (interfaces.Command, error) {
@@ -20,5 +20,5 @@ func ParseBlocks(block models.Block) (interfaces.Command, error) {
 		}
 		parsedCommands = append(parsedCommands, cmd)
 	}
-	return factories.CommandFactory(block.Id, parsedCommands, models.InitTree(block.Arguments[0].Type, args))
+	return models.CommandFactory(block.Id, parsedCommands, tree.InitTree(block.Arguments[0].Type, args))
 }
