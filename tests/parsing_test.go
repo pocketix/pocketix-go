@@ -1,0 +1,195 @@
+package tests
+
+import (
+	"encoding/json"
+	"testing"
+
+	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/parser"
+	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestParseEmptyBlock(t *testing.T) {
+	assert := assert.New(t)
+
+	program := services.OpenFile("../programs/basic/empty_block.json")
+	assert.NotNil(program, "Program should not be nil")
+
+	programResult, err := parser.Parse(program)
+
+	assert.NotNil(programResult, "Command should not be nil")
+	assert.Nil(err, "Error should be nil")
+
+	assert.Equal(0, len(programResult.Blocks), "Expected 0 block, got %d", len(programResult.Blocks))
+}
+
+func TestParseIfWithoutArguments(t *testing.T) {
+	assert := assert.New(t)
+
+	block := models.Block{
+		Id:        "if",
+		Body:      []models.Block{},
+		Arguments: []models.Argument{},
+	}
+
+	cmd, err := parser.ParseBlocks(block)
+
+	assert.Nil(cmd, "Command should not be nil")
+	assert.NotNil(err, "Error should be nil")
+}
+
+func TestParseSimpleIf(t *testing.T) {
+	assert := assert.New(t)
+
+	block := models.Block{
+		Id: "if",
+		Arguments: []models.Argument{
+			{
+				Type: "boolean_expression",
+				Value: json.RawMessage(`[
+                        {
+                            "type": "boolean",
+                            "value": true
+                        }
+                    ]`),
+			},
+		},
+		Body: []models.Block{},
+	}
+
+	cmd, err := parser.ParseBlocks(block)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	ifStatement := cmd.(*models.If)
+	assert.Equal(0, len(ifStatement.Block), "Expected 0 block, got %d", len(ifStatement.Block))
+
+	arguments := ifStatement.GetArguments()
+	assert.NotNil(arguments, "Arguments should not be nil")
+	assert.Equal(arguments.Value, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
+
+	child := arguments.Children[0]
+	assert.NotNil(child, "Child should not be nil")
+	assert.Equal(child.Value, true, "Expected true, got %v", child.Value)
+}
+
+func TestParseIfWithCondition(t *testing.T) {
+	assert := assert.New(t)
+
+	block := models.Block{
+		Id: "if",
+		Arguments: []models.Argument{
+			{
+				Type: "boolean_expression",
+				Value: json.RawMessage(`[
+                        {
+                            "value": [
+                                {
+                                    "type": "string",
+                                    "value": "a"
+                                },
+                                {
+                                    "type": "string",
+                                    "value": "abc"
+                                }
+                            ], 
+							"type": "==="
+                        }
+                    ]`),
+			},
+		},
+		Body: []models.Block{},
+	}
+
+	cmd, err := parser.ParseBlocks(block)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	ifStatement := cmd.(*models.If)
+	arguments := ifStatement.GetArguments()
+
+	assert.NotNil(arguments, "Arguments should not be nil")
+	assert.Equal(arguments.Value, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
+
+	child := arguments.Children[0]
+	assert.NotNil(child, "Child should not be nil")
+	assert.Equal(child.Value, "===", "Expected operator ===, got %v", child.Value)
+
+	operand1, operand2 := child.Children[0], child.Children[1]
+	assert.NotNil(operand1, "Operand1 should not be nil")
+	assert.NotNil(operand2, "Operand2 should not be nil")
+
+	assert.Equal(operand1.Value, "a", "Expected a, got %v", operand1.Value)
+	assert.Equal(operand2.Value, "abc", "Expected abc, got %v", operand2.Value)
+}
+
+func TestParseIfWithComplexCondition(t *testing.T) {
+	assert := assert.New(t)
+
+	block := models.Block{
+		Id: "if",
+		Arguments: []models.Argument{
+			{
+				Type: "boolean_expression",
+				Value: json.RawMessage(`[
+                        {
+                            "value": [
+                                {
+                                    "value": [
+                                        {
+                                            "type": "number",
+                                            "value": 1
+                                        },
+                                        {
+                                            "type": "boolean",
+                                            "value": false
+                                        }
+                                    ],
+                                    "type": "==="
+                                },
+                                {
+                                    "type": "boolean",
+                                    "value": true
+                                }
+                            ],
+                            "type": "==="
+                        }
+                    ]`),
+			},
+		},
+		Body: []models.Block{},
+	}
+
+	cmd, err := parser.ParseBlocks(block)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	ifStatement := cmd.(*models.If)
+	arguments := ifStatement.GetArguments()
+
+	assert.NotNil(arguments, "Arguments should not be nil")
+	assert.Equal(arguments.Value, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
+
+	child := arguments.Children[0]
+	assert.NotNil(child, "Child should not be nil")
+	assert.Equal(child.Value, "===", "Expected operator ===, got %v", child.Value)
+
+	operand1, operand2 := child.Children[0], child.Children[1]
+	assert.NotNil(operand1, "Operand1 should not be nil")
+	assert.NotNil(operand2, "Operand2 should not be nil")
+
+	assert.Equal(operand1.Value, "===", "Expected operator ===, got %v", operand1.Value)
+	assert.Equal(operand2.Value, true, "Expected true, got %v", operand2.Value)
+
+	operand1_1, operand1_2 := operand1.Children[0], operand1.Children[1]
+
+	assert.NotNil(operand1_1, "Operand1_1 should not be nil")
+	assert.NotNil(operand1_2, "Operand1_2 should not be nil")
+
+	assert.Equal(operand1_1.Value, float64(1), "Expected 1, got %v", operand1_1.Value)
+	assert.Equal(operand1_2.Value, false, "Expected false, got %v", operand1_2.Value)
+}
