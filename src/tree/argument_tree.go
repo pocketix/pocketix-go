@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/utils"
 )
 
 type TreeNode struct {
@@ -36,7 +37,6 @@ func (a *TreeNode) ParseChildren(args any) []*TreeNode {
 			children = append(children, &TreeNode{Value: argValue})
 		}
 	}
-
 	return children
 }
 
@@ -44,9 +44,10 @@ func (a *TreeNode) AddChild(child *TreeNode) {
 	a.Children = append(a.Children, child)
 }
 
-func (a *TreeNode) Evaluate() (any, error, bool) {
+func (a *TreeNode) Evaluate() (bool, error) {
 	operatorFactory := NewOperatorFactory()
-	return a.EvaluateWithFactory(operatorFactory)
+	result, err, _ := a.EvaluateWithFactory(operatorFactory)
+	return utils.ToBool(result), err
 }
 
 func (a *TreeNode) EvaluateWithFactory(factory *OperatorFactory) (any, error, bool) {
@@ -79,6 +80,11 @@ func (a *TreeNode) CheckGrandChildren(child *TreeNode, factory *OperatorFactory)
 		}
 	}
 	services.Logger.Println("This subtree can be evaluated")
+
+	if len(child.Children) == 0 {
+		return child.Value, nil, true
+	}
+
 	factoryResult, factoryErr := factory.EvaluateOperator(child.Value.(string), *child)
 	child.Value = factoryResult
 	child.RemoveChildren()
