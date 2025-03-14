@@ -19,7 +19,31 @@
                                 },
                                 {
                                     "type": "string",
-                                    "value": "a"
+                                    "value": "n"
+                                }
+                            ],
+                            "type": "==="
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "elseif",
+            "block": [],
+            "arguments": [
+                {
+                    "type": "boolean_expression",
+                    "value": [
+                        {
+                            "value": [
+                                {
+                                    "type": "string",
+                                    "value": "f"
+                                },
+                                {
+                                    "type": "string",
+                                    "value": "f"
                                 }
                             ],
                             "type": "==="
@@ -54,32 +78,7 @@
         },
         {
             "id": "else",
-            "block": [
-                {
-                    "id": "if",
-                    "block": [],
-                    "arguments": [
-                        {
-                            "type": "boolean_expression",
-                            "value": [
-                                {
-                                    "value": [
-                                        {
-                                            "type": "string",
-                                            "value": "test"
-                                        },
-                                        {
-                                            "type": "string",
-                                            "value": "test1"
-                                        }
-                                    ],
-                                    "type": "==="
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
+            "block": []
         }
     ]
 }

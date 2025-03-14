@@ -1,0 +1,19 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "if",
+            "block": [
+                {
+                    "id": "if",
+                    "block": [],
+                    "arguments": []
+                }
+            ],
+            "arguments": []
+        }
+    ]
+}
