@@ -30,13 +30,46 @@ func Parse(data []byte) (*models.Program, error) {
 		return nil, err
 	}
 
+	var previousCommand models.Command
 	for _, block := range program.Blocks {
 		cmd, err := ParseBlocks(block)
+
+		if cmd.GetId() == "if" {
+			previousCommand = cmd
+		} else if cmd.GetId() == "else" {
+			if previousCommand != nil {
+				previousCommand.(*models.If).AddElseBlock(cmd)
+				previousCommand.Execute()
+				previousCommand = nil
+			} else {
+				services.Logger.Println("Error: Else without if")
+				return nil, fmt.Errorf("else without if")
+			}
+		} else if cmd.GetId() == "elseif" {
+			if previousCommand != nil {
+				previousCommand.(*models.If).AddElseIfBlock(cmd)
+			} else {
+				services.Logger.Println("Error: Elseif without if")
+				return nil, fmt.Errorf("elseif without if")
+			}
+		} else {
+			if previousCommand != nil {
+				previousCommand.Execute()
+				previousCommand = nil
+			}
+
+			cmd.Execute()
+		}
+
 		if err != nil {
 			return nil, err
 		}
-		services.Logger.Println("Command: ", cmd)
-		cmd.Execute()
+		// cmd.Execute()
 	}
+
+	if previousCommand != nil {
+		previousCommand.Execute()
+	}
+
 	return &program, nil
 }
