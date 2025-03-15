@@ -35,8 +35,8 @@ func TestParseIfWithoutArguments(t *testing.T) {
 
 	cmd, err := parser.ParseBlocks(block)
 
-	assert.Nil(cmd, "Command should not be nil")
-	assert.NotNil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should be nil")
+	assert.Nil(err, "Error should not be nil")
 }
 
 func TestParseSimpleIf(t *testing.T) {
