@@ -1,4 +1,4 @@
-package models
+package types
 
 type Block struct {
 	Id        string     `json:"id"`
