@@ -3,23 +3,25 @@ package tree
 import (
 	"fmt"
 
+	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
 	"github.com/pocketix/pocketix-go/src/utils"
 )
 
 type TreeNode struct {
+	Type     string
 	Value    any
 	Children []*TreeNode
 }
 
-func InitTree(argumentType string, args any) *TreeNode {
+func InitTree(argumentType string, args any, variableStore *models.VariableStore) *TreeNode {
 	t := TreeNode{}
 	t.Value = argumentType
-	t.Children = t.ParseChildren(args)
+	t.Children = t.ParseChildren(args, variableStore)
 	return &t
 }
 
-func (a *TreeNode) ParseChildren(args any) []*TreeNode {
+func (a *TreeNode) ParseChildren(args any, variableStore *models.VariableStore) []*TreeNode {
 	services.Logger.Println("Parsing children", args)
 	var children []*TreeNode
 
@@ -31,10 +33,18 @@ func (a *TreeNode) ParseChildren(args any) []*TreeNode {
 		if value, ok := argValue.([]any); ok {
 			services.Logger.Println("Argument is a list of values:", value)
 			children = append(children, &TreeNode{Value: argType})
-			children[len(children)-1].Children = children[len(children)-1].ParseChildren(value)
+			children[len(children)-1].Children = children[len(children)-1].ParseChildren(value, variableStore)
 		} else {
 			services.Logger.Println("Argument is a single value:", argValue, "of type:", argType)
-			children = append(children, &TreeNode{Value: argValue})
+			if argType == "variable" {
+				if value, err := variableStore.GetVariable(argValue.(string)); err != nil {
+					return nil // TODO return error
+				} else {
+					services.Logger.Println("Variable has value", argValue)
+					argValue = value
+				}
+			}
+			children = append(children, &TreeNode{Value: argValue, Type: argType})
 		}
 	}
 	return children
