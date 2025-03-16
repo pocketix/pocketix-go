@@ -12,6 +12,8 @@ func CommandFactory(id string, blocks []Command, tree *tree.TreeNode) (Command, 
 		return &Else{Id: id, Block: blocks}, nil
 	case "elseif":
 		return &ElseIf{Id: id, Block: blocks, Arguments: tree}, nil
+	case "while":
+		return &While{Id: id, Block: blocks, Arguments: tree}, nil
 	}
 	return nil, nil
 }
