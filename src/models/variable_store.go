@@ -3,24 +3,22 @@ package models
 import "fmt"
 
 type VariableStore struct {
-	Variables []Variable
+	Variables map[string]Variable
 }
 
 func NewVariableStore() *VariableStore {
 	return &VariableStore{
-		Variables: []Variable{},
+		Variables: make(map[string]Variable),
 	}
 }
 
 func (vs *VariableStore) AddVariable(variable Variable) {
-	vs.Variables = append(vs.Variables, variable)
+	vs.Variables[variable.Name] = variable
 }
 
 func (vs *VariableStore) GetVariable(name string) (any, error) {
-	for _, variable := range vs.Variables {
-		if variable.Name == name {
-			return variable.Value, nil
-		}
+	if variable, ok := vs.Variables[name]; ok {
+		return variable.Value, nil
 	}
 	return nil, fmt.Errorf("variable %s not found", name)
 }
