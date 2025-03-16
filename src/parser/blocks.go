@@ -3,12 +3,14 @@ package parser
 import (
 	"fmt"
 
+	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
 	"github.com/pocketix/pocketix-go/src/tree"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
-func ParseBlocks(block models.Block) (models.Command, error) {
+func ParseBlocks(block types.Block, variableStore *models.VariableStore) (commands.Command, error) {
 	var argumentTree *tree.TreeNode = nil
 
 	if len(block.Arguments) == 0 {
@@ -19,20 +21,20 @@ func ParseBlocks(block models.Block) (models.Command, error) {
 		if err != nil {
 			return nil, err
 		}
-		argumentTree = tree.InitTree(arg.Type, args)
+		argumentTree = tree.InitTree(arg.Type, args, variableStore)
 	}
 
-	var parsedCommands []models.Command
-	var previousSubCommand models.Command
+	var parsedCommands []commands.Command
+	var previousSubCommand commands.Command
 
 	for _, subBlock := range block.Body {
-		cmd, err := ParseBlocks(subBlock)
+		cmd, err := ParseBlocks(subBlock, variableStore)
 
 		if cmd.GetId() == "if" {
 			previousSubCommand = cmd
 		} else if cmd.GetId() == "else" {
 			if previousSubCommand != nil {
-				previousSubCommand.(*models.If).AddElseBlock(cmd)
+				previousSubCommand.(*commands.If).AddElseBlock(cmd)
 				parsedCommands = append(parsedCommands, previousSubCommand)
 				previousSubCommand = nil
 			} else {
@@ -41,14 +43,14 @@ func ParseBlocks(block models.Block) (models.Command, error) {
 			}
 		} else if cmd.GetId() == "elseif" {
 			if previousSubCommand != nil {
-				previousSubCommand.(*models.If).AddElseIfBlock(cmd)
+				previousSubCommand.(*commands.If).AddElseIfBlock(cmd)
 			} else {
 				services.Logger.Println("Error: Elseif without if")
 				return nil, fmt.Errorf("elseif without if")
 			}
 		} else {
 			if previousSubCommand != nil {
-				previousSubCommand.Execute()
+				previousSubCommand.Execute(variableStore)
 				previousSubCommand = nil
 			}
 
@@ -65,6 +67,6 @@ func ParseBlocks(block models.Block) (models.Command, error) {
 		parsedCommands = append(parsedCommands, previousSubCommand)
 	}
 
-	cmd, err := models.CommandFactory(block.Id, parsedCommands, argumentTree)
+	cmd, err := commands.CommandFactory(block.Id, parsedCommands, argumentTree)
 	return cmd, err
 }

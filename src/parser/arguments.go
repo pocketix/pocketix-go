@@ -3,10 +3,10 @@ package parser
 import (
 	"encoding/json"
 
-	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
-func ParseArguments(rawArguments models.Argument) (any, error) {
+func ParseArguments(rawArguments types.Argument) (any, error) {
 	var args any
 
 	if err := json.Unmarshal(rawArguments.Value, &args); err != nil {
