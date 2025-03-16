@@ -1,6 +1,7 @@
-package models
+package commands
 
 import (
+	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
 	"github.com/pocketix/pocketix-go/src/tree"
 )
@@ -10,10 +11,10 @@ type Else struct {
 	Block []Command
 }
 
-func (e *Else) Execute() (bool, error) {
+func (e *Else) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing else")
 	for _, cmd := range e.Block {
-		if success, err := cmd.Execute(); err != nil {
+		if success, err := cmd.Execute(variableStore); err != nil {
 			return false, err
 		} else if success {
 			return true, nil

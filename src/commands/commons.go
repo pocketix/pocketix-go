@@ -1,6 +1,8 @@
-package models
+package commands
 
-func ExecuteCommands(commands []Command, variableStore *VariableStore) (bool, error) {
+import "github.com/pocketix/pocketix-go/src/models"
+
+func ExecuteCommands(commands []Command, variableStore *models.VariableStore) (bool, error) {
 	for _, cmd := range commands {
 		if success, err := cmd.Execute(variableStore); err != nil {
 			return false, err

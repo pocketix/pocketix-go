@@ -1,4 +1,4 @@
-package models
+package commands
 
 import (
 	"github.com/pocketix/pocketix-go/src/tree"

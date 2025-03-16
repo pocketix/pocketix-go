@@ -1,6 +1,7 @@
-package models
+package commands
 
 import (
+	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
 	"github.com/pocketix/pocketix-go/src/tree"
 )
@@ -11,7 +12,7 @@ type ElseIf struct {
 	Arguments *tree.TreeNode
 }
 
-func (e *ElseIf) Execute() (bool, error) {
+func (e *ElseIf) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing else if")
 	if result, err := e.Arguments.Evaluate(); err != nil {
 		services.Logger.Println("Error executing else if arguments", err)
@@ -19,7 +20,7 @@ func (e *ElseIf) Execute() (bool, error) {
 		if result {
 			services.Logger.Println("Else if is true, can execute body")
 			for _, cmd := range e.Block {
-				if success, err := cmd.Execute(); err != nil {
+				if success, err := cmd.Execute(variableStore); err != nil {
 					return false, err
 				} else if success {
 					return true, nil
