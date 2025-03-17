@@ -22,3 +22,14 @@ func (vs *VariableStore) GetVariable(name string) (any, error) {
 	}
 	return nil, fmt.Errorf("variable %s not found", name)
 }
+
+func (vs *VariableStore) SetVariable(name string, value any) error {
+	variable, ok := vs.Variables[name]
+	if !ok {
+		return fmt.Errorf("variable %s not found", name)
+	}
+
+	variable.Value = value
+	vs.Variables[name] = variable
+	return nil
+}
