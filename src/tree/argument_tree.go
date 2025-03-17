@@ -9,9 +9,9 @@ import (
 )
 
 type TreeNode struct {
-	Type     string
-	Value    any
-	Children []*TreeNode
+	Type     string      // Type of the argument
+	Value    any         // Value of the argument
+	Children []*TreeNode // Children of the argument
 }
 
 func InitTree(argumentType string, args any, variableStore *models.VariableStore) *TreeNode {
@@ -23,27 +23,25 @@ func InitTree(argumentType string, args any, variableStore *models.VariableStore
 
 func (a *TreeNode) ParseChildren(args any, variableStore *models.VariableStore) []*TreeNode {
 	services.Logger.Println("Parsing children", args)
-	var children []*TreeNode
 
-	for _, arg := range args.([]any) {
+	argList, ok := args.([]any)
+	if !ok {
+		return nil
+	}
+
+	children := make([]*TreeNode, 0, len(argList))
+
+	for _, arg := range argList {
 		argType := GetType(arg)
-
 		argValue := GetValue(arg)
 
 		if value, ok := argValue.([]any); ok {
 			services.Logger.Println("Argument is a list of values:", value)
-			children = append(children, &TreeNode{Value: argType})
-			children[len(children)-1].Children = children[len(children)-1].ParseChildren(value, variableStore)
+			child := &TreeNode{Value: argType}
+			child.Children = child.ParseChildren(value, variableStore)
+			children = append(children, child)
 		} else {
 			services.Logger.Println("Argument is a single value:", argValue, "of type:", argType)
-			if argType == "variable" {
-				if value, err := variableStore.GetVariable(argValue.(string)); err != nil {
-					return nil // TODO return error
-				} else {
-					services.Logger.Println("Variable has value", argValue)
-					argValue = value
-				}
-			}
 			children = append(children, &TreeNode{Value: argValue, Type: argType})
 		}
 	}
@@ -54,16 +52,16 @@ func (a *TreeNode) AddChild(child *TreeNode) {
 	a.Children = append(a.Children, child)
 }
 
-func (a *TreeNode) Evaluate() (bool, error) {
+func (a *TreeNode) Evaluate(variableStore *models.VariableStore) (bool, error) {
 	operatorFactory := NewOperatorFactory()
-	result, err, _ := a.EvaluateWithFactory(operatorFactory)
+	result, err, _ := a.EvaluateWithFactory(operatorFactory, variableStore)
 	return utils.ToBool(result), err
 }
 
-func (a *TreeNode) EvaluateWithFactory(factory *OperatorFactory) (any, error, bool) {
+func (a *TreeNode) EvaluateWithFactory(factory *OperatorFactory, variableStore *models.VariableStore) (any, error, bool) {
 	for _, child := range a.Children {
 		services.Logger.Println("Argument executing", child.Value)
-		if result, err, ok := child.CheckGrandChildren(child, factory); ok {
+		if result, err, ok := child.CheckGrandChildren(child, factory, variableStore); ok {
 			if err != nil {
 				services.Logger.Println("Error executing argument ", a.Value)
 				return nil, err, false
@@ -71,17 +69,17 @@ func (a *TreeNode) EvaluateWithFactory(factory *OperatorFactory) (any, error, bo
 			if len(child.Children) == 0 {
 				return result, nil, true
 			}
-			factoryResult, factoryErr := factory.EvaluateOperator(child.Value.(string), *child)
-			return factoryResult, factoryErr, true
+			// factoryResult, factoryErr := factory.EvaluateOperator(child.Value.(string), *child, variableStore)
+			return result, err, true
 		}
 	}
 	return false, fmt.Errorf("error executing argument"), false
 }
 
-func (a *TreeNode) CheckGrandChildren(child *TreeNode, factory *OperatorFactory) (any, error, bool) {
+func (a *TreeNode) CheckGrandChildren(child *TreeNode, factory *OperatorFactory, variableStore *models.VariableStore) (any, error, bool) {
 	for _, grandChild := range child.Children {
 		if len(grandChild.Children) != 0 {
-			if _, err, ok := grandChild.CheckGrandChildren(grandChild, factory); ok {
+			if _, err, ok := grandChild.CheckGrandChildren(grandChild, factory, variableStore); ok {
 				return grandChild.Value, err, true
 			} else if err != nil {
 				services.Logger.Println("Error executing argument ", a.Value)
@@ -95,14 +93,8 @@ func (a *TreeNode) CheckGrandChildren(child *TreeNode, factory *OperatorFactory)
 		return child.Value, nil, true
 	}
 
-	factoryResult, factoryErr := factory.EvaluateOperator(child.Value.(string), *child)
-	child.Value = factoryResult
-	child.RemoveChildren()
+	factoryResult, factoryErr := factory.EvaluateOperator(child.Value.(string), *child, variableStore)
 	return factoryResult, factoryErr, true
-}
-
-func (a *TreeNode) RemoveChildren() {
-	a.Children = nil
 }
 
 func GetValue(arg any) any {
