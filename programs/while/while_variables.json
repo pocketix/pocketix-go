@@ -1,0 +1,37 @@
+{
+    "header": {
+        "userVariables": {
+            "foo": {
+                "type": "string",
+                "value": "abc"
+            }
+        },
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "while",
+            "block": [],
+            "arguments": [
+                {
+                    "type": "boolean_expression",
+                    "value": [
+                        {
+                            "value": [
+                                {
+                                    "type": "variable",
+                                    "value": "foo"
+                                },
+                                {
+                                    "type": "string",
+                                    "value": "abc"
+                                }
+                            ],
+                            "type": "==="
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
