@@ -16,7 +16,7 @@ func (w *While) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing while")
 
 	for {
-		result, err := w.Arguments.Evaluate()
+		result, err := w.Arguments.Evaluate(variableStore)
 		if err != nil {
 			services.Logger.Println("Error executing while arguments", err)
 			return false, err
@@ -28,6 +28,7 @@ func (w *While) Execute(variableStore *models.VariableStore) (bool, error) {
 			} else if !success {
 				return success, nil
 			}
+			// variableStore.SetVariable("foo", "a") // Test setting of a variable
 		} else {
 			services.Logger.Println("While is false, breaking")
 			break

@@ -16,7 +16,7 @@ type If struct {
 
 func (i *If) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing if")
-	result, err := i.Arguments.Evaluate()
+	result, err := i.Arguments.Evaluate(variableStore)
 	if err != nil {
 		services.Logger.Println("Error executing if arguments", err)
 		return false, err

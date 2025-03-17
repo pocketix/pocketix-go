@@ -14,7 +14,7 @@ type ElseIf struct {
 
 func (e *ElseIf) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing else if")
-	if result, err := e.Arguments.Evaluate(); err != nil {
+	if result, err := e.Arguments.Evaluate(variableStore); err != nil {
 		services.Logger.Println("Error executing else if arguments", err)
 	} else {
 		if result {
