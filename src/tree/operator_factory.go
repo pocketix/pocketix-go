@@ -110,13 +110,13 @@ func NewOperatorFactory() *OperatorFactory {
 
 func GetValueFromStore(node TreeNode, variableStore *models.VariableStore) (any, error) {
 	if node.Type == "variable" {
-		if value, err := variableStore.GetVariable(node.Value.(string)); err != nil {
+		if value, err := variableStore.GetVariable(node.ResultValue.(string)); err != nil {
 			return nil, err
 		} else {
 			return value, nil
 		}
 	}
-	return node.Value, nil
+	return node.ResultValue, nil
 }
 
 func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, variableStore *models.VariableStore) (any, error) {
