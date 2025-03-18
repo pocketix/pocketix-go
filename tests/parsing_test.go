@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/parser"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,13 +28,13 @@ func TestParseEmptyBlock(t *testing.T) {
 func TestParseIfWithoutArguments(t *testing.T) {
 	assert := assert.New(t)
 
-	block := models.Block{
+	block := types.Block{
 		Id:        "if",
-		Body:      []models.Block{},
-		Arguments: []models.Argument{},
+		Body:      []types.Block{},
+		Arguments: []types.Argument{},
 	}
 
-	cmd, err := parser.ParseBlocks(block)
+	cmd, err := parser.ParseBlocks(block, nil)
 
 	assert.NotNil(cmd, "Command should be nil")
 	assert.Nil(err, "Error should not be nil")
@@ -42,9 +43,9 @@ func TestParseIfWithoutArguments(t *testing.T) {
 func TestParseSimpleIf(t *testing.T) {
 	assert := assert.New(t)
 
-	block := models.Block{
+	block := types.Block{
 		Id: "if",
-		Arguments: []models.Argument{
+		Arguments: []types.Argument{
 			{
 				Type: "boolean_expression",
 				Value: json.RawMessage(`[
@@ -55,15 +56,15 @@ func TestParseSimpleIf(t *testing.T) {
                     ]`),
 			},
 		},
-		Body: []models.Block{},
+		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block)
+	cmd, err := parser.ParseBlocks(block, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	ifStatement := cmd.(*models.If)
+	ifStatement := cmd.(*commands.If)
 	assert.Equal(0, len(ifStatement.Block), "Expected 0 block, got %d", len(ifStatement.Block))
 
 	arguments := ifStatement.GetArguments()
@@ -78,9 +79,9 @@ func TestParseSimpleIf(t *testing.T) {
 func TestParseIfWithCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	block := models.Block{
+	block := types.Block{
 		Id: "if",
-		Arguments: []models.Argument{
+		Arguments: []types.Argument{
 			{
 				Type: "boolean_expression",
 				Value: json.RawMessage(`[
@@ -100,15 +101,15 @@ func TestParseIfWithCondition(t *testing.T) {
                     ]`),
 			},
 		},
-		Body: []models.Block{},
+		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block)
+	cmd, err := parser.ParseBlocks(block, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	ifStatement := cmd.(*models.If)
+	ifStatement := cmd.(*commands.If)
 	arguments := ifStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
@@ -129,9 +130,9 @@ func TestParseIfWithCondition(t *testing.T) {
 func TestParseIfWithComplexCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	block := models.Block{
+	block := types.Block{
 		Id: "if",
-		Arguments: []models.Argument{
+		Arguments: []types.Argument{
 			{
 				Type: "boolean_expression",
 				Value: json.RawMessage(`[
@@ -160,15 +161,15 @@ func TestParseIfWithComplexCondition(t *testing.T) {
                     ]`),
 			},
 		},
-		Body: []models.Block{},
+		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block)
+	cmd, err := parser.ParseBlocks(block, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	ifStatement := cmd.(*models.If)
+	ifStatement := cmd.(*commands.If)
 	arguments := ifStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")

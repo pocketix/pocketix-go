@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/tree"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,17 +15,17 @@ func TestEvaluateIf_SingleValue(t *testing.T) {
 	expected := []bool{true, false, true, false, true, true, false, false, false, true}
 
 	for i, value := range data {
-		ifStatement := models.If{
+		ifStatement := commands.If{
 			Id: "if",
 			Arguments: &tree.TreeNode{
 				Value: "boolean_expression", Children: []*tree.TreeNode{
-					{Value: value},
+					{Value: value, ResultValue: value},
 				},
 			},
-			Block: []models.Command{},
+			Block: []commands.Command{},
 		}
 
-		result, err := ifStatement.Execute()
+		result, err := ifStatement.Execute(nil)
 
 		assert.Nil(err, "Error should be nil")
 		assert.NotNil(result, "Result should not be nil")
@@ -66,20 +66,20 @@ func TestEvaluateIf_SimpleCondition(t *testing.T) {
 
 	for i, operator := range operators {
 		for j, pair := range data {
-			ifStatement := models.If{
+			ifStatement := commands.If{
 				Id: "if",
 				Arguments: &tree.TreeNode{
 					Value: "boolean_expression", Children: []*tree.TreeNode{
 						{Value: operator, Children: []*tree.TreeNode{
-							{Value: pair.a},
-							{Value: pair.b},
+							{Value: pair.a, ResultValue: pair.a},
+							{Value: pair.b, ResultValue: pair.b},
 						}},
 					},
 				},
-				Block: []models.Command{},
+				Block: []commands.Command{},
 			}
 
-			result, err := ifStatement.Execute()
+			result, err := ifStatement.Execute(nil)
 
 			assert.Nil(err, "Error should be nil")
 			assert.NotNil(result, "Result should not be nil")

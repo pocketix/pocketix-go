@@ -7,16 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInitTree(t *testing.T) {
-
-}
-
 func TestParseChildren_EmptyArgs(t *testing.T) {
 	assert := assert.New(t)
 	root := &tree.TreeNode{}
-	children := root.ParseChildren([]any{})
+	children := root.ParseChildren([]any{}, nil)
 
-	assert.Nil(children, "Children should be nil", children)
+	assert.NotNil(children, "Children should not be nil", children)
 	assert.Equal(0, len(children), "Children should be empty")
 }
 
@@ -24,9 +20,7 @@ func TestParseChildren_SingleArg(t *testing.T) {
 	assert := assert.New(t)
 
 	root := &tree.TreeNode{}
-	children := root.ParseChildren([]any{
-		map[string]any{"type": "string", "value": "test"},
-	})
+	children := root.ParseChildren([]any{map[string]any{"type": "string", "value": "test"}}, nil)
 
 	assert.NotNil(children, "Children should not be nil")
 	assert.Equal(1, len(children), "Children should have one element")
@@ -45,7 +39,7 @@ func TestParseChildren_SimpleCondition(t *testing.T) {
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test2"},
 		}},
-	})
+	}, nil)
 
 	assert.NotNil(children, "Children should not be nil")
 	assert.Equal(1, len(children), "Children should have one element")
@@ -65,20 +59,18 @@ func TestEvaluate_NoChildren(t *testing.T) {
 	assert := assert.New(t)
 
 	root := &tree.TreeNode{}
-	factory := tree.NewOperatorFactory()
-	result, err, ok := root.EvaluateWithFactory(factory)
+	result, err := root.Evaluate(nil)
 
-	assert.False(ok, "Evaluation should not be possible")
-	assert.False(result.(bool), "Result should be false")
-	assert.NotNil(err, "Error should not be nil")
+	assert.False(result, "Result should be false")
+	assert.Nil(err, "Error should be nil")
 }
 
 func TestEvaluate_SingleValue(t *testing.T) {
 	assert := assert.New(t)
 
-	root := tree.InitTree("boolean_expresstion", []any{map[string]any{"type": "string", "value": "test"}})
+	root := tree.InitTree("boolean_expresstion", []any{map[string]any{"type": "string", "value": "test"}}, nil)
 
-	result, err := root.Evaluate()
+	result, err := root.Evaluate(nil)
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
@@ -92,9 +84,9 @@ func TestEvaluate_SimpleCondition(t *testing.T) {
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test"},
 		}},
-	})
+	}, nil)
 
-	result, err := root.Evaluate()
+	result, err := root.Evaluate(nil)
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
@@ -104,9 +96,9 @@ func TestEvaluate_SimpleCondition(t *testing.T) {
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test2"},
 		}},
-	})
+	}, nil)
 
-	result, err = root.Evaluate()
+	result, err = root.Evaluate(nil)
 
 	assert.False(result, "Result should be false")
 	assert.Nil(err, "Error should be nil")
@@ -123,9 +115,9 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 				map[string]any{"type": "string", "value": "test"},
 			}},
 		}},
-	})
+	}, nil)
 
-	result, err := root.Evaluate()
+	result, err := root.Evaluate(nil)
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
@@ -133,14 +125,14 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 	root = tree.InitTree("boolean_expresstion", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "boolean", "value": true},
-			map[string]any{"type": "string", "value": []any{
+			map[string]any{"type": "===", "value": []any{
 				map[string]any{"type": "number", "value": 1},
 				map[string]any{"type": "string", "value": "test"},
 			}},
 		}},
-	})
+	}, nil)
 
-	result, err = root.Evaluate()
+	result, err = root.Evaluate(nil)
 
 	assert.False(result, "Result should be false")
 	assert.Nil(err, "Error should be nil")
