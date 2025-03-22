@@ -1,0 +1,32 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "repeat",
+            "block": [
+                {
+                    "id": "setvar",
+                    "arguments": [
+                        {
+                            "type": "variable",
+                            "value": "foo"
+                        },
+                        {
+                            "type": "number",
+                            "value": 3
+                        }
+                    ]
+                }
+            ],
+            "arguments": [
+                {
+                    "type": "number",
+                    "value": 3
+                }
+            ]
+        }
+    ]
+}

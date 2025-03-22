@@ -1,0 +1,54 @@
+{
+    "header": {
+        "userVariables": {
+            "foo": {
+                "type": "number",
+                "value": 0
+            }
+        },
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "setvar",
+            "arguments": [
+                {
+                    "type": "variable",
+                    "value": "foo"
+                },
+                {
+                    "type": "number",
+                    "value": 4
+                }
+            ]
+        },
+        {
+            "id": "if",
+            "block": [],
+            "arguments": [
+                {
+                    "type": "boolean_expression",
+                    "value": [
+                        {
+                            "value": [
+                                {
+                                    "type": "variable",
+                                    "value": "foo"
+                                },
+                                {
+                                    "type": "number",
+                                    "value": 4
+                                }
+                            ],
+                            "type": "==="
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "else",
+            "block": []
+        }
+    ]
+}

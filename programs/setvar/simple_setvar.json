@@ -1,0 +1,26 @@
+{
+    "header": {
+        "userVariables": {
+            "foo": {
+                "type": "string",
+                "value": "abc"
+            }
+        },
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "setvar",
+            "arguments": [
+                {
+                    "type": "variable",
+                    "value": "foo"
+                },
+                {
+                    "type": "string",
+                    "value": "bac"
+                }
+            ]
+        }
+    ]
+}
