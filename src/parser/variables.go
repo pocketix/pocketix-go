@@ -8,8 +8,6 @@ import (
 )
 
 func ParseVariables(data json.RawMessage, variableStore *models.VariableStore) {
-	services.Logger.Println("Parsing variables", data)
-
 	var variables map[string]any
 
 	if err := json.Unmarshal(data, &variables); err != nil {
@@ -25,6 +23,4 @@ func ParseVariables(data json.RawMessage, variableStore *models.VariableStore) {
 			Value: varValue,
 		})
 	}
-
-	services.Logger.Println("Variables parsed", variableStore.Variables)
 }

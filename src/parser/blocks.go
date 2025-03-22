@@ -11,17 +11,18 @@ import (
 )
 
 func ParseBlocks(block types.Block, variableStore *models.VariableStore) (commands.Command, error) {
-	var argumentTree *tree.TreeNode = nil
+	// var argumentTree *tree.TreeNode = nil
+
+	argumentTree := make([]*tree.TreeNode, len(block.Arguments))
 
 	if len(block.Arguments) == 0 {
 		services.Logger.Println("Block has no arguments")
 	} else {
-		arg := block.Arguments[0]
-		args, err := ParseArguments(arg)
+		err := ParseArguments(block.Arguments, argumentTree, variableStore)
 		if err != nil {
 			return nil, err
 		}
-		argumentTree = tree.InitTree(arg.Type, args, variableStore)
+		// argumentTree = tree.InitTree(arg.Type, args, variableStore)
 	}
 
 	var parsedCommands []commands.Command

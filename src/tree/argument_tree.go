@@ -15,9 +15,10 @@ type TreeNode struct {
 	ResultValue any         // Result of the expression
 }
 
-func InitTree(argumentType string, args any, variableStore *models.VariableStore) *TreeNode {
+func InitTree(argumentType string, argumentValue any, args any, variableStore *models.VariableStore) *TreeNode {
 	t := TreeNode{}
-	t.Value = argumentType
+	t.Type = argumentType
+	// t.Value = argumentValue
 	t.Children = t.ParseChildren(args, variableStore)
 	return &t
 }
@@ -27,6 +28,7 @@ func (a *TreeNode) ParseChildren(args any, variableStore *models.VariableStore) 
 
 	argList, ok := args.([]any)
 	if !ok {
+		a.Value = args
 		return nil
 	}
 
