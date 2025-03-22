@@ -69,7 +69,7 @@ func TestParseSimpleIf(t *testing.T) {
 
 	arguments := ifStatement.GetArguments()
 	assert.NotNil(arguments, "Arguments should not be nil")
-	assert.Equal(arguments.Value, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
+	assert.Equal(arguments.Type, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
 
 	child := arguments.Children[0]
 	assert.NotNil(child, "Child should not be nil")
@@ -113,7 +113,7 @@ func TestParseIfWithCondition(t *testing.T) {
 	arguments := ifStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
-	assert.Equal(arguments.Value, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
+	assert.Equal(arguments.Type, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
 
 	child := arguments.Children[0]
 	assert.NotNil(child, "Child should not be nil")
@@ -173,7 +173,7 @@ func TestParseIfWithComplexCondition(t *testing.T) {
 	arguments := ifStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
-	assert.Equal(arguments.Value, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
+	assert.Equal(arguments.Type, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
 
 	child := arguments.Children[0]
 	assert.NotNil(child, "Child should not be nil")
@@ -193,4 +193,243 @@ func TestParseIfWithComplexCondition(t *testing.T) {
 
 	assert.Equal(operand1_1.Value, float64(1), "Expected 1, got %v", operand1_1.Value)
 	assert.Equal(operand1_2.Value, false, "Expected false, got %v", operand1_2.Value)
+}
+
+func TestParseElse(t *testing.T) {
+	assert := assert.New(t)
+
+	block := types.Block{
+		Id:        "else",
+		Arguments: []types.Argument{},
+		Body:      []types.Block{},
+	}
+
+	cmd, err := parser.ParseBlocks(block, nil)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	elseStatement := cmd.(*commands.Else)
+	assert.Equal(0, len(elseStatement.Block), "Expected 0 block, got %d", len(elseStatement.Block))
+
+	arguments := elseStatement.GetArguments()
+	assert.Nil(arguments, "Arguments should be nil")
+}
+
+func TestParseElseif(t *testing.T) {
+	assert := assert.New(t)
+
+	block := types.Block{
+		Id: "elseif",
+		Arguments: []types.Argument{
+			{
+				Type: "boolean_expression",
+				Value: json.RawMessage(`[
+                        {
+                            "type": "boolean",
+                            "value": true
+                        }
+                    ]`),
+			},
+		},
+		Body: []types.Block{},
+	}
+
+	cmd, err := parser.ParseBlocks(block, nil)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	elseifStatement := cmd.(*commands.ElseIf)
+	assert.Equal(0, len(elseifStatement.Block), "Expected 0 block, got %d", len(elseifStatement.Block))
+
+	arguments := elseifStatement.GetArguments()
+	assert.NotNil(arguments, "Arguments should not be nil")
+
+	child := arguments.Children[0]
+	assert.NotNil(child, "Child should not be nil")
+	assert.Equal(child.Value, true, "Expected true, got %v", child.Value)
+}
+
+func TestParseElseifWithCondition(t *testing.T) {
+	assert := assert.New(t)
+
+	block := types.Block{
+		Id: "elseif",
+		Arguments: []types.Argument{
+			{
+				Type: "boolean_expression",
+				Value: json.RawMessage(`[
+						{
+							"value": [
+								{
+									"type": "string",
+									"value": "a"
+								},
+								{
+									"type": "string",
+									"value": "abc"
+								}
+							], 
+							"type": "==="
+						}
+					]`),
+			},
+		},
+		Body: []types.Block{},
+	}
+
+	cmd, err := parser.ParseBlocks(block, nil)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	elseifStatement := cmd.(*commands.ElseIf)
+	arguments := elseifStatement.GetArguments()
+
+	assert.NotNil(arguments, "Arguments should not be nil")
+	assert.Equal(arguments.Type, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
+
+	child := arguments.Children[0]
+	assert.NotNil(child, "Child should not be nil")
+	assert.Equal(child.Value, "===", "Expected operator ===, got %v", child.Value)
+
+	operand1, operand2 := child.Children[0], child.Children[1]
+	assert.NotNil(operand1, "Operand1 should not be nil")
+	assert.NotNil(operand2, "Operand2 should not be nil")
+
+	assert.Equal(operand1.Value, "a", "Expected a, got %v", operand1.Value)
+	assert.Equal(operand2.Value, "abc", "Expected abc, got %v", operand2.Value)
+}
+
+func TestParseWhile(t *testing.T) {
+	assert := assert.New(t)
+
+	block := types.Block{
+		Id: "while",
+	}
+
+	cmd, err := parser.ParseBlocks(block, nil)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	whileStatement := cmd.(*commands.While)
+	assert.Equal(0, len(whileStatement.Block), "Expected 0 block, got %d", len(whileStatement.Block))
+
+	arguments := whileStatement.GetArguments()
+	assert.Nil(arguments, "Arguments should be nil")
+}
+
+func TestParseWhileWithCondition(t *testing.T) {
+	assert := assert.New(t)
+
+	block := types.Block{
+		Id: "while",
+		Arguments: []types.Argument{
+			{
+				Type: "boolean_expression",
+				Value: json.RawMessage(`[
+						{
+							"value": [
+								{
+									"type": "string",
+									"value": "a"
+								},
+								{
+									"type": "string",
+									"value": "abc"
+								}
+							], 
+							"type": "==="
+						}
+					]`),
+			},
+		},
+		Body: []types.Block{},
+	}
+
+	cmd, err := parser.ParseBlocks(block, nil)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	whileStatement := cmd.(*commands.While)
+	arguments := whileStatement.GetArguments()
+
+	assert.NotNil(arguments, "Arguments should not be nil")
+	assert.Equal(arguments.Type, "boolean_expression", "Expected boolean_expression, got %v", arguments.Value)
+
+	child := arguments.Children[0]
+	assert.NotNil(child, "Child should not be nil")
+	assert.Equal(child.Value, "===", "Expected operator ===, got %v", child.Value)
+
+	operand1, operand2 := child.Children[0], child.Children[1]
+	assert.NotNil(operand1, "Operand1 should not be nil")
+	assert.NotNil(operand2, "Operand2 should not be nil")
+
+	assert.Equal(operand1.Value, "a", "Expected a, got %v", operand1.Value)
+	assert.Equal(operand2.Value, "abc", "Expected abc, got %v", operand2.Value)
+}
+
+func TestParseRepeat(t *testing.T) {
+	assert := assert.New(t)
+
+	block := types.Block{
+		Id: "repeat",
+		Arguments: []types.Argument{
+			{
+				Type:  "number",
+				Value: json.RawMessage(`10`),
+			},
+		},
+		Body: []types.Block{},
+	}
+
+	cmd, err := parser.ParseBlocks(block, nil)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	repeatStatement := cmd.(*commands.Repeat)
+	assert.Equal(0, len(repeatStatement.Block), "Expected 0 block, got %d", len(repeatStatement.Block))
+
+	arguments := repeatStatement.GetArguments()
+	assert.Nil(arguments, "Arguments should be nil")
+
+	count := repeatStatement.GetCount()
+	assert.Equal(count, 10, "Expected 10, got %d", count)
+}
+
+func TestParseSetVariable(t *testing.T) {
+	assert := assert.New(t)
+
+	block := types.Block{
+		Id: "setvar",
+		Arguments: []types.Argument{
+			{
+				Type:  "variable",
+				Value: json.RawMessage(`"foo"`),
+			},
+			{
+				Type:  "number",
+				Value: json.RawMessage(`10`),
+			},
+		},
+		Body: []types.Block{},
+	}
+
+	cmd, err := parser.ParseBlocks(block, nil)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	setVariableStatement := cmd.(*commands.SetVariable)
+	assert.Nil(setVariableStatement.GetArguments(), "Arguments should be nil")
+	assert.Nil(setVariableStatement.GetBody(), "Body should be nil")
+
+	variableToSet := setVariableStatement.GetVariableToSet()
+
+	assert.Equal(variableToSet.Name, "foo", "Expected foo, got %v", variableToSet.Name)
+	assert.Equal(variableToSet.Value, float64(10), "Expected 10, got %v", variableToSet.Value)
 }

@@ -68,7 +68,7 @@ func TestEvaluate_NoChildren(t *testing.T) {
 func TestEvaluate_SingleValue(t *testing.T) {
 	assert := assert.New(t)
 
-	root := tree.InitTree("boolean_expresstion", []any{map[string]any{"type": "string", "value": "test"}}, nil)
+	root := tree.InitTree("boolean_expresstion", "", []any{map[string]any{"type": "string", "value": "test"}}, nil)
 
 	result, err := root.Evaluate(nil)
 
@@ -79,7 +79,7 @@ func TestEvaluate_SingleValue(t *testing.T) {
 func TestEvaluate_SimpleCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	root := tree.InitTree("boolean_expresstion", []any{
+	root := tree.InitTree("boolean_expresstion", "", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test"},
@@ -91,7 +91,7 @@ func TestEvaluate_SimpleCondition(t *testing.T) {
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
 
-	root = tree.InitTree("boolean_expresstion", []any{
+	root = tree.InitTree("boolean_expresstion", "", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test2"},
@@ -107,7 +107,7 @@ func TestEvaluate_SimpleCondition(t *testing.T) {
 func TestEvaluate_NestedCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	root := tree.InitTree("boolean_expresstion", []any{
+	root := tree.InitTree("boolean_expresstion", "", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "boolean", "value": false},
 			map[string]any{"type": "===", "value": []any{
@@ -122,7 +122,7 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
 
-	root = tree.InitTree("boolean_expresstion", []any{
+	root = tree.InitTree("boolean_expresstion", "", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "boolean", "value": true},
 			map[string]any{"type": "===", "value": []any{
