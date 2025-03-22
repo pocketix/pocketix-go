@@ -35,7 +35,7 @@ func (i *If) Execute(variableStore *models.VariableStore) (bool, error) {
 		}
 	}
 
-	if len(i.ElseBlock.Block) != 0 {
+	if i.ElseBlock.Id != "" {
 		return i.ElseBlock.Execute(variableStore)
 	}
 	return false, nil
