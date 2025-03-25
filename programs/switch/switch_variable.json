@@ -1,0 +1,58 @@
+{
+    "header": {
+        "userVariables": {
+            "foo": {
+                "type": "string",
+                "value": "abc"
+            }
+        },
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "switch",
+            "block": [
+                {
+                    "id": "case",
+                    "block": [
+                        {
+                            "id": "setvar",
+                            "arguments": [
+                                {
+                                    "type": "variable",
+                                    "value": "foo"
+                                },
+                                {
+                                    "type": "string",
+                                    "value": "abcd"
+                                }
+                            ]
+                        }
+                    ],
+                    "arguments": [
+                        {
+                            "type": "string",
+                            "value": "abc"
+                        }
+                    ]
+                },
+                {
+                    "id": "case",
+                    "block": [],
+                    "arguments": [
+                        {
+                            "type": "string",
+                            "value": "abcd"
+                        }
+                    ]
+                }
+            ],
+            "arguments": [
+                {
+                    "type": "variable",
+                    "value": "foo"
+                }
+            ]
+        }
+    ]
+}

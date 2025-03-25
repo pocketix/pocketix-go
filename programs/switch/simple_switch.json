@@ -1,0 +1,39 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "switch",
+            "block": [
+                {
+                    "id": "case",
+                    "block": [],
+                    "arguments": [
+                        {
+                            "type": "string",
+                            "value": "a"
+                        }
+                    ]
+                },
+                {
+                    "id": "case",
+                    "block": [],
+                    "arguments": [
+                        {
+                            "type": "string",
+                            "value": "b"
+                        }
+                    ]
+                }
+            ],
+            "arguments": [
+                {
+                    "type": "string",
+                    "value": "a"
+                }
+            ]
+        }
+    ]
+}
