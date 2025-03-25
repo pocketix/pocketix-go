@@ -29,7 +29,11 @@ func CommandFactory(id string, blocks []Command, tree []*tree.TreeNode) (Command
 		}
 		return &SetVariable{Id: id, VariableToSet: argument}, nil
 	case "repeat":
-		return &Repeat{Id: id, Count: int(tree[0].Value.(float64)), Block: blocks}, nil
+		return &Repeat{Id: id, Count: int(tree[0].Value.(float64)), CountType: tree[0].Type, Block: blocks}, nil
+	case "switch":
+		return &Switch{Id: id, Block: blocks, Selector: tree[0].Value, SelectorType: tree[0].Type}, nil
+	case "case":
+		return &Case{Id: id, Block: blocks, Value: tree[0].Value, Type: tree[0].Type}, nil
 	}
 	return nil, nil
 }
