@@ -433,3 +433,123 @@ func TestParseSetVariable(t *testing.T) {
 	assert.Equal(variableToSet.Name, "foo", "Expected foo, got %v", variableToSet.Name)
 	assert.Equal(variableToSet.Value, float64(10), "Expected 10, got %v", variableToSet.Value)
 }
+
+func TestParseSwitch(t *testing.T) {
+	assert := assert.New(t)
+
+	block := types.Block{
+		Id: "switch",
+		Arguments: []types.Argument{
+			{
+				Type:  "string",
+				Value: json.RawMessage(`"foo"`),
+			},
+		},
+		Body: []types.Block{
+			{
+				Id: "case",
+				Arguments: []types.Argument{
+					{
+						Type:  "string",
+						Value: json.RawMessage(`"foo"`),
+					},
+				},
+			},
+			{
+				Id: "case",
+				Arguments: []types.Argument{
+					{
+						Type:  "string",
+						Value: json.RawMessage(`"bar"`),
+					},
+				},
+			},
+		},
+	}
+
+	cmd, err := parser.ParseBlocks(block, nil)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	switchStatement := cmd.(*commands.Switch)
+
+	assert.Equal(2, len(switchStatement.Block), "Expected 2 block, got %d", len(switchStatement.Block))
+
+	selectorValue, selectorType := switchStatement.GetSelector()
+
+	assert.Equal(selectorValue, "foo", "Selector should be foo, got %v", selectorValue)
+	assert.Equal(selectorType, "string", "Selector type should be string, got %v", selectorType)
+
+	case1 := switchStatement.Block[0].(*commands.Case)
+	case1Value := case1.GetValue()
+
+	assert.Equal(0, len(case1.Block), "Expected 0 block, got %d", len(case1.Block))
+	assert.Equal(case1Value, "foo", "Expected foo, got %v", case1Value)
+
+	case2 := switchStatement.Block[1].(*commands.Case)
+	case2Value := case2.GetValue()
+
+	assert.Equal(0, len(case2.Block), "Expected 0 block, got %d", len(case2.Block))
+	assert.Equal(case2Value, "bar", "Expected bar, got %v", case2Value)
+}
+
+func TestParseSwitchWithVariableSelector(t *testing.T) {
+	assert := assert.New(t)
+
+	block := types.Block{
+		Id: "switch",
+		Arguments: []types.Argument{
+			{
+				Type:  "variable",
+				Value: json.RawMessage(`"foo"`),
+			},
+		},
+		Body: []types.Block{
+			{
+				Id: "case",
+				Arguments: []types.Argument{
+					{
+						Type:  "string",
+						Value: json.RawMessage(`"foo"`),
+					},
+				},
+			},
+			{
+				Id: "case",
+				Arguments: []types.Argument{
+					{
+						Type:  "string",
+						Value: json.RawMessage(`"bar"`),
+					},
+				},
+			},
+		},
+	}
+
+	cmd, err := parser.ParseBlocks(block, nil)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	switchStatement := cmd.(*commands.Switch)
+
+	assert.Equal(2, len(switchStatement.Block), "Expected 2 block, got %d", len(switchStatement.Block))
+
+	selectorValue, selectorType := switchStatement.GetSelector()
+
+	assert.Equal(selectorValue, "foo", "Selector should be foo, got %v", selectorValue)
+	assert.Equal(selectorType, "variable", "Selector type should be variable, got %v", selectorType)
+
+	case1 := switchStatement.Block[0].(*commands.Case)
+	case1Value := case1.GetValue()
+
+	assert.Equal(0, len(case1.Block), "Expected 0 block, got %d", len(case1.Block))
+	assert.Equal(case1Value, "foo", "Expected foo, got %v", case1Value)
+
+	case2 := switchStatement.Block[1].(*commands.Case)
+	case2Value := case2.GetValue()
+
+	assert.Equal(0, len(case2.Block), "Expected 0 block, got %d", len(case2.Block))
+	assert.Equal(case2Value, "bar", "Expected bar, got %v", case2Value)
+}

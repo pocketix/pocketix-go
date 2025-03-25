@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/pocketix/pocketix-go/src/commands"
+	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/tree"
 	"github.com/stretchr/testify/assert"
 )
@@ -86,4 +87,35 @@ func TestEvaluateIf_SimpleCondition(t *testing.T) {
 			assert.Equal(expected[i][j], result, "Result of %v %v %v should be %v", pair.a, operator, pair.b, expected[i][j])
 		}
 	}
+}
+
+func TestEvaluateIfWithVariable(t *testing.T) {
+	assert := assert.New(t)
+
+	variableStore := models.NewVariableStore()
+	variable := models.Variable{
+		Name:  "foo",
+		Type:  "string",
+		Value: "abc",
+	}
+	variableStore.AddVariable(variable)
+
+	ifStatement := commands.If{
+		Id: "if",
+		Arguments: &tree.TreeNode{
+			Value: "boolean_expression", Children: []*tree.TreeNode{
+				{Value: "===", Children: []*tree.TreeNode{
+					{Value: "foo", ResultValue: "foo", Type: "variable"},
+					{Value: "abc", ResultValue: "abc", Type: "string"},
+				}},
+			},
+		},
+		Block: []commands.Command{},
+	}
+
+	result, err := ifStatement.Execute(variableStore)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(result, "Result should not be nil")
+	assert.True(result, "Result should be true")
 }

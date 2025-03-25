@@ -3,6 +3,7 @@ package tests
 import (
 	"testing"
 
+	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/tree"
 	"github.com/stretchr/testify/assert"
 )
@@ -135,5 +136,29 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 	result, err = root.Evaluate(nil)
 
 	assert.False(result, "Result should be false")
+	assert.Nil(err, "Error should be nil")
+}
+
+func TestEvaluateWithVariable(t *testing.T) {
+	assert := assert.New(t)
+
+	variableStore := models.NewVariableStore()
+	variable := models.Variable{
+		Name:  "foo",
+		Type:  "number",
+		Value: 1,
+	}
+	variableStore.AddVariable(variable)
+
+	root := tree.InitTree("boolean_expresstion", "", []any{
+		map[string]any{"type": "===", "value": []any{
+			map[string]any{"type": "variable", "value": "foo"},
+			map[string]any{"type": "string", "value": 1},
+		}},
+	}, variableStore)
+
+	result, err := root.Evaluate(variableStore)
+
+	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
 }
