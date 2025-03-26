@@ -77,3 +77,41 @@ func TestExecuteSwitchWithOneCase(t *testing.T) {
 	assert.Nil(err, "Expected nil, got %v", err)
 	assert.Equal("value", caseValue, "Expected value, got %v", caseValue)
 }
+
+func TestExecuteSwitchWithVariableSelector(t *testing.T) {
+	assert := assert.New(t)
+
+	variableStore := models.NewVariableStore()
+	variable := models.Variable{
+		Name:  "selector",
+		Value: "value",
+		Type:  "string",
+	}
+	variableStore.AddVariable(variable)
+
+	switchStatement := commands.Switch{
+		Id: "switch",
+		Block: []commands.Command{
+			&commands.Case{
+				Id:    "case",
+				Block: []commands.Command{},
+				Value: "test",
+				Type:  "string",
+			},
+			&commands.Case{
+				Id:    "case",
+				Block: []commands.Command{},
+				Value: "value",
+				Type:  "string",
+			},
+		},
+		SelectorType: "variable",
+		Selector:     "selector",
+	}
+
+	result, caseValue, err := MockSwitchExecute(variableStore, switchStatement)
+
+	assert.True(result, "Expected true, got false")
+	assert.Nil(err, "Expected nil, got %v", err)
+	assert.Equal("value", caseValue, "Expected value, got %v", caseValue)
+}

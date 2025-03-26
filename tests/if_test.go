@@ -13,6 +13,7 @@ func TestEvaluateIf_SingleValue(t *testing.T) {
 	assert := assert.New(t)
 
 	data := []any{true, false, 1, 0, "true", "false", "", nil, 0.0, 1.0}
+	types := []string{"boolean", "boolean", "number", "number", "string", "string", "string", "", "number", "number"}
 	expected := []bool{true, false, true, false, true, true, false, false, false, true}
 
 	for i, value := range data {
@@ -20,7 +21,7 @@ func TestEvaluateIf_SingleValue(t *testing.T) {
 			Id: "if",
 			Arguments: &tree.TreeNode{
 				Value: "boolean_expression", Children: []*tree.TreeNode{
-					{Value: value, ResultValue: value},
+					{Value: value, ResultValue: value, Type: types[i]},
 				},
 			},
 			Block: []commands.Command{},
@@ -60,6 +61,23 @@ func TestEvaluateIf_SimpleCondition(t *testing.T) {
 		{"", "true"},
 	}
 
+	types := []Pair{
+		{"boolean", "boolean"},
+		{"boolean", "boolean"},
+		{"boolean", "boolean"},
+		{"number", "number"},
+		{"number", "number"},
+		{"number", "number"},
+		{"string", "string"},
+		{"string", "string"},
+		{"string", "string"},
+		{"", ""},
+		{"number", "number"},
+		{"number", "number"},
+		{"string", ""},
+		{"string", "string"},
+	}
+
 	expected := [][]bool{
 		{true, false, true, true, false, true, true, false, true, true, true, true, false, false},
 		{false, true, false, false, true, false, false, true, false, false, false, false, true, true},
@@ -72,8 +90,8 @@ func TestEvaluateIf_SimpleCondition(t *testing.T) {
 				Arguments: &tree.TreeNode{
 					Value: "boolean_expression", Children: []*tree.TreeNode{
 						{Value: operator, Children: []*tree.TreeNode{
-							{Value: pair.a, ResultValue: pair.a},
-							{Value: pair.b, ResultValue: pair.b},
+							{Value: pair.a, ResultValue: pair.a, Type: types[i].a.(string)},
+							{Value: pair.b, ResultValue: pair.b, Type: types[i].b.(string)},
 						}},
 					},
 				},

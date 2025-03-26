@@ -153,7 +153,7 @@ func TestEvaluateWithVariable(t *testing.T) {
 	root := tree.InitTree("boolean_expresstion", "", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "variable", "value": "foo"},
-			map[string]any{"type": "string", "value": 1},
+			map[string]any{"type": "number", "value": 1},
 		}},
 	}, variableStore)
 

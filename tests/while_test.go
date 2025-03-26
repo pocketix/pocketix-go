@@ -51,7 +51,7 @@ func TestExecuteWhileFalse(t *testing.T) {
 		Arguments: &tree.TreeNode{
 			Value: "boolean_expression",
 			Children: []*tree.TreeNode{
-				{Value: false, ResultValue: false},
+				{Value: false, ResultValue: false, Type: "boolean"},
 			},
 		},
 		Block: []commands.Command{},
@@ -105,4 +105,32 @@ func TestExecuteWhileWithIterations(t *testing.T) {
 	assert.NotNil(result, "Result should not be nil")
 	assert.Equal(true, result, "Result should be true")
 	assert.Equal(10, iterations, "Iterations should be 10")
+}
+
+func TestExecuteWhileWithVariable(t *testing.T) {
+	assert := assert.New(t)
+
+	variableStore := models.NewVariableStore()
+	variable := models.Variable{
+		Name:  "var",
+		Value: false,
+		Type:  "boolean",
+	}
+	variableStore.AddVariable(variable)
+
+	whileStatement := commands.While{
+		Id: "while",
+		Arguments: &tree.TreeNode{
+			Value: "boolean_expression", Children: []*tree.TreeNode{
+				{Value: "var", ResultValue: "var", Type: "variable"},
+			},
+		},
+		Block: []commands.Command{},
+	}
+
+	result, err := whileStatement.Execute(variableStore)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(result, "Result should not be nil")
+	assert.Equal(true, result, "Result should be true")
 }
