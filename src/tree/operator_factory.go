@@ -22,12 +22,8 @@ func NewOperatorFactory() *OperatorFactory {
 					return child.Value, nil
 				}
 				for i := range len(child.Children) - 1 {
-					a, errA := GetValueFromStore(*child.Children[i], variableStore)
-					b, errB := GetValueFromStore(*child.Children[i+1], variableStore)
-
-					if errA != nil || errB != nil {
-						return nil, fmt.Errorf("error getting value from store %v %v", errA, errB)
-					}
+					a := child.Children[i].ResultValue
+					b := child.Children[i+1].ResultValue
 
 					services.Logger.Println("Comparing", a, b)
 					if a != b {
@@ -41,12 +37,8 @@ func NewOperatorFactory() *OperatorFactory {
 					return child.Value, nil
 				}
 				for i := range len(child.Children) - 1 {
-					a, errA := GetValueFromStore(*child.Children[i], variableStore)
-					b, errB := GetValueFromStore(*child.Children[i+1], variableStore)
-
-					if errA != nil || errB != nil {
-						return nil, fmt.Errorf("error getting value from store %v %v", errA, errB)
-					}
+					a := child.Children[i].ResultValue
+					b := child.Children[i+1].ResultValue
 
 					services.Logger.Println("Comparing", a, b)
 					if a == b {
@@ -120,9 +112,20 @@ func GetValueFromStore(node TreeNode, variableStore *models.VariableStore) (any,
 }
 
 func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, variableStore *models.VariableStore) (any, error) {
+	if len(child.Children) == 0 {
+		if child.Type == "variable" {
+			if variable, err := variableStore.GetVariable(child.ResultValue.(string)); err != nil {
+				return nil, err
+			} else {
+				return variable.Value, nil
+			}
+		}
+		return child.Value, nil
+	}
+
 	if fn, exists := o.operator[operator]; exists {
 		return fn(child, variableStore)
 	}
 	services.Logger.Println("Operator not found", operator)
-	return false, nil
+	return false, fmt.Errorf("operator not found")
 }

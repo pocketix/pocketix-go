@@ -63,7 +63,8 @@ func (a *TreeNode) Evaluate(variableStore *models.VariableStore) (bool, error) {
 
 func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *models.VariableStore) (any, error, bool) {
 	if len(a.Children) == 0 {
-		return a.Value, nil, true
+		return EvaluateArgumentsHelper(a, factory, variableStore)
+		// return a.Value, nil, true
 	}
 
 	if len(a.Children) == 1 {
@@ -85,12 +86,20 @@ func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *models.
 	}
 
 	if len(evaluatedChildren) > 0 {
-		factoryResult, factoryErr := factory.EvaluateOperator(a.Value.(string), *a, variableStore)
-		a.ResultValue = factoryResult
-		return factoryResult, factoryErr, factoryErr == nil
+		return EvaluateArgumentsHelper(a, factory, variableStore)
 	}
 
 	return nil, fmt.Errorf("error executing argument"), false
+}
+
+func EvaluateArgumentsHelper(node *TreeNode, factory *OperatorFactory, variableStore *models.VariableStore) (any, error, bool) {
+	if node.Value == nil || (node.Type != "string" && node.Type != "" && node.Type != "variable") {
+		return node.Value, nil, true
+	}
+
+	factoryResult, factoryErr := factory.EvaluateOperator(node.Value.(string), *node, variableStore)
+	node.ResultValue = factoryResult
+	return factoryResult, factoryErr, factoryErr == nil
 }
 
 func GetValue(arg any) any {
