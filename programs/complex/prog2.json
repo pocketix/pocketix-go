@@ -1,0 +1,72 @@
+{
+    "header": {
+        "userVariables": {
+            "count": {
+                "type": "number",
+                "value": 0
+            },
+            "foo": {
+                "value": [
+                    {
+                        "value": [
+                            {
+                                "type": "number",
+                                "value": 1,
+                                "_uuid": "2b263798-958b-4344-b775-f54cb681732a"
+                            },
+                            {
+                                "type": "variable",
+                                "value": "count",
+                                "_uuid": "de2d135d-b668-4cab-b28b-06876cd0ed2b"
+                            }
+                        ],
+                        "type": "+",
+                        "_uuid": "df7b75e4-0572-459f-b488-54741bd8b104"
+                    }
+                ],
+                "type": "boolean_expression"
+            }
+        },
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "while",
+            "block": [
+                {
+                    "id": "setvar",
+                    "arguments": [
+                        {
+                            "type": "variable",
+                            "value": "count"
+                        },
+                        {
+                            "type": "variable",
+                            "value": "foo"
+                        }
+                    ]
+                }
+            ],
+            "arguments": [
+                {
+                    "type": "boolean_expression",
+                    "value": [
+                        {
+                            "value": [
+                                {
+                                    "type": "variable",
+                                    "value": "count"
+                                },
+                                {
+                                    "type": "number",
+                                    "value": 5
+                                }
+                            ],
+                            "type": "<"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
