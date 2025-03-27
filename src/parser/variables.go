@@ -17,10 +17,14 @@ func ParseVariables(data json.RawMessage, variableStore *models.VariableStore) {
 	for varName, varData := range variables {
 		varType, varValue := varData.(map[string]any)["type"], varData.(map[string]any)["value"]
 
+		// if varList, ok := varValue.([]any); ok {
+		// 	services.Logger.Println("Parsing list of variables", varList)
+		// }
+
 		variableStore.AddVariable(models.Variable{
 			Name:  varName,
 			Type:  varType.(string),
-			Value: varValue,
+			Value: models.InitTree(varType.(string), varType, varValue, variableStore),
 		})
 	}
 }

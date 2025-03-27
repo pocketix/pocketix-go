@@ -5,7 +5,6 @@ import (
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
-	"github.com/pocketix/pocketix-go/src/tree"
 )
 
 type Repeat struct {
@@ -20,11 +19,11 @@ func (r *Repeat) Execute(variableStore *models.VariableStore) (bool, error) {
 
 	count := r.Count
 	if r.CountType == "variable" {
-		variable, err := variableStore.GetVariable(count.(string))
-		if err != nil {
-			return false, err
-		}
-		count = variable.Value.(int)
+		// variable, err := variableStore.GetVariable(count.(string))
+		// if err != nil {
+		// 	return false, err
+		// }
+		// count = variable.Value.(int)
 	}
 
 	if count.(int) < 0 {
@@ -47,7 +46,7 @@ func (r *Repeat) GetBody() []Command {
 	return r.Block
 }
 
-func (r *Repeat) GetArguments() *tree.TreeNode {
+func (r *Repeat) GetArguments() *models.TreeNode {
 	return nil
 }
 

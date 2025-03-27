@@ -3,7 +3,6 @@ package commands
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
-	"github.com/pocketix/pocketix-go/src/tree"
 )
 
 type Else struct {
@@ -31,6 +30,6 @@ func (e *Else) GetBody() []Command {
 	return e.Block
 }
 
-func (e *Else) GetArguments() *tree.TreeNode {
+func (e *Else) GetArguments() *models.TreeNode {
 	return nil
 }

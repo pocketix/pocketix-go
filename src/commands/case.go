@@ -3,7 +3,6 @@ package commands
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
-	"github.com/pocketix/pocketix-go/src/tree"
 )
 
 type Case struct {
@@ -26,7 +25,7 @@ func (c *Case) GetBody() []Command {
 	return c.Block
 }
 
-func (c *Case) GetArguments() *tree.TreeNode {
+func (c *Case) GetArguments() *models.TreeNode {
 	return nil
 }
 

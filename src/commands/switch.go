@@ -3,7 +3,6 @@ package commands
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
-	"github.com/pocketix/pocketix-go/src/tree"
 )
 
 type Switch struct {
@@ -51,7 +50,7 @@ func (s *Switch) GetBody() []Command {
 	return []Command{}
 }
 
-func (s *Switch) GetArguments() *tree.TreeNode {
+func (s *Switch) GetArguments() *models.TreeNode {
 	return nil
 }
 

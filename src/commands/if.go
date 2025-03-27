@@ -3,20 +3,19 @@ package commands
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
-	"github.com/pocketix/pocketix-go/src/tree"
 )
 
 type If struct {
 	Id           string
 	Block        []Command
-	Arguments    *tree.TreeNode
+	Arguments    *models.TreeNode
 	IfElseBlocks []ElseIf
 	ElseBlock    Else
 }
 
 func (i *If) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing if")
-	result, err := i.Arguments.Evaluate(variableStore)
+	result, _, err := i.Arguments.Evaluate(variableStore)
 	if err != nil {
 		services.Logger.Println("Error executing if arguments", err)
 		return false, err
@@ -49,7 +48,7 @@ func (i *If) GetBody() []Command {
 	return i.Block
 }
 
-func (i *If) GetArguments() *tree.TreeNode {
+func (i *If) GetArguments() *models.TreeNode {
 	return i.Arguments
 }
 

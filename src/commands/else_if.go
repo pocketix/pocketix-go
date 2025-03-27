@@ -3,18 +3,17 @@ package commands
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
-	"github.com/pocketix/pocketix-go/src/tree"
 )
 
 type ElseIf struct {
 	Id        string
 	Block     []Command
-	Arguments *tree.TreeNode
+	Arguments *models.TreeNode
 }
 
 func (e *ElseIf) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing else if")
-	if result, err := e.Arguments.Evaluate(variableStore); err != nil {
+	if result, _, err := e.Arguments.Evaluate(variableStore); err != nil {
 		services.Logger.Println("Error executing else if arguments", err)
 	} else {
 		if result {
@@ -40,6 +39,6 @@ func (e *ElseIf) GetBody() []Command {
 	return e.Block
 }
 
-func (e *ElseIf) GetArguments() *tree.TreeNode {
+func (e *ElseIf) GetArguments() *models.TreeNode {
 	return e.Arguments
 }

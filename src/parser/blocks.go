@@ -6,14 +6,13 @@ import (
 	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
-	"github.com/pocketix/pocketix-go/src/tree"
 	"github.com/pocketix/pocketix-go/src/types"
 )
 
 func ParseBlocks(block types.Block, variableStore *models.VariableStore) (commands.Command, error) {
 	// var argumentTree *tree.TreeNode = nil
 
-	argumentTree := make([]*tree.TreeNode, len(block.Arguments))
+	argumentTree := make([]*models.TreeNode, len(block.Arguments))
 
 	if len(block.Arguments) == 0 {
 		services.Logger.Println("Block has no arguments")

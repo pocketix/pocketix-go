@@ -3,20 +3,19 @@ package commands
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
-	"github.com/pocketix/pocketix-go/src/tree"
 )
 
 type While struct {
 	Id        string
 	Block     []Command
-	Arguments *tree.TreeNode
+	Arguments *models.TreeNode
 }
 
 func (w *While) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing while")
 
 	for {
-		result, err := w.Arguments.Evaluate(variableStore)
+		result, _, err := w.Arguments.Evaluate(variableStore)
 		if err != nil {
 			services.Logger.Println("Error executing while arguments", err)
 			return false, err
@@ -46,6 +45,6 @@ func (w *While) GetBody() []Command {
 	return w.Block
 }
 
-func (w *While) GetArguments() *tree.TreeNode {
+func (w *While) GetArguments() *models.TreeNode {
 	return w.Arguments
 }

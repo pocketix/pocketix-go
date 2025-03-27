@@ -3,5 +3,5 @@ package models
 type Variable struct {
 	Name  string
 	Type  string
-	Value any
+	Value *TreeNode
 }

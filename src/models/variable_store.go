@@ -27,17 +27,30 @@ func (vs *VariableStore) GetVariable(name string) (*Variable, error) {
 	return &variable, nil
 }
 
-func (vs *VariableStore) SetVariable(name string, value any) error {
+func (vs *VariableStore) SetVariable(name string, value any, valueType string) error {
 	variable, err := vs.GetVariable(name)
 	if err != nil {
 		return err
 	}
 
-	if reflect.TypeOf(value).String() != reflect.TypeOf(variable.Value).String() {
+	if valueType == "variable" {
+		LValVariable, err := vs.GetVariable(value.(string))
+		if err != nil {
+			return err
+		}
+		// TODO Evaluate should return any (because it can be a string, int, float, etc)
+		_, numericalResult, err := LValVariable.Value.Evaluate(vs)
+		if err != nil {
+			return err
+		}
+		value = numericalResult
+	}
+
+	if reflect.TypeOf(value).String() != reflect.TypeOf(variable.Value.Value).String() {
 		return fmt.Errorf("type mismatch at SetVariable")
 	}
 
-	variable.Value = value
+	variable.Value.Value = value
 	vs.Variables[name] = *variable
 	return nil
 }

@@ -2,10 +2,9 @@ package commands
 
 import (
 	"github.com/pocketix/pocketix-go/src/models"
-	"github.com/pocketix/pocketix-go/src/tree"
 )
 
-func CommandFactory(id string, blocks []Command, tree []*tree.TreeNode) (Command, error) {
+func CommandFactory(id string, blocks []Command, tree []*models.TreeNode) (Command, error) {
 	switch id {
 	case "if":
 		if len(tree) == 0 {
@@ -22,12 +21,7 @@ func CommandFactory(id string, blocks []Command, tree []*tree.TreeNode) (Command
 		}
 		return &While{Id: id, Block: blocks, Arguments: tree[0]}, nil
 	case "setvar":
-		argument := models.Variable{
-			Name:  tree[0].Value.(string),
-			Type:  tree[1].Type,
-			Value: tree[1].Value,
-		}
-		return &SetVariable{Id: id, VariableToSet: argument}, nil
+		return &SetVariable{Id: id, LVal: tree[0].Value.(string), LValType: tree[0].Type, RVal: tree[1].Value, RValType: tree[1].Type}, nil
 	case "repeat":
 		return &Repeat{Id: id, Count: int(tree[0].Value.(float64)), CountType: tree[0].Type, Block: blocks}, nil
 	case "switch":
