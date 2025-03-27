@@ -6,7 +6,6 @@ import (
 	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
-	"github.com/pocketix/pocketix-go/src/tree"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,9 +47,9 @@ func TestExecuteWhileFalse(t *testing.T) {
 
 	whileStatement := commands.While{
 		Id: "while",
-		Arguments: &tree.TreeNode{
+		Arguments: &models.TreeNode{
 			Value: "boolean_expression",
-			Children: []*tree.TreeNode{
+			Children: []*models.TreeNode{
 				{Value: false, ResultValue: false, Type: "boolean"},
 			},
 		},
@@ -69,10 +68,10 @@ func TestExecuteWhileWithFalseCondition(t *testing.T) {
 
 	whileStatement := commands.While{
 		Id: "while",
-		Arguments: &tree.TreeNode{
+		Arguments: &models.TreeNode{
 			Value: "boolean_expression",
-			Children: []*tree.TreeNode{
-				{Value: "===", Children: []*tree.TreeNode{
+			Children: []*models.TreeNode{
+				{Value: "===", Children: []*models.TreeNode{
 					{Value: "a", ResultValue: "a"},
 					{Value: "b", ResultValue: "b"},
 				}},
@@ -113,15 +112,15 @@ func TestExecuteWhileWithVariable(t *testing.T) {
 	variableStore := models.NewVariableStore()
 	variable := models.Variable{
 		Name:  "var",
-		Value: false,
 		Type:  "boolean",
+		Value: &models.TreeNode{Value: false, Type: "boolean", ResultValue: false},
 	}
 	variableStore.AddVariable(variable)
 
 	whileStatement := commands.While{
 		Id: "while",
-		Arguments: &tree.TreeNode{
-			Value: "boolean_expression", Children: []*tree.TreeNode{
+		Arguments: &models.TreeNode{
+			Value: "boolean_expression", Children: []*models.TreeNode{
 				{Value: "var", ResultValue: "var", Type: "variable"},
 			},
 		},

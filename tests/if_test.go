@@ -5,7 +5,6 @@ import (
 
 	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
-	"github.com/pocketix/pocketix-go/src/tree"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,8 +18,8 @@ func TestEvaluateIf_SingleValue(t *testing.T) {
 	for i, value := range data {
 		ifStatement := commands.If{
 			Id: "if",
-			Arguments: &tree.TreeNode{
-				Value: "boolean_expression", Children: []*tree.TreeNode{
+			Arguments: &models.TreeNode{
+				Value: "boolean_expression", Children: []*models.TreeNode{
 					{Value: value, ResultValue: value, Type: types[i]},
 				},
 			},
@@ -87,9 +86,9 @@ func TestEvaluateIf_SimpleCondition(t *testing.T) {
 		for j, pair := range data {
 			ifStatement := commands.If{
 				Id: "if",
-				Arguments: &tree.TreeNode{
-					Value: "boolean_expression", Children: []*tree.TreeNode{
-						{Value: operator, Children: []*tree.TreeNode{
+				Arguments: &models.TreeNode{
+					Value: "boolean_expression", Children: []*models.TreeNode{
+						{Value: operator, Children: []*models.TreeNode{
 							{Value: pair.a, ResultValue: pair.a, Type: types[i].a.(string)},
 							{Value: pair.b, ResultValue: pair.b, Type: types[i].b.(string)},
 						}},
@@ -114,15 +113,15 @@ func TestEvaluateIfWithVariable(t *testing.T) {
 	variable := models.Variable{
 		Name:  "foo",
 		Type:  "string",
-		Value: "abc",
+		Value: &models.TreeNode{Type: "string", Value: "abc", ResultValue: "abc"},
 	}
 	variableStore.AddVariable(variable)
 
 	ifStatement := commands.If{
 		Id: "if",
-		Arguments: &tree.TreeNode{
-			Value: "boolean_expression", Children: []*tree.TreeNode{
-				{Value: "===", Children: []*tree.TreeNode{
+		Arguments: &models.TreeNode{
+			Value: "boolean_expression", Children: []*models.TreeNode{
+				{Value: "===", Children: []*models.TreeNode{
 					{Value: "foo", ResultValue: "foo", Type: "variable"},
 					{Value: "abc", ResultValue: "abc", Type: "string"},
 				}},

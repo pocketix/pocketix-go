@@ -21,7 +21,7 @@ func MockRepeatExecute(r commands.Repeat, variableStore *models.VariableStore) (
 		if err != nil {
 			return false, -1, err
 		}
-		count = variable.Value.(int)
+		count = variable.Value.Value.(int)
 	}
 
 	if count.(int) < 0 {
@@ -89,8 +89,8 @@ func TestRepeatWithVariable(t *testing.T) {
 	variableStore := models.NewVariableStore()
 	variable := models.Variable{
 		Name:  "count",
-		Value: 5,
 		Type:  "number",
+		Value: &models.TreeNode{Type: "number", Value: 5, ResultValue: 5},
 	}
 	variableStore.AddVariable(variable)
 

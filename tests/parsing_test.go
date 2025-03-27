@@ -428,10 +428,13 @@ func TestParseSetVariable(t *testing.T) {
 	assert.Nil(setVariableStatement.GetArguments(), "Arguments should be nil")
 	assert.Nil(setVariableStatement.GetBody(), "Body should be nil")
 
-	variableToSet := setVariableStatement.GetVariableToSet()
+	LVal, LValType := setVariableStatement.GetLVal(), setVariableStatement.GetLValType()
+	assert.Equal(LVal, "foo", "Expected foo, got %v", LVal)
+	assert.Equal(LValType, "variable", "Expected variable, got %v", LValType)
 
-	assert.Equal(variableToSet.Name, "foo", "Expected foo, got %v", variableToSet.Name)
-	assert.Equal(variableToSet.Value, float64(10), "Expected 10, got %v", variableToSet.Value)
+	RVal, RValType := setVariableStatement.GetRVal(), setVariableStatement.GetRValType()
+	assert.Equal(RVal, float64(10), "Expected 10, got %v", RVal)
+	assert.Equal(RValType, "number", "Expected number, got %v", RValType)
 }
 
 func TestParseSwitch(t *testing.T) {

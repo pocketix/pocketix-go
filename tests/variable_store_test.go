@@ -25,7 +25,7 @@ func TestAddVariable(t *testing.T) {
 	variable := models.Variable{
 		Name:  "variable",
 		Type:  "string",
-		Value: "value",
+		Value: &models.TreeNode{Type: "string", Value: "value", ResultValue: "value"},
 	}
 
 	variableStore.AddVariable(variable)
@@ -42,7 +42,7 @@ func TestGetVariable(t *testing.T) {
 	variable := models.Variable{
 		Name:  "variable",
 		Type:  "string",
-		Value: "value",
+		Value: &models.TreeNode{Type: "string", Value: "value", ResultValue: "value"},
 	}
 
 	variableStore.AddVariable(variable)
@@ -50,8 +50,8 @@ func TestGetVariable(t *testing.T) {
 	newVariable, err := variableStore.GetVariable("variable")
 
 	assert.Nil(err, "Expected nil, got %v", err)
-	assert.Equal(newVariable.Value, "value", "Expected value, got %v", newVariable.Value)
-	assert.Equal(newVariable.Type, "string", "Expected string, got %v", newVariable.Type)
+	assert.Equal(newVariable.Value.Value, "value", "Expected value, got %v", newVariable.Value.Value)
+	assert.Equal(newVariable.Value.Type, "string", "Expected string, got %v", newVariable.Value.Type)
 }
 
 func TestGetVariableNotFound(t *testing.T) {
@@ -73,18 +73,18 @@ func TestSetVariable(t *testing.T) {
 	variable := models.Variable{
 		Name:  "variable",
 		Type:  "string",
-		Value: "value",
+		Value: &models.TreeNode{Type: "string", Value: "value", ResultValue: "value"},
 	}
 
 	variableStore.AddVariable(variable)
 
-	err := variableStore.SetVariable("variable", "new value")
+	err := variableStore.SetVariable("variable", "new value", "string")
 
 	setVariable, _ := variableStore.GetVariable("variable")
 
 	assert.Nil(err, "Expected nil, got %v", err)
-	assert.Equal(setVariable.Value, "new value", "Expected new value, got %v", setVariable.Value)
-	assert.Equal(setVariable.Type, "string", "Expected string, got %v", setVariable.Type)
+	assert.Equal(setVariable.Value.Value, "new value", "Expected new value, got %v", setVariable.Value.Value)
+	assert.Equal(setVariable.Value.Type, "string", "Expected string, got %v", setVariable.Value.Type)
 }
 
 func TestSetVariableNotFound(t *testing.T) {
@@ -92,7 +92,7 @@ func TestSetVariableNotFound(t *testing.T) {
 
 	variableStore := models.NewVariableStore()
 
-	err := variableStore.SetVariable("variable", "value")
+	err := variableStore.SetVariable("variable", "value", "string")
 
 	assert.NotNil(err, "Expected not nil, got nil")
 }
@@ -105,12 +105,12 @@ func TestSetVariableTypeMismatch(t *testing.T) {
 	variable := models.Variable{
 		Name:  "variable",
 		Type:  "string",
-		Value: "value",
+		Value: &models.TreeNode{Type: "string", Value: "value", ResultValue: "value"},
 	}
 
 	variableStore.AddVariable(variable)
 
-	err := variableStore.SetVariable("variable", 1)
+	err := variableStore.SetVariable("variable", 1, "number")
 
 	assert.NotNil(err, "Expected not nil, got nil")
 }

@@ -19,7 +19,7 @@ func MockSwitchExecute(variableStore *models.VariableStore, s commands.Switch) (
 			if err != nil {
 				return false, nil, err
 			}
-			selectorValue = variable.Value
+			selectorValue = variable.Value.Value
 		}
 
 		if caseCommand.Type == "variable" {
@@ -84,7 +84,7 @@ func TestExecuteSwitchWithVariableSelector(t *testing.T) {
 	variableStore := models.NewVariableStore()
 	variable := models.Variable{
 		Name:  "selector",
-		Value: "value",
+		Value: &models.TreeNode{Type: "string", Value: "value", ResultValue: "value"},
 		Type:  "string",
 	}
 	variableStore.AddVariable(variable)
