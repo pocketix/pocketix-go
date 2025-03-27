@@ -1,9 +1,8 @@
-package tree
+package models
 
 import (
 	"fmt"
 
-	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
 	"github.com/pocketix/pocketix-go/src/utils"
 )
@@ -15,7 +14,7 @@ type TreeNode struct {
 	ResultValue any         // Result of the expression
 }
 
-func InitTree(argumentType string, argumentValue any, args any, variableStore *models.VariableStore) *TreeNode {
+func InitTree(argumentType string, argumentValue any, args any, variableStore *VariableStore) *TreeNode {
 	t := TreeNode{}
 	t.Type = argumentType
 	// t.Value = argumentValue
@@ -23,7 +22,7 @@ func InitTree(argumentType string, argumentValue any, args any, variableStore *m
 	return &t
 }
 
-func (a *TreeNode) ParseChildren(args any, variableStore *models.VariableStore) []*TreeNode {
+func (a *TreeNode) ParseChildren(args any, variableStore *VariableStore) []*TreeNode {
 	services.Logger.Println("Parsing children", args)
 
 	argList, ok := args.([]any)
@@ -45,7 +44,15 @@ func (a *TreeNode) ParseChildren(args any, variableStore *models.VariableStore) 
 			children = append(children, child)
 		} else {
 			services.Logger.Println("Argument is a single value:", argValue, "of type:", argType)
-			children = append(children, &TreeNode{Value: argValue, Type: argType, ResultValue: argValue})
+			if argType == "variable" {
+				if variable, err := variableStore.GetVariable(argValue.(string)); err != nil {
+					services.Logger.Println("Error getting variable", argValue)
+				} else {
+					children = append(children, &TreeNode{Value: argValue, Type: argType, ResultValue: variable.Value.Value})
+				}
+			} else {
+				children = append(children, &TreeNode{Value: argValue, Type: argType, ResultValue: argValue})
+			}
 		}
 	}
 	return children
@@ -55,13 +62,13 @@ func (a *TreeNode) AddChild(child *TreeNode) {
 	a.Children = append(a.Children, child)
 }
 
-func (a *TreeNode) Evaluate(variableStore *models.VariableStore) (bool, error) {
+func (a *TreeNode) Evaluate(variableStore *VariableStore) (bool, float64, error) {
 	operatorFactory := NewOperatorFactory()
-	result, err, _ := a.EvaluateNode(operatorFactory, variableStore)
-	return utils.ToBool(result), err
+	result, numericalResult, err, _ := a.EvaluateNode(operatorFactory, variableStore)
+	return utils.ToBool(result), numericalResult, err
 }
 
-func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *models.VariableStore) (any, error, bool) {
+func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *VariableStore) (any, float64, error, bool) {
 	if len(a.Children) == 0 {
 		return EvaluateArgumentsHelper(a, factory, variableStore)
 		// return a.Value, nil, true
@@ -75,10 +82,10 @@ func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *models.
 
 	for _, child := range a.Children {
 		services.Logger.Println("Evaluating child", child.Value)
-		result, err, ok := child.EvaluateNode(factory, variableStore)
+		result, _, err, ok := child.EvaluateNode(factory, variableStore)
 		if err != nil {
 			services.Logger.Println("Error executing argument", a.Value)
-			return nil, err, false
+			return nil, -1, err, false
 		}
 		if ok {
 			evaluatedChildren = append(evaluatedChildren, result)
@@ -89,17 +96,17 @@ func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *models.
 		return EvaluateArgumentsHelper(a, factory, variableStore)
 	}
 
-	return nil, fmt.Errorf("error executing argument"), false
+	return nil, -1, fmt.Errorf("error executing argument"), false
 }
 
-func EvaluateArgumentsHelper(node *TreeNode, factory *OperatorFactory, variableStore *models.VariableStore) (any, error, bool) {
+func EvaluateArgumentsHelper(node *TreeNode, factory *OperatorFactory, variableStore *VariableStore) (any, float64, error, bool) {
 	if node.Value == nil || (node.Type != "string" && node.Type != "" && node.Type != "variable") {
-		return node.Value, nil, true
+		return node.Value, -1, nil, true
 	}
 
-	factoryResult, factoryErr := factory.EvaluateOperator(node.Value.(string), *node, variableStore)
+	factoryResult, factoryNumericalResult, factoryErr := factory.EvaluateOperator(node.Value.(string), *node, variableStore)
 	node.ResultValue = factoryResult
-	return factoryResult, factoryErr, factoryErr == nil
+	return factoryResult, factoryNumericalResult, factoryErr, factoryErr == nil
 }
 
 func GetValue(arg any) any {
