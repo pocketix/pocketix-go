@@ -22,9 +22,8 @@ func CheckMissingBlock(data []byte) error {
 	return nil
 }
 
-func Parse(data []byte) (*types.Program, error) {
+func Parse(data []byte, variableStore *models.VariableStore) (*types.Program, error) {
 	var program types.Program
-	variableStore := models.NewVariableStore()
 
 	if err := CheckMissingBlock(data); err != nil {
 		return nil, err

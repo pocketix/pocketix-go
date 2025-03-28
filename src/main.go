@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 
+	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/parser"
 	"github.com/pocketix/pocketix-go/src/services"
 )
@@ -13,7 +14,10 @@ func main() {
 	flag.Parse()
 
 	data := services.OpenFile(*path)
-	if _, err := parser.Parse(data); err != nil {
+	variableStore := models.NewVariableStore()
+
+	_, err := parser.Parse(data, variableStore)
+	if err != nil {
 		log.Fatalln(err)
 	}
 }
