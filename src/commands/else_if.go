@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/utils"
 )
 
 type ElseIf struct {
@@ -13,10 +14,10 @@ type ElseIf struct {
 
 func (e *ElseIf) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing else if")
-	if result, _, err := e.Arguments.Evaluate(variableStore); err != nil {
+	if result, err := e.Arguments.Evaluate(variableStore); err != nil {
 		services.Logger.Println("Error executing else if arguments", err)
 	} else {
-		if result {
+		if utils.ToBool(result) {
 			services.Logger.Println("Else if is true, can execute body")
 			for _, cmd := range e.Block {
 				if success, err := cmd.Execute(variableStore); err != nil {

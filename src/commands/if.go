@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/utils"
 )
 
 type If struct {
@@ -15,12 +16,12 @@ type If struct {
 
 func (i *If) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing if")
-	result, _, err := i.Arguments.Evaluate(variableStore)
+	result, err := i.Arguments.Evaluate(variableStore)
 	if err != nil {
 		services.Logger.Println("Error executing if arguments", err)
 		return false, err
 	}
-	if result {
+	if utils.ToBool(result) {
 		services.Logger.Println("If is true, can execute body")
 		return ExecuteCommands(i.Block, variableStore)
 	}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/pocketix/pocketix-go/src/services"
-	"github.com/pocketix/pocketix-go/src/utils"
 )
 
 type TreeNode struct {
@@ -62,16 +61,15 @@ func (a *TreeNode) AddChild(child *TreeNode) {
 	a.Children = append(a.Children, child)
 }
 
-func (a *TreeNode) Evaluate(variableStore *VariableStore) (bool, float64, error) {
+func (a *TreeNode) Evaluate(variableStore *VariableStore) (any, error) {
 	operatorFactory := NewOperatorFactory()
-	result, numericalResult, err, _ := a.EvaluateNode(operatorFactory, variableStore)
-	return utils.ToBool(result), numericalResult, err
+	result, err, _ := a.EvaluateNode(operatorFactory, variableStore)
+	return result, err
 }
 
-func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *VariableStore) (any, float64, error, bool) {
+func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *VariableStore) (any, error, bool) {
 	if len(a.Children) == 0 {
 		return EvaluateArgumentsHelper(a, factory, variableStore)
-		// return a.Value, nil, true
 	}
 
 	if len(a.Children) == 1 {
@@ -82,10 +80,10 @@ func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *Variabl
 
 	for _, child := range a.Children {
 		services.Logger.Println("Evaluating child", child.Value)
-		result, _, err, ok := child.EvaluateNode(factory, variableStore)
+		result, err, ok := child.EvaluateNode(factory, variableStore)
 		if err != nil {
 			services.Logger.Println("Error executing argument", a.Value)
-			return nil, -1, err, false
+			return nil, err, false
 		}
 		if ok {
 			evaluatedChildren = append(evaluatedChildren, result)
@@ -96,17 +94,17 @@ func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *Variabl
 		return EvaluateArgumentsHelper(a, factory, variableStore)
 	}
 
-	return nil, -1, fmt.Errorf("error executing argument"), false
+	return nil, fmt.Errorf("error executing argument"), false
 }
 
-func EvaluateArgumentsHelper(node *TreeNode, factory *OperatorFactory, variableStore *VariableStore) (any, float64, error, bool) {
+func EvaluateArgumentsHelper(node *TreeNode, factory *OperatorFactory, variableStore *VariableStore) (any, error, bool) {
 	if node.Value == nil || (node.Type != "string" && node.Type != "" && node.Type != "variable") {
-		return node.Value, -1, nil, true
+		return node.Value, nil, true
 	}
 
-	factoryResult, factoryNumericalResult, factoryErr := factory.EvaluateOperator(node.Value.(string), *node, variableStore)
+	factoryResult, factoryErr := factory.EvaluateOperator(node.Value.(string), *node, variableStore)
 	node.ResultValue = factoryResult
-	return factoryResult, factoryNumericalResult, factoryErr, factoryErr == nil
+	return factoryResult, factoryErr, factoryErr == nil
 }
 
 func GetValue(arg any) any {

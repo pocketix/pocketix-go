@@ -34,16 +34,15 @@ func (vs *VariableStore) SetVariable(name string, value any, valueType string) e
 	}
 
 	if valueType == "variable" {
-		LValVariable, err := vs.GetVariable(value.(string))
+		RValVariable, err := vs.GetVariable(value.(string))
 		if err != nil {
 			return err
 		}
-		// TODO Evaluate should return any (because it can be a string, int, float, etc)
-		_, numericalResult, err := LValVariable.Value.Evaluate(vs)
+		result, err := RValVariable.Value.Evaluate(vs)
 		if err != nil {
 			return err
 		}
-		value = numericalResult
+		value = result
 	}
 
 	if reflect.TypeOf(value).String() != reflect.TypeOf(variable.Value.Value).String() {
