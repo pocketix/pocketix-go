@@ -16,10 +16,10 @@ func NewOperatorFactory() *OperatorFactory {
 	return &OperatorFactory{
 		operator: map[string]func(a, b any) (any, error){
 			"===": func(a, b any) (any, error) {
-				return a == b, nil
+				return CompareValues(a, b, func(x, y float64) bool { return x == y })
 			},
 			"!==": func(a, b any) (any, error) {
-				return a != b, nil
+				return CompareValues(a, b, func(x, y float64) bool { return x != y })
 			},
 			"<": func(a, b any) (any, error) {
 				return CompareValues(a, b, func(x, y float64) bool { return x < y })
@@ -58,6 +58,18 @@ func AddValues(a, b any) (any, error) {
 
 func CompareValues(a, b any, comparator func(x, y float64) bool) (bool, error) {
 	switch a := a.(type) {
+	case bool:
+		b, ok := b.(bool)
+		if !ok {
+			return false, fmt.Errorf("type mismatch: %T and %T", a, b)
+		}
+		if comparator(1, 1) {
+			return a == b, nil
+		}
+		if comparator(1, 0) {
+			return a != b, nil
+		}
+		return false, fmt.Errorf("unsupported comparison for bool: %T", a)
 	case float64:
 		b, ok := b.(float64)
 		if !ok {
@@ -76,117 +88,15 @@ func CompareValues(a, b any, comparator func(x, y float64) bool) (bool, error) {
 			return false, fmt.Errorf("type mismatch: %T and %T", a, b)
 		}
 		return comparator(float64(len(a)), float64(len(b))), nil
+	case nil:
+		if b == nil {
+			return comparator(0, 0), nil
+		}
+		return false, fmt.Errorf("type mismatch: %T and %T", a, b)
 	default:
 		return false, fmt.Errorf("unsupported type: %T", a)
 	}
 }
-
-// TODO add more operators
-// func NewOperatorFactory() *OperatorFactory {
-// 	return &OperatorFactory{
-// 		operator: map[string]OperatorFunction{
-// 			"===": func(child TreeNode, variableStore *VariableStore) (any, error) {
-// 				if len(child.Children) == 0 {
-// 					return child.Value, nil
-// 				}
-// 				for i := range len(child.Children) - 1 {
-// 					a := child.Children[i].ResultValue
-// 					b := child.Children[i+1].ResultValue
-
-// 					services.Logger.Println("Comparing", a, b)
-// 					if a != b {
-// 						return false, nil
-// 					}
-// 				}
-// 				return true, nil
-// 			},
-// 			"!==": func(child TreeNode, variableStore *VariableStore) (any, error) {
-// 				if len(child.Children) == 0 {
-// 					return child.Value, nil
-// 				}
-// 				for i := range len(child.Children) - 1 {
-// 					a := child.Children[i].ResultValue
-// 					b := child.Children[i+1].ResultValue
-
-// 					services.Logger.Println("Comparing", a, b)
-// 					if a == b {
-// 						return false, nil
-// 					}
-// 				}
-
-// 				return true, nil
-// 			},
-// 			"<": func(child TreeNode, variableStore *VariableStore) (any, error) {
-// 				if len(child.Children) == 0 {
-// 					return child.Value, nil
-// 				}
-// 				for i := range len(child.Children) - 1 {
-// 					a := child.Children[i].ResultValue
-// 					b := child.Children[i+1].ResultValue
-
-// 					services.Logger.Println("Comparing", a, b)
-// 					if a >= b {
-// 						return false, nil
-// 					}
-// 				}
-// 				return true, nil
-// 			},
-// 			// ">=": func(child TreeNode) (any, error) {
-// 			// 	if len(child.Children) == 0 {
-// 			// 		return child.Value, nil
-// 			// 	}
-// 			// 	for i := range len(child.Children) - 1 {
-// 			// 		services.Logger.Println("Comparing", child.Children[i].Value, child.Children[i+1].Value)
-// 			// 		if child.Children[i].Value < child.Children[i+1].Value {
-// 			// 			return false, nil
-// 			// 		}
-// 			// 	}
-// 			// 	return true, nil
-// 			// },
-// 			// "<=": func(child TreeNode) (any, error) {
-// 			// 	if len(child.Children) == 0 {
-// 			// 		return child.Value, nil
-// 			// 	}
-// 			// 	for i := range len(child.Children) - 1 {
-// 			// 		services.Logger.Println("Comparing", child.Children[i].Value, child.Children[i+1].Value)
-// 			// 		if child.Children[i].Value > child.Children[i+1].Value {
-// 			// 			return false, nil
-// 			// 		}
-// 			// 	}
-// 			// 	return true, nil
-// 			// },
-// 			// ">": func(child TreeNode) (any, error) {
-// 			// 	if len(child.Children) == 0 {
-// 			// 		return child.Value, nil
-// 			// 	}
-// 			// 	for i := range len(child.Children) - 1 {
-// 			// 		services.Logger.Println("Comparing", child.Children[i].Value, child.Children[i+1].Value)
-// 			// 		if child.Children[i].Value <= child.Children[i+1].Value {
-// 			// 			return false, nil
-// 			// 		}
-// 			// 	}
-// 			// 	return true, nil
-// 			// },
-// 			// "<": func(child TreeNode) (any, error) {
-// 			// 	if len(child.Children) == 0 {
-// 			// 		return child.Value, nil
-// 			// 	}
-// 			// 	for i := range len(child.Children) - 1 {
-// 			// 		services.Logger.Println("Comparing", child.Children[i].Value, child.Children[i+1].Value)
-// 			// 		if child.Children[i].Value >= child.Children[i+1].Value {
-// 			// 			return false, nil
-// 			// 		}
-// 			// 	}
-// 			// 	return true, nil
-// 			// },
-// 		},
-// 	}
-// }
-
-// func CheckOperatorsType(leftOperand models.TreeNode, rightOperand models.TreeNode) error {
-// 	if leftOperand.Type == "string" && rightOperand.Type == "string" {
-
-// }
 
 func GetValueFromStore(node TreeNode, variableStore *VariableStore) (any, error) {
 	if node.Type == "variable" {
