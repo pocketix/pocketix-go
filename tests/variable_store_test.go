@@ -114,3 +114,30 @@ func TestSetVariableTypeMismatch(t *testing.T) {
 
 	assert.NotNil(err, "Expected not nil, got nil")
 }
+
+func TestExpressionVariable(t *testing.T) {
+	assert := assert.New(t)
+
+	variableStore := models.NewVariableStore()
+
+	variable := models.Variable{
+		Name: "variable",
+		Type: "string",
+		Value: &models.TreeNode{Type: "boolean_expression", Children: []*models.TreeNode{
+			{Value: "===", Children: []*models.TreeNode{
+				{Type: "string", Value: "value", ResultValue: "value"},
+				{Type: "string", Value: "value", ResultValue: "value"},
+			}},
+		}},
+	}
+
+	variableStore.AddVariable(variable)
+	result, err := variableStore.GetVariable("variable")
+
+	assert.Nil(err, "Expected nil, got %v", err)
+
+	expressionResult, err := result.Value.Evaluate(variableStore)
+
+	assert.Nil(err, "Expected nil, got %v", err)
+	assert.True(expressionResult.(bool), "Expected true, got false")
+}

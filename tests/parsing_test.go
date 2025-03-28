@@ -17,7 +17,7 @@ func TestParseEmptyBlock(t *testing.T) {
 	program := services.OpenFile("../programs/basic/empty_block.json")
 	assert.NotNil(program, "Program should not be nil")
 
-	programResult, err := parser.Parse(program)
+	programResult, err := parser.Parse(program, nil)
 
 	assert.NotNil(programResult, "Command should not be nil")
 	assert.Nil(err, "Error should be nil")

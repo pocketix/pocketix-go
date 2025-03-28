@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,9 +60,9 @@ func TestEvaluate_NoChildren(t *testing.T) {
 	assert := assert.New(t)
 
 	root := &models.TreeNode{}
-	result, _, err := root.Evaluate(nil)
+	result, err := root.Evaluate(nil)
 
-	assert.False(result, "Result should be false")
+	assert.False(utils.ToBool(result), "Result should be false")
 	assert.Nil(err, "Error should be nil")
 }
 
@@ -70,9 +71,9 @@ func TestEvaluate_SingleValue(t *testing.T) {
 
 	root := models.InitTree("boolean_expresstion", "", []any{map[string]any{"type": "string", "value": "test"}}, nil)
 
-	result, _, err := root.Evaluate(nil)
+	result, err := root.Evaluate(nil)
 
-	assert.True(result, "Result should be true")
+	assert.True(utils.ToBool(result), "Result should be true")
 	assert.Nil(err, "Error should be nil")
 }
 
@@ -86,9 +87,9 @@ func TestEvaluate_SimpleCondition(t *testing.T) {
 		}},
 	}, nil)
 
-	result, _, err := root.Evaluate(nil)
+	result, err := root.Evaluate(nil)
 
-	assert.True(result, "Result should be true")
+	assert.True(utils.ToBool(result), "Result should be true")
 	assert.Nil(err, "Error should be nil")
 
 	root = models.InitTree("boolean_expresstion", "", []any{
@@ -98,9 +99,9 @@ func TestEvaluate_SimpleCondition(t *testing.T) {
 		}},
 	}, nil)
 
-	result, _, err = root.Evaluate(nil)
+	result, err = root.Evaluate(nil)
 
-	assert.False(result, "Result should be false")
+	assert.False(utils.ToBool(result), "Result should be false")
 	assert.Nil(err, "Error should be nil")
 }
 
@@ -117,9 +118,9 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 		}},
 	}, nil)
 
-	result, _, err := root.Evaluate(nil)
+	result, err := root.Evaluate(nil)
 
-	assert.True(result, "Result should be true")
+	assert.True(utils.ToBool(result), "Result should be true")
 	assert.Nil(err, "Error should be nil")
 
 	root = models.InitTree("boolean_expresstion", "", []any{
@@ -132,9 +133,9 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 		}},
 	}, nil)
 
-	result, _, err = root.Evaluate(nil)
+	result, err = root.Evaluate(nil)
 
-	assert.False(result, "Result should be false")
+	assert.False(utils.ToBool(result), "Result should be false")
 	assert.Nil(err, "Error should be nil")
 }
 
@@ -156,8 +157,8 @@ func TestEvaluateWithVariable(t *testing.T) {
 		}},
 	}, variableStore)
 
-	result, _, err := root.Evaluate(variableStore)
+	result, err := root.Evaluate(variableStore)
 
-	assert.True(result, "Result should be true")
+	assert.True(utils.ToBool(result), "Result should be true")
 	assert.Nil(err, "Error should be nil")
 }
