@@ -112,7 +112,7 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "boolean", "value": false},
 			map[string]any{"type": "===", "value": []any{
-				map[string]any{"type": "number", "value": 1},
+				map[string]any{"type": "string", "value": "testing"},
 				map[string]any{"type": "string", "value": "test"},
 			}},
 		}},
@@ -127,7 +127,7 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "boolean", "value": true},
 			map[string]any{"type": "===", "value": []any{
-				map[string]any{"type": "number", "value": 1},
+				map[string]any{"type": "string", "value": "testing"},
 				map[string]any{"type": "string", "value": "test"},
 			}},
 		}},

@@ -73,7 +73,7 @@ func TestExecuteWhileWithFalseCondition(t *testing.T) {
 			Children: []*models.TreeNode{
 				{Value: "===", Children: []*models.TreeNode{
 					{Value: "a", ResultValue: "a"},
-					{Value: "b", ResultValue: "b"},
+					{Value: "ab", ResultValue: "ab"},
 				}},
 			},
 		},

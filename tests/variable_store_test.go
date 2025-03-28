@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -139,5 +140,31 @@ func TestExpressionVariable(t *testing.T) {
 	expressionResult, err := result.Value.Evaluate(variableStore)
 
 	assert.Nil(err, "Expected nil, got %v", err)
-	assert.True(expressionResult.(bool), "Expected true, got false")
+	assert.True(utils.ToBool(expressionResult), "Expected true, got false")
+}
+
+func TestExpressionVariableTypeMismatch(t *testing.T) {
+	assert := assert.New(t)
+
+	variableStore := models.NewVariableStore()
+
+	variable := models.Variable{
+		Name: "variable",
+		Type: "string",
+		Value: &models.TreeNode{Type: "boolean_expression", Children: []*models.TreeNode{
+			{Value: "===", Children: []*models.TreeNode{
+				{Type: "string", Value: "value", ResultValue: "value"},
+				{Type: "number", Value: 1, ResultValue: 1},
+			}},
+		}},
+	}
+
+	variableStore.AddVariable(variable)
+	result, err := variableStore.GetVariable("variable")
+
+	assert.Nil(err, "Expected nil, got %v", err)
+
+	_, err = result.Value.Evaluate(variableStore)
+
+	assert.NotNil(err, "Expected not nil, got nil")
 }

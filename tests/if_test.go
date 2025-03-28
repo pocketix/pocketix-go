@@ -41,67 +41,66 @@ func TestEvaluateIf_SimpleCondition(t *testing.T) {
 		a, b any
 	}
 
-	operators := []string{"===", "!=="} // TODO add more operators
-
-	data := []Pair{
-		{true, true},
-		{true, false},
-		{false, false},
-		{1, 1},
-		{1, 0},
-		{0, 0},
-		{"true", "true"},
-		{"true", "false"},
-		{"", ""},
-		{nil, nil},
-		{0.0, 0.0},
-		{1.0, 1.0},
-		{"", nil},
-		{"", "true"},
+	type TestCase struct {
+		Operator      string
+		Pair          Pair
+		Types         Pair
+		expected      bool
+		expectedError bool
 	}
 
-	types := []Pair{
-		{"boolean", "boolean"},
-		{"boolean", "boolean"},
-		{"boolean", "boolean"},
-		{"number", "number"},
-		{"number", "number"},
-		{"number", "number"},
-		{"string", "string"},
-		{"string", "string"},
-		{"string", "string"},
-		{"", ""},
-		{"number", "number"},
-		{"number", "number"},
-		{"string", ""},
-		{"string", "string"},
+	testCases := []TestCase{
+		{"===", Pair{true, true}, Pair{"boolean", "boolean"}, true, false},
+		{"===", Pair{true, false}, Pair{"boolean", "boolean"}, false, false},
+		{"===", Pair{false, false}, Pair{"boolean", "boolean"}, true, false},
+		{"===", Pair{1, 1}, Pair{"number", "number"}, true, false},
+		{"===", Pair{1, 0}, Pair{"number", "number"}, false, false},
+		{"===", Pair{0, 0}, Pair{"number", "number"}, true, false},
+		{"===", Pair{"true", "true"}, Pair{"string", "string"}, true, false},
+		{"===", Pair{"true", "false"}, Pair{"string", "string"}, false, false},
+		{"===", Pair{"", ""}, Pair{"string", "string"}, true, false},
+		{"===", Pair{nil, nil}, Pair{"", ""}, true, false},
+		{"===", Pair{0.0, 0.0}, Pair{"number", "number"}, true, false},
+		{"===", Pair{1.0, 1.0}, Pair{"number", "number"}, true, false},
+		{"===", Pair{"", nil}, Pair{"string", ""}, false, true},
+		{"===", Pair{"", "true"}, Pair{"string", "string"}, false, false},
+
+		{"!==", Pair{true, true}, Pair{"boolean", "boolean"}, false, false},
+		{"!==", Pair{true, false}, Pair{"boolean", "boolean"}, true, false},
+		{"!==", Pair{false, false}, Pair{"boolean", "boolean"}, false, false},
+		{"!==", Pair{1, 1}, Pair{"number", "number"}, false, false},
+		{"!==", Pair{1, 0}, Pair{"number", "number"}, true, false},
+		{"!==", Pair{0, 0}, Pair{"number", "number"}, false, false},
+		{"!==", Pair{"true", "true"}, Pair{"string", "string"}, false, false},
+		{"!==", Pair{"true", "false"}, Pair{"string", "string"}, true, false},
+		{"!==", Pair{"", ""}, Pair{"string", "string"}, false, false},
+		{"!==", Pair{nil, nil}, Pair{"", ""}, false, false},
+		{"!==", Pair{0.0, 0.0}, Pair{"number", "number"}, false, false},
+		{"!==", Pair{1.0, 1.0}, Pair{"number", "number"}, false, false},
+		{"!==", Pair{"", nil}, Pair{"string", ""}, true, true},
+		{"!==", Pair{"", "true"}, Pair{"string", "string"}, true, false},
 	}
 
-	expected := [][]bool{
-		{true, false, true, true, false, true, true, false, true, true, true, true, false, false},
-		{false, true, false, false, true, false, false, true, false, false, false, false, true, true},
-	}
-
-	for i, operator := range operators {
-		for j, pair := range data {
-			ifStatement := commands.If{
-				Id: "if",
-				Arguments: &models.TreeNode{
-					Value: "boolean_expression", Children: []*models.TreeNode{
-						{Value: operator, Children: []*models.TreeNode{
-							{Value: pair.a, ResultValue: pair.a, Type: types[i].a.(string)},
-							{Value: pair.b, ResultValue: pair.b, Type: types[i].b.(string)},
-						}},
-					},
+	for _, testCase := range testCases {
+		ifStatement := commands.If{
+			Id: "if",
+			Arguments: &models.TreeNode{
+				Value: "boolean_expression", Children: []*models.TreeNode{
+					{Value: testCase.Operator, Children: []*models.TreeNode{
+						{Value: testCase.Pair.a, ResultValue: testCase.Pair.a, Type: testCase.Types.a.(string)},
+						{Value: testCase.Pair.b, ResultValue: testCase.Pair.b, Type: testCase.Types.b.(string)},
+					}},
 				},
-				Block: []commands.Command{},
-			}
-
-			result, err := ifStatement.Execute(nil)
-
+			},
+			Block: []commands.Command{},
+		}
+		result, err := ifStatement.Execute(nil)
+		if testCase.expectedError {
+			assert.NotNil(err, "Expected error, got nil")
+		} else {
 			assert.Nil(err, "Error should be nil")
 			assert.NotNil(result, "Result should not be nil")
-			assert.Equal(expected[i][j], result, "Result of %v %v %v should be %v", pair.a, operator, pair.b, expected[i][j])
+			assert.Equal(testCase.expected, result, "Result should be %v", testCase.expected)
 		}
 	}
 }
