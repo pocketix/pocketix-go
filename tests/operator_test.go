@@ -1,0 +1,276 @@
+package tests
+
+import (
+	"testing"
+
+	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestOperators(t *testing.T) {
+	assert := assert.New(t)
+
+	type Pair struct {
+		value1 any
+		value2 any
+	}
+
+	type TestCase struct {
+		operator string
+		value    Pair
+		types    Pair
+		expected any
+		error    bool
+	}
+
+	testCases := []TestCase{
+		{"===", Pair{true, true}, Pair{"boolean", "boolean"}, true, false},
+		{"===", Pair{true, false}, Pair{"boolean", "boolean"}, false, false},
+		{"===", Pair{false, false}, Pair{"boolean", "boolean"}, true, false},
+		{"===", Pair{1, 1}, Pair{"number", "number"}, true, false},
+		{"===", Pair{1, 0}, Pair{"number", "number"}, false, false},
+		{"===", Pair{0, 0}, Pair{"number", "number"}, true, false},
+		{"===", Pair{"true", "true"}, Pair{"string", "string"}, true, false},
+		{"===", Pair{"true", "false"}, Pair{"string", "string"}, false, false},
+		{"===", Pair{"", ""}, Pair{"string", "string"}, true, false},
+		{"===", Pair{nil, nil}, Pair{"", ""}, false, false},
+		{"===", Pair{0.0, 0.0}, Pair{"number", "number"}, true, false},
+		{"===", Pair{1.0, 1.0}, Pair{"number", "number"}, true, false},
+		{"===", Pair{"", nil}, Pair{"string", ""}, false, true},
+		{"===", Pair{"", "true"}, Pair{"string", "string"}, false, false},
+
+		{"!==", Pair{true, true}, Pair{"boolean", "boolean"}, false, false},
+		{"!==", Pair{true, false}, Pair{"boolean", "boolean"}, true, false},
+		{"!==", Pair{false, false}, Pair{"boolean", "boolean"}, false, false},
+		{"!==", Pair{1, 1}, Pair{"number", "number"}, false, false},
+		{"!==", Pair{1, 0}, Pair{"number", "number"}, true, false},
+		{"!==", Pair{0, 0}, Pair{"number", "number"}, false, false},
+		{"!==", Pair{"true", "true"}, Pair{"string", "string"}, false, false},
+		{"!==", Pair{"true", "false"}, Pair{"string", "string"}, true, false},
+		{"!==", Pair{"", ""}, Pair{"string", "string"}, false, false},
+		{"!==", Pair{nil, nil}, Pair{"", ""}, false, false},
+		{"!==", Pair{0.0, 0.0}, Pair{"number", "number"}, false, false},
+		{"!==", Pair{1.0, 1.0}, Pair{"number", "number"}, false, false},
+		{"!==", Pair{"", nil}, Pair{"string", ""}, true, true},
+		{"!==", Pair{"", "true"}, Pair{"string", "string"}, true, false},
+
+		{"<", Pair{true, false}, Pair{"boolean", "boolean"}, false, true},
+		{"<", Pair{1, false}, Pair{"number", "boolean"}, false, true},
+		{"<", Pair{true, "abc"}, Pair{"number", "number"}, false, true},
+		{"<", Pair{1, 2}, Pair{"number", "number"}, true, false},
+		{"<", Pair{2, 1}, Pair{"number", "number"}, false, false},
+		{"<", Pair{1, 1}, Pair{"number", "number"}, false, false},
+		{"<", Pair{1.0, 2.0}, Pair{"number", "number"}, true, false},
+		{"<", Pair{2.0, 1.0}, Pair{"number", "number"}, false, false},
+		{"<", Pair{1.0, 1.0}, Pair{"number", "number"}, false, false},
+		{"<", Pair{"1", "2"}, Pair{"string", "string"}, true, false},
+		{"<", Pair{"2", "1"}, Pair{"string", "string"}, false, false},
+		{"<", Pair{"1", "1"}, Pair{"string", "string"}, false, false},
+		{"<", Pair{"", ""}, Pair{"string", "string"}, false, false},
+		{"<", Pair{nil, nil}, Pair{"", ""}, false, false},
+		{"<", Pair{"test", nil}, Pair{"string", ""}, true, true},
+		{"<", Pair{"test", "test2"}, Pair{"string", "string"}, true, false},
+		{"<", Pair{"test2", "test"}, Pair{"string", "string"}, false, false},
+		{"<", Pair{"test", "test"}, Pair{"string", "string"}, false, false},
+
+		{">", Pair{false, true}, Pair{"boolean", "boolean"}, false, true},
+		{">", Pair{1, false}, Pair{"number", "boolean"}, false, true},
+		{">", Pair{true, "abc"}, Pair{"number", "number"}, false, true},
+		{">", Pair{2, 1}, Pair{"number", "number"}, true, false},
+		{">", Pair{1, 2}, Pair{"number", "number"}, false, false},
+		{">", Pair{1, 1}, Pair{"number", "number"}, false, false},
+		{">", Pair{2.0, 1.0}, Pair{"number", "number"}, true, false},
+		{">", Pair{1.0, 2.0}, Pair{"number", "number"}, false, false},
+		{">", Pair{1.0, 1.0}, Pair{"number", "number"}, false, false},
+		{">", Pair{"2", "1"}, Pair{"string", "string"}, true, false},
+		{">", Pair{"1", "2"}, Pair{"string", "string"}, false, false},
+		{">", Pair{"1", "1"}, Pair{"string", "string"}, false, false},
+		{">", Pair{"", ""}, Pair{"string", "string"}, false, false},
+		{">", Pair{nil, nil}, Pair{"", ""}, false, false},
+		{">", Pair{"test", nil}, Pair{"string", ""}, false, true},
+		{">", Pair{"test2", "test"}, Pair{"string", "string"}, true, false},
+		{">", Pair{"test", "test2"}, Pair{"string", "string"}, false, false},
+		{">", Pair{"test", "test"}, Pair{"string", "string"}, false, false},
+
+		{"<=", Pair{false, true}, Pair{"boolean", "boolean"}, true, true},
+		{"<=", Pair{1, false}, Pair{"number", "boolean"}, false, true},
+		{"<=", Pair{true, "abc"}, Pair{"number", "number"}, false, true},
+		{"<=", Pair{1, 2}, Pair{"number", "number"}, true, false},
+		{"<=", Pair{2, 1}, Pair{"number", "number"}, false, false},
+		{"<=", Pair{1, 1}, Pair{"number", "number"}, true, false},
+		{"<=", Pair{1.0, 2.0}, Pair{"number", "number"}, true, false},
+		{"<=", Pair{2.0, 1.0}, Pair{"number", "number"}, false, false},
+		{"<=", Pair{1.0, 1.0}, Pair{"number", "number"}, true, false},
+		{"<=", Pair{"1", "2"}, Pair{"string", "string"}, true, false},
+		{"<=", Pair{"2", "1"}, Pair{"string", "string"}, false, false},
+		{"<=", Pair{"1", "1"}, Pair{"string", "string"}, true, false},
+		{"<=", Pair{"", ""}, Pair{"string", "string"}, true, false},
+		{"<=", Pair{nil, nil}, Pair{"", ""}, false, false},
+		{"<=", Pair{"test", nil}, Pair{"string", ""}, false, true},
+		{"<=", Pair{"test", "test2"}, Pair{"string", "string"}, true, false},
+		{"<=", Pair{"test2", "test"}, Pair{"string", "string"}, false, false},
+		{"<=", Pair{"test", "test"}, Pair{"string", "string"}, true, false},
+
+		{">=", Pair{false, true}, Pair{"boolean", "boolean"}, false, true},
+		{">=", Pair{1, false}, Pair{"number", "boolean"}, false, true},
+		{">=", Pair{true, "abc"}, Pair{"number", "number"}, false, true},
+		{">=", Pair{2, 1}, Pair{"number", "number"}, true, false},
+		{">=", Pair{1, 2}, Pair{"number", "number"}, false, false},
+		{">=", Pair{1, 1}, Pair{"number", "number"}, true, false},
+		{">=", Pair{2.0, 1.0}, Pair{"number", "number"}, true, false},
+		{">=", Pair{1.0, 2.0}, Pair{"number", "number"}, false, false},
+		{">=", Pair{1.0, 1.0}, Pair{"number", "number"}, true, false},
+		{">=", Pair{"2", "1"}, Pair{"string", "string"}, true, false},
+		{">=", Pair{"1", "2"}, Pair{"string", "string"}, false, false},
+		{">=", Pair{"1", "1"}, Pair{"string", "string"}, true, false},
+		{">=", Pair{"", ""}, Pair{"string", "string"}, true, false},
+		{">=", Pair{nil, nil}, Pair{"", ""}, false, false},
+		{">=", Pair{"test", nil}, Pair{"string", ""}, false, true},
+		{">=", Pair{"test2", "test"}, Pair{"string", "string"}, true, false},
+		{">=", Pair{"test", "test2"}, Pair{"string", "string"}, false, false},
+		{">=", Pair{"test", "test"}, Pair{"string", "string"}, true, false},
+
+		{"+", Pair{true, true}, Pair{"boolean", "boolean"}, false, true},
+		{"+", Pair{1, true}, Pair{"number", "boolean"}, false, true},
+		{"+", Pair{true, "abc"}, Pair{"number", "number"}, false, true},
+		{"+", Pair{1, 2}, Pair{"number", "number"}, float64(3), false},
+		{"+", Pair{1.0, 2.0}, Pair{"number", "number"}, 3.0, false},
+		{"+", Pair{"1", "2"}, Pair{"string", "string"}, "12", false},
+		{"+", Pair{"1", 2}, Pair{"string", "number"}, false, true},
+		{"+", Pair{"1", nil}, Pair{"string", ""}, false, true},
+		{"+", Pair{nil, nil}, Pair{"", ""}, false, true},
+		{"+", Pair{"test", nil}, Pair{"string", ""}, false, true},
+		{"+", Pair{"test", "test2"}, Pair{"string", "string"}, "testtest2", false},
+		{"+", Pair{"test2", "test"}, Pair{"string", "string"}, "test2test", false},
+
+		{"-", Pair{true, true}, Pair{"boolean", "boolean"}, false, true},
+		{"-", Pair{1, true}, Pair{"number", "boolean"}, false, true},
+		{"-", Pair{true, "abc"}, Pair{"number", "number"}, false, true},
+		{"-", Pair{1, 2}, Pair{"number", "number"}, float64(-1), false},
+		{"-", Pair{1.0, 2.0}, Pair{"number", "number"}, -1.0, false},
+		{"-", Pair{"1", "2"}, Pair{"string", "string"}, false, true},
+		{"-", Pair{"1", 2}, Pair{"string", "number"}, false, true},
+		{"-", Pair{"1", nil}, Pair{"string", ""}, false, true},
+		{"-", Pair{nil, nil}, Pair{"", ""}, false, true},
+		{"-", Pair{"test", nil}, Pair{"string", ""}, false, true},
+		{"-", Pair{"test", "test2"}, Pair{"string", "string"}, false, true},
+		{"-", Pair{"test2", "test"}, Pair{"string", "string"}, false, true},
+
+		{"*", Pair{true, true}, Pair{"boolean", "boolean"}, false, true},
+		{"*", Pair{1, true}, Pair{"number", "boolean"}, false, true},
+		{"*", Pair{true, "abc"}, Pair{"number", "number"}, false, true},
+		{"*", Pair{1, 2}, Pair{"number", "number"}, float64(2), false},
+		{"*", Pair{1.0, 2.0}, Pair{"number", "number"}, 2.0, false},
+		{"*", Pair{1.5, 2.5}, Pair{"number", "number"}, 3.75, false},
+		{"*", Pair{"1", "2"}, Pair{"string", "string"}, false, true},
+		{"*", Pair{"1", 2}, Pair{"string", "number"}, false, true},
+		{"*", Pair{"1", nil}, Pair{"string", ""}, false, true},
+		{"*", Pair{nil, nil}, Pair{"", ""}, false, true},
+		{"*", Pair{"test", nil}, Pair{"string", ""}, false, true},
+		{"*", Pair{"test", "test2"}, Pair{"string", "string"}, false, true},
+		{"*", Pair{"test2", "test"}, Pair{"string", "string"}, false, true},
+		{"*", Pair{6, 7}, Pair{"number", "number"}, float64(42), false},
+		{"*", Pair{0, 7}, Pair{"number", "number"}, float64(0), false},
+		{"*", Pair{6, 0}, Pair{"number", "number"}, float64(0), false},
+		{"*", Pair{0, 0}, Pair{"number", "number"}, float64(0), false},
+
+		{"/", Pair{true, true}, Pair{"boolean", "boolean"}, false, true},
+		{"/", Pair{1, true}, Pair{"number", "boolean"}, false, true},
+		{"/", Pair{true, "abc"}, Pair{"number", "number"}, false, true},
+		{"/", Pair{1, 2}, Pair{"number", "number"}, float64(0.5), false},
+		{"/", Pair{1.0, 2.0}, Pair{"number", "number"}, 0.5, false},
+		{"/", Pair{1.5, 2.5}, Pair{"number", "number"}, 0.6, false},
+		{"/", Pair{"1", "2"}, Pair{"string", "string"}, false, true},
+		{"/", Pair{"1", 2}, Pair{"string", "number"}, false, true},
+		{"/", Pair{"1", nil}, Pair{"string", ""}, false, true},
+		{"/", Pair{nil, nil}, Pair{"", ""}, false, true},
+		{"/", Pair{"test", nil}, Pair{"string", ""}, false, true},
+		{"/", Pair{"test", "test2"}, Pair{"string", "string"}, false, true},
+		{"/", Pair{"test2", "test"}, Pair{"string", "string"}, false, true},
+		{"/", Pair{0, 7}, Pair{"number", "number"}, float64(0), false},
+		{"/", Pair{6, 0}, Pair{"number", "number"}, false, true},
+		{"/", Pair{0, 0}, Pair{"number", "number"}, false, true},
+
+		{"%", Pair{true, true}, Pair{"boolean", "boolean"}, false, true},
+		{"%", Pair{1, true}, Pair{"number", "boolean"}, false, true},
+		{"%", Pair{true, "abc"}, Pair{"number", "number"}, false, true},
+		{"%", Pair{1, 2}, Pair{"number", "number"}, 1, false},
+		{"%", Pair{1.0, 2.0}, Pair{"number", "number"}, 1, false},
+		{"%", Pair{1.5, 2.5}, Pair{"number", "number"}, 1, false},
+		{"%", Pair{"1", "2"}, Pair{"string", "string"}, false, true},
+		{"%", Pair{"1", 2}, Pair{"string", "number"}, false, true},
+		{"%", Pair{"1", nil}, Pair{"string", ""}, false, true},
+		{"%", Pair{nil, nil}, Pair{"", ""}, false, true},
+		{"%", Pair{"test", nil}, Pair{"string", ""}, false, true},
+		{"%", Pair{"test", "test2"}, Pair{"string", "string"}, false, true},
+		{"%", Pair{"test2", "test"}, Pair{"string", "string"}, false, true},
+		{"%", Pair{0, 7}, Pair{"number", "number"}, 0, false},
+		{"%", Pair{6, 0}, Pair{"number", "number"}, false, true},
+		{"%", Pair{0, 0}, Pair{"number", "number"}, false, true},
+		{"%", Pair{33, 7}, Pair{"number", "number"}, 5, false},
+
+		{"&&", Pair{true, true}, Pair{"boolean", "boolean"}, true, false},
+		{"&&", Pair{true, false}, Pair{"boolean", "boolean"}, false, false},
+		{"&&", Pair{false, false}, Pair{"boolean", "boolean"}, false, false},
+		{"&&", Pair{1, 1}, Pair{"number", "number"}, true, false},
+		{"&&", Pair{1, 0}, Pair{"number", "number"}, false, false},
+		{"&&", Pair{0, 0}, Pair{"number", "number"}, false, false},
+		{"&&", Pair{"true", "true"}, Pair{"string", "string"}, true, false},
+		{"&&", Pair{"true", "false"}, Pair{"string", "string"}, false, false},
+		{"&&", Pair{"", ""}, Pair{"string", "string"}, false, true},
+		{"&&", Pair{nil, nil}, Pair{"", ""}, false, true},
+		{"&&", Pair{0.0, 0.0}, Pair{"number", "number"}, false, false},
+		{"&&", Pair{1.0, 1.0}, Pair{"number", "number"}, true, false},
+		{"&&", Pair{"", nil}, Pair{"string", ""}, false, true},
+		{"&&", Pair{"", "true"}, Pair{"string", "string"}, false, true},
+		{"&&", Pair{"test", nil}, Pair{"string", ""}, false, true},
+		{"&&", Pair{"test", "test2"}, Pair{"string", "string"}, true, true},
+
+		{"||", Pair{true, true}, Pair{"boolean", "boolean"}, true, false},
+		{"||", Pair{true, false}, Pair{"boolean", "boolean"}, true, false},
+		{"||", Pair{false, false}, Pair{"boolean", "boolean"}, false, false},
+		{"||", Pair{1, 1}, Pair{"number", "number"}, true, false},
+		{"||", Pair{1, 0}, Pair{"number", "number"}, true, false},
+		{"||", Pair{0, 0}, Pair{"number", "number"}, false, false},
+		{"||", Pair{"true", "true"}, Pair{"string", "string"}, true, false},
+		{"||", Pair{"true", "false"}, Pair{"string", "string"}, true, false},
+		{"||", Pair{"false", "false"}, Pair{"string", "string"}, false, false},
+		{"||", Pair{"", ""}, Pair{"string", "string"}, false, true},
+		{"||", Pair{nil, nil}, Pair{"", ""}, false, true},
+		{"||", Pair{0.0, 0.0}, Pair{"number", "number"}, false, false},
+		{"||", Pair{1.0, 1.0}, Pair{"number", "number"}, true, false},
+		{"||", Pair{"", nil}, Pair{"string", ""}, false, true},
+		{"||", Pair{"", "true"}, Pair{"string", "string"}, false, true},
+		{"||", Pair{"test", nil}, Pair{"string", ""}, false, true},
+		{"||", Pair{"test", "test2"}, Pair{"string", "string"}, true, true},
+		{"||", Pair{"test2", "test"}, Pair{"string", "string"}, true, true},
+
+		{"!", Pair{true, ""}, Pair{"boolean", ""}, false, false},
+		{"!", Pair{false, ""}, Pair{"boolean", ""}, true, false},
+		{"!", Pair{1, ""}, Pair{"number", ""}, false, false},
+		{"!", Pair{0, ""}, Pair{"number", ""}, true, false},
+		{"!", Pair{1.0, ""}, Pair{"number", ""}, false, false},
+		{"!", Pair{0.0, ""}, Pair{"number", ""}, true, false},
+		{"!", Pair{"true", ""}, Pair{"string", ""}, false, false},
+		{"!", Pair{"false", ""}, Pair{"string", ""}, true, false},
+		{"!", Pair{"", ""}, Pair{"string", ""}, false, true},
+		{"!", Pair{nil, ""}, Pair{"", ""}, false, true},
+		{"!", Pair{"test", ""}, Pair{"string", ""}, false, true},
+	}
+
+	for _, testCase := range testCases {
+		tree := &models.TreeNode{Type: "boolean_expression", Children: []*models.TreeNode{
+			{Value: testCase.operator, Children: []*models.TreeNode{
+				{Type: testCase.types.value1.(string), Value: testCase.value.value1, ResultValue: testCase.value.value1},
+				{Type: testCase.types.value2.(string), Value: testCase.value.value2, ResultValue: testCase.value.value2},
+			}},
+		}}
+		result, err := tree.Evaluate(nil)
+		if testCase.error {
+			assert.NotNil(err, "Expected error for operator %s with values %v and %v", testCase.operator, testCase.value.value1, testCase.value.value2)
+		} else {
+			assert.Nil(err, "Unexpected error for operator %s with values %v and %v: %v", testCase.operator, testCase.value.value1, testCase.value.value2, err)
+			assert.Equal(testCase.expected, result, "Expected %v for operator %s with values %v and %v", testCase.expected, testCase.operator, testCase.value.value1, testCase.value.value2)
+		}
+	}
+}
