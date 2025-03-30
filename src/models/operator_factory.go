@@ -2,8 +2,10 @@ package models
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/utils"
 )
 
 type OperatorFunction func(child TreeNode, variableStore *VariableStore) (any, error)
@@ -22,10 +24,92 @@ func NewOperatorFactory() *OperatorFactory {
 				return CompareValues(a, b, func(x, y float64) bool { return x != y })
 			},
 			"<": func(a, b any) (any, error) {
+				if err := ForbidBoolean("<", a, b); err != nil {
+					return nil, err
+				}
 				return CompareValues(a, b, func(x, y float64) bool { return x < y })
+			},
+			"<=": func(a, b any) (any, error) {
+				if err := ForbidBoolean("<=", a, b); err != nil {
+					return nil, err
+				}
+				return CompareValues(a, b, func(x, y float64) bool { return x <= y })
+			},
+			">": func(a, b any) (any, error) {
+				if err := ForbidBoolean(">", a, b); err != nil {
+					return nil, err
+				}
+				return CompareValues(a, b, func(x, y float64) bool { return x > y })
+			},
+			">=": func(a, b any) (any, error) {
+				if err := ForbidBoolean(">", a, b); err != nil {
+					return nil, err
+				}
+				return CompareValues(a, b, func(x, y float64) bool { return x >= y })
 			},
 			"+": func(a, b any) (any, error) {
 				return AddValues(a, b)
+			},
+			"-": func(a, b any) (any, error) {
+				if aFloat, bFloat, err := AllowNumber("-", a, b); err != nil {
+					return nil, err
+				} else {
+					return aFloat - bFloat, nil
+				}
+			},
+			"*": func(a, b any) (any, error) {
+				if aFloat, bFloat, err := AllowNumber("*", a, b); err != nil {
+					return nil, err
+				} else {
+					return aFloat * bFloat, nil
+				}
+			},
+			"/": func(a, b any) (any, error) {
+				if aFloat, bFloat, err := AllowNumber("/", a, b); err != nil {
+					return nil, err
+				} else if bFloat == 0 {
+					return nil, fmt.Errorf("division by zero")
+				} else {
+					return aFloat / bFloat, nil
+				}
+			},
+			"%": func(a, b any) (any, error) {
+				if aFloat, bFloat, err := AllowNumber("%", a, b); err != nil {
+					return nil, err
+				} else if bFloat == 0 {
+					return nil, fmt.Errorf("division by zero")
+				} else {
+					return int(aFloat) % int(bFloat), nil
+				}
+			},
+			"&&": func(a, b any) (any, error) {
+				aBool, aErr := utils.ToBool(a)
+				if aErr != nil {
+					return nil, aErr
+				}
+				bBool, bErr := utils.ToBool(b)
+				if bErr != nil {
+					return nil, bErr
+				}
+				return aBool && bBool, nil
+			},
+			"||": func(a, b any) (any, error) {
+				aBool, aErr := utils.ToBool(a)
+				if aErr != nil {
+					return nil, aErr
+				}
+				bBool, bErr := utils.ToBool(b)
+				if bErr != nil {
+					return nil, bErr
+				}
+				return aBool || bBool, nil
+			},
+			"!": func(a, b any) (any, error) {
+				aBool, aErr := utils.ToBool(a)
+				if aErr != nil {
+					return nil, aErr
+				}
+				return !aBool, nil
 			},
 		},
 	}
@@ -63,13 +147,15 @@ func CompareValues(a, b any, comparator func(x, y float64) bool) (bool, error) {
 		if !ok {
 			return false, fmt.Errorf("type mismatch: %T and %T", a, b)
 		}
+		// "===" operator
 		if comparator(1, 1) {
 			return a == b, nil
 		}
+		// "!==" operator
 		if comparator(1, 0) {
 			return a != b, nil
 		}
-		return false, fmt.Errorf("unsupported comparison for bool: %T", a)
+		return false, fmt.Errorf("unsupported operator for boolean: %T", a)
 	case float64:
 		b, ok := b.(float64)
 		if !ok {
@@ -87,26 +173,15 @@ func CompareValues(a, b any, comparator func(x, y float64) bool) (bool, error) {
 		if !ok {
 			return false, fmt.Errorf("type mismatch: %T and %T", a, b)
 		}
-		return comparator(float64(len(a)), float64(len(b))), nil
+		return comparator(float64(strings.Compare(a, b)), 0), nil
 	case nil:
 		if b == nil {
-			return comparator(0, 0), nil
+			return false, nil
 		}
 		return false, fmt.Errorf("type mismatch: %T and %T", a, b)
 	default:
 		return false, fmt.Errorf("unsupported type: %T", a)
 	}
-}
-
-func GetValueFromStore(node TreeNode, variableStore *VariableStore) (any, error) {
-	if node.Type == "variable" {
-		if variable, err := variableStore.GetVariable(node.Value.(string)); err != nil {
-			return nil, err
-		} else {
-			return variable.Value, nil
-		}
-	}
-	return node.ResultValue, nil
 }
 
 func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, variableStore *VariableStore) (any, error) {
@@ -134,7 +209,6 @@ func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, vari
 	var err error
 
 	for i := range len(child.Children) - 1 {
-		// a := child.Children[i].ResultValue
 		b := child.Children[i+1].ResultValue
 
 		services.Logger.Println("Comparing", expressionResult, b, "with operator", operator)
@@ -146,4 +220,51 @@ func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, vari
 	}
 
 	return expressionResult, nil
+}
+
+func ForbidBoolean(operator string, a, b any) error {
+	if _, ok := a.(bool); ok {
+		return fmt.Errorf("operator %s not supported for boolean", operator)
+	}
+	if _, ok := b.(bool); ok {
+		return fmt.Errorf("operator %s not supported for boolean", operator)
+	}
+	return nil
+}
+
+func AllowNumber(operator string, a, b any) (float64, float64, error) {
+	var aFloat, bFloat float64
+
+	convertToFloat := func(v any) (float64, error) {
+		switch value := v.(type) {
+		case float64:
+			return value, nil
+		case int:
+			return float64(value), nil
+		default:
+			return 0, fmt.Errorf("operator %s not supported for non-numeric type: %T", operator, v)
+		}
+	}
+
+	if value, err := convertToFloat(a); err != nil {
+		return 0, 0, err
+	} else {
+		aFloat = value
+	}
+	if value, err := convertToFloat(b); err != nil {
+		return 0, 0, err
+	} else {
+		bFloat = value
+	}
+	return aFloat, bFloat, nil
+}
+
+func AllowBoolean(operator string, a, b any) error {
+	if _, ok := a.(bool); !ok {
+		return fmt.Errorf("operator %s not supported for non-boolean type: %T", operator, a)
+	}
+	if _, ok := b.(bool); !ok {
+		return fmt.Errorf("operator %s not supported for non-boolean type: %T", operator, b)
+	}
+	return nil
 }
