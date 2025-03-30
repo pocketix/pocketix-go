@@ -138,9 +138,11 @@ func TestExpressionVariable(t *testing.T) {
 	assert.Nil(err, "Expected nil, got %v", err)
 
 	expressionResult, err := result.Value.Evaluate(variableStore)
-
 	assert.Nil(err, "Expected nil, got %v", err)
-	assert.True(utils.ToBool(expressionResult), "Expected true, got false")
+
+	boolResult, boolErr := utils.ToBool(expressionResult)
+	assert.Nil(boolErr, "Expected nil, got %v", boolErr)
+	assert.True(boolResult, "Expected true, got false")
 }
 
 func TestExpressionVariableTypeMismatch(t *testing.T) {
@@ -167,4 +169,113 @@ func TestExpressionVariableTypeMismatch(t *testing.T) {
 	_, err = result.Value.Evaluate(variableStore)
 
 	assert.NotNil(err, "Expected not nil, got nil")
+}
+
+func TestExpressionVariableNotFound(t *testing.T) {
+	assert := assert.New(t)
+
+	variableStore := models.NewVariableStore()
+
+	variable := models.Variable{
+		Name: "variable",
+		Type: "string",
+		Value: &models.TreeNode{Type: "boolean_expression", Children: []*models.TreeNode{
+			{Value: "===", Children: []*models.TreeNode{
+				{Type: "string", Value: "value", ResultValue: "value"},
+				{Type: "variable", Value: "not_found", ResultValue: "not_found"},
+			}},
+		}},
+	}
+
+	variableStore.AddVariable(variable)
+	result, err := variableStore.GetVariable("variable")
+
+	assert.Nil(err, "Expected nil, got %v", err)
+
+	_, err = result.Value.Evaluate(variableStore)
+
+	assert.NotNil(err, "Expected not nil, got nil")
+}
+
+func TestExpressionVariableWithAnotherVariable(t *testing.T) {
+	assert := assert.New(t)
+
+	variableStore := models.NewVariableStore()
+
+	fooVar := models.Variable{
+		Name:  "foo",
+		Type:  "string",
+		Value: &models.TreeNode{Type: "string", Value: "value", ResultValue: "value"},
+	}
+
+	variable := models.Variable{
+		Name: "bar",
+		Type: "string",
+		Value: &models.TreeNode{Type: "boolean_expression", Children: []*models.TreeNode{
+			{Value: "===", Children: []*models.TreeNode{
+				{Type: "string", Value: "value", ResultValue: "value"},
+				{Type: "variable", Value: "foo", ResultValue: "foo"},
+			}},
+		}},
+	}
+
+	variableStore.AddVariable(variable)
+	variableStore.AddVariable(fooVar)
+
+	result, err := variableStore.GetVariable("bar")
+	assert.Nil(err, "Expected nil, got %v", err)
+
+	expressionResult, err := result.Value.Evaluate(variableStore)
+	assert.Nil(err, "Expected nil, got %v", err)
+
+	boolResult, boolErr := utils.ToBool(expressionResult)
+	assert.Nil(boolErr, "Expected nil, got %v", boolErr)
+	assert.True(boolResult, "Expected true, got false")
+}
+
+func TestExpressionVariableWithAnotherVariableNested(t *testing.T) {
+	assert := assert.New(t)
+
+	variableStore := models.NewVariableStore()
+
+	fooVar := models.Variable{
+		Name:  "foo",
+		Type:  "boolean",
+		Value: &models.TreeNode{Type: "boolean", Value: true, ResultValue: true},
+	}
+
+	barVar := models.Variable{
+		Name:  "bar",
+		Type:  "number",
+		Value: &models.TreeNode{Type: "number", Value: 10, ResultValue: 10},
+	}
+
+	variable := models.Variable{
+		Name: "var",
+		Type: "boolean_expression",
+		Value: &models.TreeNode{Type: "boolean_expression", Children: []*models.TreeNode{
+			{Value: "===", Children: []*models.TreeNode{
+				{Type: "variable", Value: "foo", ResultValue: "foo"},
+				{Value: "===", Children: []*models.TreeNode{
+					{Type: "number", Value: 10, ResultValue: 10},
+					{Type: "variable", Value: "bar", ResultValue: "bar"},
+				},
+				}},
+			}},
+		},
+	}
+
+	variableStore.AddVariable(variable)
+	variableStore.AddVariable(fooVar)
+	variableStore.AddVariable(barVar)
+
+	result, err := variableStore.GetVariable("var")
+	assert.Nil(err, "Expected nil, got %v", err)
+
+	expressionResult, err := result.Value.Evaluate(variableStore)
+	assert.Nil(err, "Expected nil, got %v", err)
+
+	boolResult, boolErr := utils.ToBool(expressionResult)
+	assert.Nil(boolErr, "Expected nil, got %v", boolErr)
+	assert.True(boolResult, "Expected true, got false")
 }
