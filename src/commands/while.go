@@ -21,7 +21,10 @@ func (w *While) Execute(variableStore *models.VariableStore) (bool, error) {
 			services.Logger.Println("Error executing while arguments", err)
 			return false, err
 		}
-		if utils.ToBool(result) {
+		if boolResult, boolErr := utils.ToBool(result); boolErr != nil {
+			services.Logger.Println("Error converting while result to bool", boolErr)
+			return false, boolErr
+		} else if boolResult {
 			services.Logger.Println("While is true, can execute body")
 			if success, err := ExecuteCommands(w.Block, variableStore); err != nil {
 				return success, err

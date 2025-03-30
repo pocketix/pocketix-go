@@ -21,7 +21,10 @@ func (i *If) Execute(variableStore *models.VariableStore) (bool, error) {
 		services.Logger.Println("Error executing if arguments", err)
 		return false, err
 	}
-	if utils.ToBool(result) {
+	if boolResult, boolErr := utils.ToBool(result); boolErr != nil {
+		services.Logger.Println("Error converting if result to bool", boolErr)
+		return false, boolErr
+	} else if boolResult {
 		services.Logger.Println("If is true, can execute body")
 		return ExecuteCommands(i.Block, variableStore)
 	}

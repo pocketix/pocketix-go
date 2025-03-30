@@ -17,7 +17,10 @@ func (e *ElseIf) Execute(variableStore *models.VariableStore) (bool, error) {
 	if result, err := e.Arguments.Evaluate(variableStore); err != nil {
 		services.Logger.Println("Error executing else if arguments", err)
 	} else {
-		if utils.ToBool(result) {
+		if boolResult, boolErr := utils.ToBool(result); boolErr != nil {
+			services.Logger.Println("Error converting else if result to bool", boolErr)
+			return false, boolErr
+		} else if boolResult {
 			services.Logger.Println("Else if is true, can execute body")
 			for _, cmd := range e.Block {
 				if success, err := cmd.Execute(variableStore); err != nil {
