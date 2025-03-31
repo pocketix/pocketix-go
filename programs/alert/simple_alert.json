@@ -1,0 +1,25 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "alert",
+            "arguments": [
+                {
+                    "type": "str_opt",
+                    "value": "phone_number"
+                },
+                {
+                    "type": "string",
+                    "value": "123456"
+                },
+                {
+                    "type": "string",
+                    "value": "Message"
+                }
+            ]
+        }
+    ]
+}
