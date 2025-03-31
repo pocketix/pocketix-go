@@ -2,9 +2,9 @@ package models
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
-	"github.com/pocketix/pocketix-go/src/services"
 	"github.com/pocketix/pocketix-go/src/utils"
 )
 
@@ -116,28 +116,30 @@ func NewOperatorFactory() *OperatorFactory {
 }
 
 func AddValues(a, b any) (any, error) {
-	switch aTyped := a.(type) {
-	case float64:
-		bTyped, ok := b.(float64)
-		if !ok {
-			return false, fmt.Errorf("type mismatch: %T and %T", a, b)
+	convertToFloat := func(v any) (float64, bool) {
+		switch val := v.(type) {
+		case float64:
+			return val, true
+		case int:
+			return float64(val), true
+		default:
+			return 0, false
 		}
-		return aTyped + bTyped, nil
-	case int:
-		bTyped, ok := b.(int)
-		if !ok {
-			return false, fmt.Errorf("type mismatch: %T and %T", a, b)
-		}
-		return float64(aTyped) + float64(bTyped), nil
-	case string:
-		bTyped, ok := b.(string)
-		if !ok {
-			return false, fmt.Errorf("type mismatch: %T and %T", a, b)
-		}
-		return aTyped + bTyped, nil
-	default:
-		return false, fmt.Errorf("unsupported type for + operator: %T", a)
 	}
+
+	if aFloat, okA := convertToFloat(a); okA {
+		if bFloat, okB := convertToFloat(b); okB {
+			return aFloat + bFloat, nil
+		}
+	}
+
+	if aStr, okA := a.(string); okA {
+		if bStr, okB := b.(string); okB {
+			return aStr + bStr, nil
+		}
+	}
+
+	return nil, fmt.Errorf("type mismatch: %T and %T", a, b)
 }
 
 func CompareValues(a, b any, comparator func(x, y float64) bool) (bool, error) {
@@ -204,22 +206,50 @@ func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, vari
 	if !exists {
 		return nil, fmt.Errorf("operator not supported: %s", operator)
 	}
+	comparisonOperators := []string{"<", "<=", ">", ">=", "===", "!=="}
 
-	expressionResult := child.Children[0].ResultValue
-	var err error
+	if slices.Contains(comparisonOperators, operator) {
+		return ComparisonOperator(child, opFunc)
+	}
 
+	return NumericLocicaloperator(child, opFunc)
+}
+
+func ComparisonOperator(child TreeNode, opFunc func(a, b any) (any, error)) (any, error) {
 	for i := range len(child.Children) - 1 {
+		a := child.Children[i].ResultValue
 		b := child.Children[i+1].ResultValue
 
-		services.Logger.Println("Comparing", expressionResult, b, "with operator", operator)
+		result, err := opFunc(a, b)
+		if err != nil {
+			return nil, err
+		}
 
-		expressionResult, err = opFunc(expressionResult, b)
+		boolComp, ok := result.(bool)
+		if !ok {
+			return nil, fmt.Errorf("comparison operator %s must return boolean", child.Type)
+		}
+		if !boolComp {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+func NumericLocicaloperator(child TreeNode, opFunc func(a, b any) (any, error)) (any, error) {
+	result := child.Children[0].ResultValue
+	var err error
+
+	for i := 1; i < len(child.Children); i++ {
+		b := child.Children[i].ResultValue
+
+		result, err = opFunc(result, b)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return expressionResult, nil
+	return result, nil
 }
 
 func ForbidBoolean(operator string, a, b any) error {
