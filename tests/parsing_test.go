@@ -556,3 +556,44 @@ func TestParseSwitchWithVariableSelector(t *testing.T) {
 	assert.Equal(0, len(case2.Block), "Expected 0 block, got %d", len(case2.Block))
 	assert.Equal(case2Value, "bar", "Expected bar, got %v", case2Value)
 }
+
+func TestParseAlert(t *testing.T) {
+	assert := assert.New(t)
+
+	block := types.Block{
+		Id: "alert",
+		Arguments: []types.Argument{
+			{
+				Type:  "str_opt",
+				Value: json.RawMessage(`"phone_number"`),
+			},
+			{
+				Type:  "string",
+				Value: json.RawMessage(`"1234567890"`),
+			},
+			{
+				Type:  "string",
+				Value: json.RawMessage(`"Hello, World!"`),
+			},
+		},
+	}
+
+	cmd, err := parser.ParseBlocks(block, nil)
+
+	assert.Nil(err, "Error should be nil")
+	assert.NotNil(cmd, "Command should not be nil")
+
+	alertStatement := cmd.(*commands.Alert)
+
+	method := alertStatement.GetMethod()
+	assert.Equal(method, "phone_number", "Expected phone_number, got %v", method)
+
+	receiver, receiverType := alertStatement.GetReceiver()
+	assert.Equal(receiver, "1234567890", "Expected 1234567890, got %v", receiver)
+	assert.Equal(receiverType, "string", "Expected string, got %v", receiverType)
+
+	message, messageType := alertStatement.GetMessage()
+	assert.Equal(message, "Hello, World!", "Expected Hello, World!, got %v", message)
+	assert.Equal(messageType, "string", "Expected string, got %v", messageType)
+
+}
