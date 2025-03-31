@@ -18,12 +18,13 @@ func (r *Repeat) Execute(variableStore *models.VariableStore) (bool, error) {
 	services.Logger.Println("Executing repeat")
 
 	count := r.Count
+
 	if r.CountType == "variable" {
-		// variable, err := variableStore.GetVariable(count.(string))
-		// if err != nil {
-		// 	return false, err
-		// }
-		// count = variable.Value.(int)
+		variable, err := variableStore.GetVariable(count.(string))
+		if err != nil {
+			return false, err
+		}
+		count = variable.Value.Value.(int)
 	}
 
 	if count.(int) < 0 {
