@@ -145,10 +145,14 @@ func AddValues(a, b any) (any, error) {
 func CompareValues(a, b any, comparator func(x, y float64) bool) (bool, error) {
 	switch a := a.(type) {
 	case bool:
-		b, ok := b.(bool)
-		if !ok {
-			return false, fmt.Errorf("type mismatch: %T and %T", a, b)
+		b, err := utils.ToBool(b)
+		if err != nil {
+			return false, err
 		}
+		// b, ok := b.(bool)
+		// if !ok {
+		// return false, fmt.Errorf("type mismatch: %T and %T", a, b)
+		// }
 		// "===" operator
 		if comparator(1, 1) {
 			return a == b, nil
@@ -159,17 +163,41 @@ func CompareValues(a, b any, comparator func(x, y float64) bool) (bool, error) {
 		}
 		return false, fmt.Errorf("unsupported operator for boolean: %T", a)
 	case float64:
-		b, ok := b.(float64)
-		if !ok {
+		switch b := b.(type) {
+		case bool:
+			if b {
+				return comparator(a, 1), nil
+			} else {
+				return comparator(a, 0), nil
+			}
+		case float64:
+			return comparator(a, b), nil
+		case int:
+			return comparator(a, float64(b)), nil
+			// For now, forbid string comparison
+		case string:
 			return false, fmt.Errorf("type mismatch: %T and %T", a, b)
+		default:
+			return false, fmt.Errorf("unsupported type: %T", b)
 		}
-		return comparator(a, b), nil
 	case int:
-		b, ok := b.(int)
-		if !ok {
+		switch b := b.(type) {
+		case bool:
+			if b {
+				return comparator(float64(a), 1), nil
+			} else {
+				return comparator(float64(a), 0), nil
+			}
+		case float64:
+			return comparator(float64(a), b), nil
+		case int:
+			return comparator(float64(a), float64(b)), nil
+			// For now, forbid string comparison
+		case string:
 			return false, fmt.Errorf("type mismatch: %T and %T", a, b)
+		default:
+			return false, fmt.Errorf("unsupported type: %T", b)
 		}
-		return comparator(float64(a), float64(b)), nil
 	case string:
 		b, ok := b.(string)
 		if !ok {
@@ -184,6 +212,24 @@ func CompareValues(a, b any, comparator func(x, y float64) bool) (bool, error) {
 	default:
 		return false, fmt.Errorf("unsupported type: %T", a)
 	}
+}
+
+func (o *OperatorFactory) ValidateOperator(node TreeNode) error {
+
+	opFunc, exists := o.operator[node.Value.(string)]
+	if !exists {
+		return fmt.Errorf("operator not supported: %s", node.Value)
+	}
+
+	comparisonOperators := []string{"<", "<=", ">", ">=", "===", "!=="}
+	if slices.Contains(comparisonOperators, node.Value.(string)) {
+		_, err := ComparisonOperator(node, opFunc)
+		if err != nil {
+			return fmt.Errorf("error evaluating comparison operator: %s", err)
+		}
+	}
+	_, err := NumericLocicaloperator(node, opFunc)
+	return err
 }
 
 func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, variableStore *VariableStore) (any, error) {

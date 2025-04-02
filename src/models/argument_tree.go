@@ -13,21 +13,54 @@ type TreeNode struct {
 	ResultValue any         // Result of the expression
 }
 
-func InitTree(argumentType string, argumentValue any, args any, variableStore *VariableStore) *TreeNode {
-	t := TreeNode{}
-	t.Type = argumentType
-	// t.Value = argumentValue
-	t.Children = t.ParseChildren(args, variableStore)
-	return &t
+var typeValidators = map[string]func(any) error{
+	"string": func(v any) error {
+		if _, ok := v.(string); !ok {
+			return fmt.Errorf("expected string, got %T", v)
+		}
+		return nil
+	},
+	"number": func(v any) error {
+		_, ok := v.(float64)
+		_, ok2 := v.(int)
+		if !ok && !ok2 {
+			return fmt.Errorf("expected number, got %T", v)
+		}
+		return nil
+	},
+	"boolean": func(v any) error {
+		if _, ok := v.(bool); !ok {
+			return fmt.Errorf("expected boolean, got %T", v)
+		}
+		return nil
+	},
 }
 
-func (a *TreeNode) ParseChildren(args any, variableStore *VariableStore) []*TreeNode {
+func InitTree(argumentType string, argumentValue any, args any, variableStore *VariableStore) (*TreeNode, error) {
+	t := TreeNode{}
+	t.Type = argumentType
+
+	parsedChildren, err := t.ParseChildren(args, variableStore)
+	if err != nil {
+		return nil, err
+	}
+
+	t.Children = parsedChildren
+	return &t, nil
+}
+
+func (a *TreeNode) ParseChildren(args any, variableStore *VariableStore) ([]*TreeNode, error) {
 	services.Logger.Println("Parsing children", args)
+
+	factory := NewOperatorFactory()
 
 	argList, ok := args.([]any)
 	if !ok {
+		if err := ValidateType(a.Type, args); err != nil {
+			return nil, err
+		}
 		a.Value = args
-		return nil
+		return nil, nil
 	}
 
 	children := make([]*TreeNode, 0, len(argList))
@@ -38,14 +71,29 @@ func (a *TreeNode) ParseChildren(args any, variableStore *VariableStore) []*Tree
 
 		if value, ok := argValue.([]any); ok {
 			services.Logger.Println("Argument is a list of values:", value)
+
 			child := &TreeNode{Value: argType}
-			child.Children = child.ParseChildren(value, variableStore)
+			childrenList, err := child.ParseChildren(value, variableStore)
+			if err != nil {
+				return nil, err
+			}
+			child.Children = childrenList
+
+			err = child.ValidateNode(factory)
+			if err != nil {
+				return nil, err
+			}
 			children = append(children, child)
 		} else {
 			services.Logger.Println("Argument is a single value:", argValue, "of type:", argType)
+
+			if err := ValidateType(argType, argValue); err != nil {
+				return nil, err
+			}
+
 			if argType == "variable" {
 				if variable, err := variableStore.GetVariable(argValue.(string)); err != nil {
-					services.Logger.Println("Error getting variable", argValue)
+					return nil, err
 				} else {
 					children = append(children, &TreeNode{Value: argValue, Type: argType, ResultValue: variable.Value.Value})
 				}
@@ -54,7 +102,26 @@ func (a *TreeNode) ParseChildren(args any, variableStore *VariableStore) []*Tree
 			}
 		}
 	}
-	return children
+	return children, nil
+}
+
+func ValidateType(argType string, argValue any) error {
+	if validator, exists := typeValidators[argType]; exists {
+		return validator(argValue)
+	}
+	return nil
+}
+
+func (a *TreeNode) ValidateNode(factory *OperatorFactory) error {
+	// Check if children are empty
+	for _, child := range a.Children {
+		if len(child.Children) > 0 {
+			return nil
+		}
+	}
+
+	// This node's children are empty, therefore this node is leaf node and can validate it
+	return factory.ValidateOperator(*a)
 }
 
 func (a *TreeNode) AddChild(child *TreeNode) {
