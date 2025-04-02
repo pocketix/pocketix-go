@@ -16,7 +16,7 @@ func main() {
 	data := services.OpenFile(*path)
 	variableStore := models.NewVariableStore()
 
-	_, err := parser.Parse(data, variableStore)
+	_, err := parser.ParseWithoutExecuting(data, variableStore)
 	if err != nil {
 		log.Fatalln(err)
 	}
