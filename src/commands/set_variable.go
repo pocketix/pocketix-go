@@ -49,3 +49,7 @@ func (s *SetVariable) GetLValType() string {
 func (s *SetVariable) GetRValType() string {
 	return s.RValType
 }
+
+func (s *SetVariable) Validate(variableStore *models.VariableStore, args ...any) error {
+	return nil
+}

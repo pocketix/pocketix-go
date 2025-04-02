@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
 )
@@ -56,4 +58,30 @@ func (s *Switch) GetArguments() *models.TreeNode {
 
 func (s *Switch) GetSelector() (any, string) {
 	return s.Selector, s.SelectorType
+}
+
+func (s *Switch) Validate(variableStore *models.VariableStore, args ...any) error {
+	if s.SelectorType != "variable" && s.SelectorType != "boolean_expression" {
+		return fmt.Errorf("invalid selector type: %s", s.SelectorType)
+	}
+
+	for _, command := range s.Block {
+		caseCommand, ok := command.(*Case)
+		if !ok {
+			return fmt.Errorf("invalid command in switch block: %T", command)
+		}
+
+		// Can only validate variable type, boolean_expression could be validated only at runtime
+		if s.SelectorType == "variable" {
+			variable, err := variableStore.GetVariable(s.Selector.(string))
+			if err != nil {
+				return err
+			}
+			err = caseCommand.Validate(variableStore, variable.Type)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

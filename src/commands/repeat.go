@@ -58,3 +58,21 @@ func (r *Repeat) GetCount() any {
 func (r *Repeat) GetCountType() string {
 	return r.CountType
 }
+
+func (r *Repeat) Validate(variableStore *models.VariableStore, args ...any) error {
+	if r.CountType == "variable" {
+		variable, err := variableStore.GetVariable(r.Count.(string))
+		if err != nil {
+			return err
+		}
+		if variable.Type != "number" {
+			return fmt.Errorf("count variable must be of type number")
+		} else {
+			return nil
+		}
+	}
+	if r.CountType != "number" {
+		return fmt.Errorf("count type must be number or variable")
+	}
+	return nil
+}

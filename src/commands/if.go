@@ -67,3 +67,7 @@ func (i *If) AddElseIfBlock(block Command) {
 		i.IfElseBlocks = append(i.IfElseBlocks, *elseIfBlock)
 	}
 }
+
+func (i *If) Validate(variableStore *models.VariableStore, args ...any) error {
+	return nil
+}

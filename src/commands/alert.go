@@ -69,3 +69,7 @@ func (a *Alert) GetReceiver() (string, string) {
 func (a *Alert) GetMessage() (string, string) {
 	return a.Message, a.MessageType
 }
+
+func (a *Alert) Validate(variableStore *models.VariableStore, args ...any) error {
+	return nil
+}

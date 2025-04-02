@@ -9,4 +9,5 @@ type Command interface {
 	GetId() string
 	GetBody() []Command
 	GetArguments() *models.TreeNode
+	Validate(variableStore *models.VariableStore, args ...any) error
 }

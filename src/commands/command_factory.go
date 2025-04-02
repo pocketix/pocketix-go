@@ -52,7 +52,7 @@ func CommandFactory(id string, blocks []Command, tree []*models.TreeNode) (Comma
 	case "repeat":
 		return &Repeat{
 			Id:        id,
-			Count:     int(tree[0].Value.(float64)),
+			Count:     tree[0].Value,
 			CountType: tree[0].Type,
 			Block:     blocks,
 		}, nil

@@ -52,3 +52,7 @@ func (w *While) GetBody() []Command {
 func (w *While) GetArguments() *models.TreeNode {
 	return w.Arguments
 }
+
+func (w *While) Validate(variableStore *models.VariableStore, args ...any) error {
+	return nil
+}

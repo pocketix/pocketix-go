@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
 )
@@ -31,4 +33,29 @@ func (c *Case) GetArguments() *models.TreeNode {
 
 func (c *Case) GetValue() any {
 	return c.Value
+}
+
+func (c *Case) Validate(variableStore *models.VariableStore, args ...any) error {
+	if len(args) == 0 {
+		if c.Type == "boolean_expression" {
+			return fmt.Errorf("case value should be constant")
+		} else {
+			return nil
+		}
+	}
+	selectorType := args[0].(string)
+
+	if c.Type == "variable" {
+		variable, err := variableStore.GetVariable(c.Value.(string))
+		if err != nil {
+			return err
+		}
+		if variable.Type != selectorType {
+			return fmt.Errorf("case value type %s does not match selector type %s", variable.Type, selectorType)
+		}
+	}
+	if c.Type != selectorType {
+		return fmt.Errorf("case value type %s does not match selector type %s", c.Type, selectorType)
+	}
+	return nil
 }

@@ -33,3 +33,7 @@ func (e *Else) GetBody() []Command {
 func (e *Else) GetArguments() *models.TreeNode {
 	return nil
 }
+
+func (e *Else) Validate(variableStore *models.VariableStore, args ...any) error {
+	return nil
+}

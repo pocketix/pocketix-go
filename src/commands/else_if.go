@@ -46,3 +46,7 @@ func (e *ElseIf) GetBody() []Command {
 func (e *ElseIf) GetArguments() *models.TreeNode {
 	return e.Arguments
 }
+
+func (e *ElseIf) Validate(variableStore *models.VariableStore, args ...any) error {
+	return nil
+}
