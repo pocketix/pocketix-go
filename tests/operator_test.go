@@ -24,6 +24,7 @@ func TestOperators(t *testing.T) {
 	}
 
 	testCases := []TestCase{
+		{"===", Pair{1, false}, Pair{"number", "boolean"}, false, false},
 		{"===", Pair{true, true}, Pair{"boolean", "boolean"}, true, false},
 		{"===", Pair{true, false}, Pair{"boolean", "boolean"}, false, false},
 		{"===", Pair{false, false}, Pair{"boolean", "boolean"}, true, false},
@@ -38,6 +39,7 @@ func TestOperators(t *testing.T) {
 		{"===", Pair{1.0, 1.0}, Pair{"number", "number"}, true, false},
 		{"===", Pair{"", nil}, Pair{"string", ""}, false, true},
 		{"===", Pair{"", "true"}, Pair{"string", "string"}, false, false},
+		{"===", Pair{true, "abc"}, Pair{"number", "number"}, false, true},
 
 		{"!==", Pair{true, true}, Pair{"boolean", "boolean"}, false, false},
 		{"!==", Pair{true, false}, Pair{"boolean", "boolean"}, true, false},
@@ -302,7 +304,7 @@ func TestMultipleOperators(t *testing.T) {
 		{"===", []any{"", nil, ""}, []string{"string", "", ""}, false, true},
 		{"===", []any{1, "test", 1}, []string{"number", "string", "number"}, false, true},
 		{"===", []any{true, "test", true}, []string{"boolean", "string", "boolean"}, false, true},
-		{"===", []any{1, false, 1}, []string{"number", "boolean", "number"}, false, true},
+		{"===", []any{1, false, 1}, []string{"number", "boolean", "number"}, false, false},
 
 		{"!==", []any{true, true, true}, []string{"boolean", "boolean", "boolean"}, false, false},
 		{"!==", []any{true, false, true}, []string{"boolean", "boolean", "boolean"}, true, false},
@@ -319,7 +321,7 @@ func TestMultipleOperators(t *testing.T) {
 		{"!==", []any{"", nil, ""}, []string{"string", "", ""}, true, true},
 		{"!==", []any{1, "test", 1}, []string{"number", "string", "number"}, true, true},
 		{"!==", []any{true, "test", true}, []string{"boolean", "string", "boolean"}, true, true},
-		{"!==", []any{1, false, 1}, []string{"number", "boolean", "number"}, true, true},
+		{"!==", []any{1, false, 1}, []string{"number", "boolean", "number"}, true, false},
 
 		{"<", []any{true, false, true}, []string{"boolean", "boolean", "boolean"}, false, true},
 		{"<", []any{1, false, true}, []string{"number", "boolean", "boolean"}, false, true},

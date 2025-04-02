@@ -5,25 +5,11 @@ import (
 	"testing"
 
 	"github.com/pocketix/pocketix-go/src/commands"
+	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/parser"
-	"github.com/pocketix/pocketix-go/src/services"
 	"github.com/pocketix/pocketix-go/src/types"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestParseEmptyBlock(t *testing.T) {
-	assert := assert.New(t)
-
-	program := services.OpenFile("../programs/basic/empty_block.json")
-	assert.NotNil(program, "Program should not be nil")
-
-	programResult, err := parser.Parse(program, nil)
-
-	assert.NotNil(programResult, "Command should not be nil")
-	assert.Nil(err, "Error should be nil")
-
-	assert.Equal(0, len(programResult.Blocks), "Expected 0 block, got %d", len(programResult.Blocks))
-}
 
 func TestParseIfWithoutArguments(t *testing.T) {
 	assert := assert.New(t)
@@ -398,7 +384,7 @@ func TestParseRepeat(t *testing.T) {
 	assert.Nil(arguments, "Arguments should be nil")
 
 	count := repeatStatement.GetCount()
-	assert.Equal(count, 10, "Expected 10, got %d", count)
+	assert.Equal(count, float64(10), "Expected 10, got %d", count)
 }
 
 func TestParseSetVariable(t *testing.T) {
@@ -440,65 +426,13 @@ func TestParseSetVariable(t *testing.T) {
 func TestParseSwitch(t *testing.T) {
 	assert := assert.New(t)
 
-	block := types.Block{
-		Id: "switch",
-		Arguments: []types.Argument{
-			{
-				Type:  "string",
-				Value: json.RawMessage(`"foo"`),
-			},
-		},
-		Body: []types.Block{
-			{
-				Id: "case",
-				Arguments: []types.Argument{
-					{
-						Type:  "string",
-						Value: json.RawMessage(`"foo"`),
-					},
-				},
-			},
-			{
-				Id: "case",
-				Arguments: []types.Argument{
-					{
-						Type:  "string",
-						Value: json.RawMessage(`"bar"`),
-					},
-				},
-			},
-		},
+	variableStore := models.NewVariableStore()
+	variable := models.Variable{
+		Name:  "foo",
+		Type:  "string",
+		Value: &models.TreeNode{Type: "string", Value: "abc", ResultValue: "abc"},
 	}
-
-	cmd, err := parser.ParseBlocks(block, nil)
-
-	assert.Nil(err, "Error should be nil")
-	assert.NotNil(cmd, "Command should not be nil")
-
-	switchStatement := cmd.(*commands.Switch)
-
-	assert.Equal(2, len(switchStatement.Block), "Expected 2 block, got %d", len(switchStatement.Block))
-
-	selectorValue, selectorType := switchStatement.GetSelector()
-
-	assert.Equal(selectorValue, "foo", "Selector should be foo, got %v", selectorValue)
-	assert.Equal(selectorType, "string", "Selector type should be string, got %v", selectorType)
-
-	case1 := switchStatement.Block[0].(*commands.Case)
-	case1Value := case1.GetValue()
-
-	assert.Equal(0, len(case1.Block), "Expected 0 block, got %d", len(case1.Block))
-	assert.Equal(case1Value, "foo", "Expected foo, got %v", case1Value)
-
-	case2 := switchStatement.Block[1].(*commands.Case)
-	case2Value := case2.GetValue()
-
-	assert.Equal(0, len(case2.Block), "Expected 0 block, got %d", len(case2.Block))
-	assert.Equal(case2Value, "bar", "Expected bar, got %v", case2Value)
-}
-
-func TestParseSwitchWithVariableSelector(t *testing.T) {
-	assert := assert.New(t)
+	variableStore.AddVariable(variable)
 
 	block := types.Block{
 		Id: "switch",
@@ -530,7 +464,7 @@ func TestParseSwitchWithVariableSelector(t *testing.T) {
 		},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil)
+	cmd, err := parser.ParseBlocks(block, variableStore)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")

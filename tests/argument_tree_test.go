@@ -11,7 +11,8 @@ import (
 func TestParseChildren_EmptyArgs(t *testing.T) {
 	assert := assert.New(t)
 	root := &models.TreeNode{}
-	children := root.ParseChildren([]any{}, nil)
+	children, err := root.ParseChildren([]any{}, nil)
+	assert.Nil(err, "Error should be nil")
 
 	assert.NotNil(children, "Children should not be nil", children)
 	assert.Equal(0, len(children), "Children should be empty")
@@ -21,7 +22,8 @@ func TestParseChildren_SingleArg(t *testing.T) {
 	assert := assert.New(t)
 
 	root := &models.TreeNode{}
-	children := root.ParseChildren([]any{map[string]any{"type": "string", "value": "test"}}, nil)
+	children, err := root.ParseChildren([]any{map[string]any{"type": "string", "value": "test"}}, nil)
+	assert.Nil(err, "Error should be nil")
 
 	assert.NotNil(children, "Children should not be nil")
 	assert.Equal(1, len(children), "Children should have one element")
@@ -35,12 +37,13 @@ func TestParseChildren_SimpleCondition(t *testing.T) {
 	assert := assert.New(t)
 
 	root := &models.TreeNode{}
-	children := root.ParseChildren([]any{
+	children, err := root.ParseChildren([]any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test2"},
 		}},
 	}, nil)
+	assert.Nil(err, "Error should be nil")
 
 	assert.NotNil(children, "Children should not be nil")
 	assert.Equal(1, len(children), "Children should have one element")
@@ -71,7 +74,8 @@ func TestEvaluate_NoChildren(t *testing.T) {
 func TestEvaluate_SingleValue(t *testing.T) {
 	assert := assert.New(t)
 
-	root := models.InitTree("boolean_expresstion", "", []any{map[string]any{"type": "string", "value": "true"}}, nil)
+	root, err := models.InitTree("boolean_expresstion", "", []any{map[string]any{"type": "string", "value": "true"}}, nil)
+	assert.Nil(err, "Error should be nil")
 
 	result, err := root.Evaluate(nil)
 	boolResult, boolErr := utils.ToBool(result)
@@ -86,12 +90,13 @@ func TestEvaluate_SingleValue(t *testing.T) {
 func TestEvaluate_SimpleCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	root := models.InitTree("boolean_expresstion", "", []any{
+	root, err := models.InitTree("boolean_expresstion", "", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test"},
 		}},
 	}, nil)
+	assert.Nil(err, "Error should be nil")
 
 	result, err := root.Evaluate(nil)
 	boolResult, boolErr := utils.ToBool(result)
@@ -102,12 +107,13 @@ func TestEvaluate_SimpleCondition(t *testing.T) {
 	assert.Nil(boolErr, "Bool error should be nil")
 	assert.True(boolResult, "Bool result should be true")
 
-	root = models.InitTree("boolean_expresstion", "", []any{
+	root, err = models.InitTree("boolean_expresstion", "", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test2"},
 		}},
 	}, nil)
+	assert.Nil(err, "Error should be nil")
 
 	result, err = root.Evaluate(nil)
 	boolResult, boolErr = utils.ToBool(result)
@@ -122,7 +128,7 @@ func TestEvaluate_SimpleCondition(t *testing.T) {
 func TestEvaluate_NestedCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	root := models.InitTree("boolean_expresstion", "", []any{
+	root, err := models.InitTree("boolean_expresstion", "", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "boolean", "value": false},
 			map[string]any{"type": "===", "value": []any{
@@ -131,6 +137,7 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 			}},
 		}},
 	}, nil)
+	assert.Nil(err, "Error should be nil")
 
 	result, err := root.Evaluate(nil)
 	boolResult, boolErr := utils.ToBool(result)
@@ -141,7 +148,7 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 	assert.Nil(boolErr, "Bool error should be nil")
 	assert.True(boolResult, "Bool result should be true")
 
-	root = models.InitTree("boolean_expresstion", "", []any{
+	root, err = models.InitTree("boolean_expresstion", "", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "boolean", "value": true},
 			map[string]any{"type": "===", "value": []any{
@@ -150,6 +157,7 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 			}},
 		}},
 	}, nil)
+	assert.Nil(err, "Error should be nil")
 
 	result, err = root.Evaluate(nil)
 	boolResult, boolErr = utils.ToBool(result)
@@ -172,12 +180,13 @@ func TestEvaluateWithVariable(t *testing.T) {
 	}
 	variableStore.AddVariable(variable)
 
-	root := models.InitTree("boolean_expresstion", "", []any{
+	root, err := models.InitTree("boolean_expresstion", "", []any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "variable", "value": "foo"},
 			map[string]any{"type": "number", "value": 1},
 		}},
 	}, variableStore)
+	assert.Nil(err, "Error should be nil")
 
 	result, err := root.Evaluate(variableStore)
 	boolResult, boolErr := utils.ToBool(result)
