@@ -2,13 +2,16 @@ package parser
 
 import (
 	"encoding/json"
+	"fmt"
+	"slices"
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
 )
 
-func ParseVariables(data json.RawMessage, variableStore *models.VariableStore) {
+func ParseVariables(data json.RawMessage, variableStore *models.VariableStore) error {
 	var variables map[string]any
+	argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt"}
 
 	if err := json.Unmarshal(data, &variables); err != nil {
 		services.Logger.Println("Error parsing variables", err)
@@ -25,11 +28,11 @@ func ParseVariables(data json.RawMessage, variableStore *models.VariableStore) {
 	for varName, varData := range variables {
 		varType, varValue := varData.(map[string]any)["type"], varData.(map[string]any)["value"]
 
-		// if varList, ok := varValue.([]any); ok {
-		// 	services.Logger.Println("Parsing list of variables", varList)
-		// }
+		if !slices.Contains(argTypes, varType.(string)) {
+			return fmt.Errorf("argument type %s is not supported", varType)
+		}
 
-		if varType == "boolean_expression" {
+		if varType == "boolean_expression" || varType == "variable" {
 			expressionVariables = append(expressionVariables, ExpressionVariable{
 				Name:  varName,
 				Type:  varType.(string),
@@ -37,19 +40,30 @@ func ParseVariables(data json.RawMessage, variableStore *models.VariableStore) {
 			})
 			continue
 		}
+		tree, err := models.InitTree(varType.(string), varValue, varValue, variableStore)
+		if err != nil {
+			return err
+		}
 
 		variableStore.AddVariable(models.Variable{
 			Name:  varName,
 			Type:  varType.(string),
-			Value: models.InitTree(varType.(string), varType, varValue, variableStore),
+			Value: tree,
 		})
 	}
 
 	for _, expressionVariable := range expressionVariables {
+		tree, err := models.InitTree(expressionVariable.Type, expressionVariable.Value, expressionVariable.Value, variableStore)
+		if err != nil {
+			return err
+		}
+
 		variableStore.AddVariable(models.Variable{
 			Name:  expressionVariable.Name,
 			Type:  expressionVariable.Type,
-			Value: models.InitTree(expressionVariable.Type, expressionVariable.Type, expressionVariable.Value, variableStore),
+			Value: tree,
 		})
 	}
+
+	return nil
 }
