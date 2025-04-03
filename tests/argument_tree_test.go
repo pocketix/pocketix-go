@@ -11,7 +11,7 @@ import (
 func TestParseChildren_EmptyArgs(t *testing.T) {
 	assert := assert.New(t)
 	root := &models.TreeNode{}
-	children, err := root.ParseChildren([]any{}, nil)
+	children, err := root.ParseChildren([]any{}, nil, nil, nil)
 	assert.Nil(err, "Error should be nil")
 
 	assert.NotNil(children, "Children should not be nil", children)
@@ -22,7 +22,7 @@ func TestParseChildren_SingleArg(t *testing.T) {
 	assert := assert.New(t)
 
 	root := &models.TreeNode{}
-	children, err := root.ParseChildren([]any{map[string]any{"type": "string", "value": "test"}}, nil)
+	children, err := root.ParseChildren([]any{map[string]any{"type": "string", "value": "test"}}, nil, nil, nil)
 	assert.Nil(err, "Error should be nil")
 
 	assert.NotNil(children, "Children should not be nil")
@@ -37,12 +37,14 @@ func TestParseChildren_SimpleCondition(t *testing.T) {
 	assert := assert.New(t)
 
 	root := &models.TreeNode{}
+	operatorFactory := models.NewOperatorFactory()
+
 	children, err := root.ParseChildren([]any{
 		map[string]any{"type": "===", "value": []any{
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test2"},
 		}},
-	}, nil)
+	}, operatorFactory, nil, nil)
 	assert.Nil(err, "Error should be nil")
 
 	assert.NotNil(children, "Children should not be nil")
@@ -63,7 +65,7 @@ func TestEvaluate_NoChildren(t *testing.T) {
 	assert := assert.New(t)
 
 	root := &models.TreeNode{}
-	result, err := root.Evaluate(nil)
+	result, err := root.Evaluate(nil, nil)
 	_, boolErr := utils.ToBool(result)
 
 	assert.Nil(result, "Result should be nil")
@@ -74,10 +76,10 @@ func TestEvaluate_NoChildren(t *testing.T) {
 func TestEvaluate_SingleValue(t *testing.T) {
 	assert := assert.New(t)
 
-	root, err := models.InitTree("boolean_expresstion", "", []any{map[string]any{"type": "string", "value": "true"}}, nil)
+	root, err := models.InitTree("boolean_expresstion", "", []any{map[string]any{"type": "string", "value": "true"}}, nil, nil)
 	assert.Nil(err, "Error should be nil")
 
-	result, err := root.Evaluate(nil)
+	result, err := root.Evaluate(nil, nil)
 	boolResult, boolErr := utils.ToBool(result)
 
 	assert.Nil(err, "Error should be nil")
@@ -95,10 +97,10 @@ func TestEvaluate_SimpleCondition(t *testing.T) {
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test"},
 		}},
-	}, nil)
+	}, nil, nil)
 	assert.Nil(err, "Error should be nil")
 
-	result, err := root.Evaluate(nil)
+	result, err := root.Evaluate(nil, nil)
 	boolResult, boolErr := utils.ToBool(result)
 
 	assert.Nil(err, "Error should be nil")
@@ -112,10 +114,10 @@ func TestEvaluate_SimpleCondition(t *testing.T) {
 			map[string]any{"type": "string", "value": "test"},
 			map[string]any{"type": "string", "value": "test2"},
 		}},
-	}, nil)
+	}, nil, nil)
 	assert.Nil(err, "Error should be nil")
 
-	result, err = root.Evaluate(nil)
+	result, err = root.Evaluate(nil, nil)
 	boolResult, boolErr = utils.ToBool(result)
 
 	assert.Nil(err, "Error should be nil")
@@ -136,10 +138,10 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 				map[string]any{"type": "string", "value": "test"},
 			}},
 		}},
-	}, nil)
+	}, nil, nil)
 	assert.Nil(err, "Error should be nil")
 
-	result, err := root.Evaluate(nil)
+	result, err := root.Evaluate(nil, nil)
 	boolResult, boolErr := utils.ToBool(result)
 
 	assert.Nil(err, "Error should be nil")
@@ -156,10 +158,10 @@ func TestEvaluate_NestedCondition(t *testing.T) {
 				map[string]any{"type": "string", "value": "test"},
 			}},
 		}},
-	}, nil)
+	}, nil, nil)
 	assert.Nil(err, "Error should be nil")
 
-	result, err = root.Evaluate(nil)
+	result, err = root.Evaluate(nil, nil)
 	boolResult, boolErr = utils.ToBool(result)
 
 	assert.Nil(err, "Error should be nil")
@@ -185,10 +187,10 @@ func TestEvaluateWithVariable(t *testing.T) {
 			map[string]any{"type": "variable", "value": "foo"},
 			map[string]any{"type": "number", "value": 1},
 		}},
-	}, variableStore)
+	}, variableStore, nil)
 	assert.Nil(err, "Error should be nil")
 
-	result, err := root.Evaluate(variableStore)
+	result, err := root.Evaluate(variableStore, nil)
 	boolResult, boolErr := utils.ToBool(result)
 
 	assert.Nil(err, "Error should be nil")

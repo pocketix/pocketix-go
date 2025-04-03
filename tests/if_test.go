@@ -26,7 +26,7 @@ func TestEvaluateIf_SingleValue(t *testing.T) {
 			Block: []commands.Command{},
 		}
 
-		result, err := ifStatement.Execute(nil)
+		result, err := ifStatement.Execute(nil, nil)
 
 		assert.Nil(err, "Error should be nil")
 		assert.NotNil(result, "Result should not be nil")
@@ -50,7 +50,7 @@ func TestEvaluateIf_SimpleCondition(t *testing.T) {
 		Block: []commands.Command{},
 	}
 
-	result, err := ifStatement.Execute(nil)
+	result, err := ifStatement.Execute(nil, nil)
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(result, "Result should not be nil")
 	assert.False(result, "Result should be false")
@@ -80,7 +80,7 @@ func TestEvaluateIfWithVariable(t *testing.T) {
 		Block: []commands.Command{},
 	}
 
-	result, err := ifStatement.Execute(variableStore)
+	result, err := ifStatement.Execute(variableStore, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(result, "Result should not be nil")

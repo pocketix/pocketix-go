@@ -267,7 +267,7 @@ func TestOperators(t *testing.T) {
 				{Type: testCase.types.value2.(string), Value: testCase.value.value2, ResultValue: testCase.value.value2},
 			}},
 		}}
-		result, err := tree.Evaluate(nil)
+		result, err := tree.Evaluate(nil, nil)
 		if testCase.error {
 			assert.NotNil(err, "Expected error for operator %s with values %v and %v", testCase.operator, testCase.value.value1, testCase.value.value2)
 		} else {
@@ -504,7 +504,7 @@ func TestMultipleOperators(t *testing.T) {
 				{Type: testCase.Types[2], Value: testCase.Values[2], ResultValue: testCase.Values[2]},
 			}},
 		}}
-		result, err := tree.Evaluate(nil)
+		result, err := tree.Evaluate(nil, nil)
 		if testCase.ExpectedError {
 			assert.NotNil(err, "Expected error for operator %s with values %v and %v", testCase.Operator, testCase.Values, testCase.Expected)
 		} else {

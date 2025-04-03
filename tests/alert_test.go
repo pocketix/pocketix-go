@@ -20,7 +20,7 @@ func TestExecuteAlertPhoneNumber(t *testing.T) {
 		MessageType:  "string",
 	}
 
-	result, err := alert.Execute(nil)
+	result, err := alert.Execute(nil, nil)
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
@@ -38,7 +38,7 @@ func TestExecuteAlertEmail(t *testing.T) {
 		MessageType:  "string",
 	}
 
-	result, err := alert.Execute(nil)
+	result, err := alert.Execute(nil, nil)
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
@@ -64,7 +64,7 @@ func TestExecuteAlertVariableReceiver(t *testing.T) {
 		MessageType:  "string",
 	}
 
-	result, err := alert.Execute(variableStore)
+	result, err := alert.Execute(variableStore, nil)
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
@@ -94,7 +94,7 @@ func TestExecuteAlertVariableMessage(t *testing.T) {
 		MessageType:  "variable",
 	}
 
-	result, err := alert.Execute(variableStore)
+	result, err := alert.Execute(variableStore, nil)
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
@@ -116,7 +116,7 @@ func TestExecuteAlertInvalidMethod(t *testing.T) {
 		MessageType:  "string",
 	}
 
-	result, err := alert.Execute(nil)
+	result, err := alert.Execute(nil, nil)
 
 	assert.False(result, "Result should be false")
 	assert.NotNil(err, "Error should not be nil")

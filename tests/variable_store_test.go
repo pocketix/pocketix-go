@@ -79,7 +79,7 @@ func TestSetVariable(t *testing.T) {
 
 	variableStore.AddVariable(variable)
 
-	err := variableStore.SetVariable("variable", "new value", "string")
+	err := variableStore.SetVariable("variable", "new value", "string", nil)
 
 	setVariable, _ := variableStore.GetVariable("variable")
 
@@ -93,7 +93,7 @@ func TestSetVariableNotFound(t *testing.T) {
 
 	variableStore := models.NewVariableStore()
 
-	err := variableStore.SetVariable("variable", "value", "string")
+	err := variableStore.SetVariable("variable", "value", "string", nil)
 
 	assert.NotNil(err, "Expected not nil, got nil")
 }
@@ -111,7 +111,7 @@ func TestSetVariableTypeMismatch(t *testing.T) {
 
 	variableStore.AddVariable(variable)
 
-	err := variableStore.SetVariable("variable", 1, "number")
+	err := variableStore.SetVariable("variable", 1, "number", nil)
 
 	assert.NotNil(err, "Expected not nil, got nil")
 }
@@ -137,7 +137,7 @@ func TestExpressionVariable(t *testing.T) {
 
 	assert.Nil(err, "Expected nil, got %v", err)
 
-	expressionResult, err := result.Value.Evaluate(variableStore)
+	expressionResult, err := result.Value.Evaluate(variableStore, nil)
 	assert.Nil(err, "Expected nil, got %v", err)
 
 	boolResult, boolErr := utils.ToBool(expressionResult)
@@ -166,7 +166,7 @@ func TestExpressionVariableTypeMismatch(t *testing.T) {
 
 	assert.Nil(err, "Expected nil, got %v", err)
 
-	_, err = result.Value.Evaluate(variableStore)
+	_, err = result.Value.Evaluate(variableStore, nil)
 
 	assert.NotNil(err, "Expected not nil, got nil")
 }
@@ -192,7 +192,7 @@ func TestExpressionVariableNotFound(t *testing.T) {
 
 	assert.Nil(err, "Expected nil, got %v", err)
 
-	_, err = result.Value.Evaluate(variableStore)
+	_, err = result.Value.Evaluate(variableStore, nil)
 
 	assert.NotNil(err, "Expected not nil, got nil")
 }
@@ -225,7 +225,7 @@ func TestExpressionVariableWithAnotherVariable(t *testing.T) {
 	result, err := variableStore.GetVariable("bar")
 	assert.Nil(err, "Expected nil, got %v", err)
 
-	expressionResult, err := result.Value.Evaluate(variableStore)
+	expressionResult, err := result.Value.Evaluate(variableStore, nil)
 	assert.Nil(err, "Expected nil, got %v", err)
 
 	boolResult, boolErr := utils.ToBool(expressionResult)
@@ -272,7 +272,7 @@ func TestExpressionVariableWithAnotherVariableNested(t *testing.T) {
 	result, err := variableStore.GetVariable("var")
 	assert.Nil(err, "Expected nil, got %v", err)
 
-	expressionResult, err := result.Value.Evaluate(variableStore)
+	expressionResult, err := result.Value.Evaluate(variableStore, nil)
 	assert.Nil(err, "Expected nil, got %v", err)
 
 	boolResult, boolErr := utils.ToBool(expressionResult)

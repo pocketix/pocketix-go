@@ -23,7 +23,7 @@ func MockWhileExecute(variableStore *models.VariableStore, w commands.While) (bo
 		// 	return false, err
 		// }
 		if result {
-			if success, err := commands.ExecuteCommands(w.Block, variableStore); err != nil {
+			if success, err := commands.ExecuteCommands(w.Block, variableStore, nil); err != nil {
 				return success, -1, err
 			} else if !success {
 				return success, -1, nil
@@ -56,7 +56,7 @@ func TestExecuteWhileFalse(t *testing.T) {
 		Block: []commands.Command{},
 	}
 
-	result, err := whileStatement.Execute(nil)
+	result, err := whileStatement.Execute(nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(result, "Result should not be nil")
@@ -81,7 +81,7 @@ func TestExecuteWhileWithFalseCondition(t *testing.T) {
 	}
 
 	variableStore := models.VariableStore{}
-	result, err := whileStatement.Execute(&variableStore)
+	result, err := whileStatement.Execute(&variableStore, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(result, "Result should not be nil")
@@ -127,7 +127,7 @@ func TestExecuteWhileWithVariable(t *testing.T) {
 		Block: []commands.Command{},
 	}
 
-	result, err := whileStatement.Execute(variableStore)
+	result, err := whileStatement.Execute(variableStore, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(result, "Result should not be nil")
