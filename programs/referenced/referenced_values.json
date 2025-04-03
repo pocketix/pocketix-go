@@ -1,0 +1,32 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "if",
+            "block": [],
+            "arguments": [
+                {
+                    "type": "boolean_expression",
+                    "value": [
+                        {
+                            "value": [
+                                {
+                                    "type": "device_variable",
+                                    "value": "DistanceSensor-1.waterLevel"
+                                },
+                                {
+                                    "type": "number",
+                                    "value": 10
+                                }
+                            ],
+                            "type": "==="
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

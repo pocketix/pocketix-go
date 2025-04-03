@@ -1,0 +1,17 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "TemperatureDevice-1.setTemperature",
+            "arguments": [
+                {
+                    "type": "str_opt",
+                    "value": "ideal"
+                }
+            ]
+        }
+    ]
+}
