@@ -14,9 +14,9 @@ type Case struct {
 	Value any
 }
 
-func (c *Case) Execute(variableStore *models.VariableStore) (bool, error) {
+func (c *Case) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
 	services.Logger.Println("Executing case", c.Value)
-	return ExecuteCommands(c.Block, variableStore)
+	return ExecuteCommands(c.Block, variableStore, referenceValueStore)
 }
 
 func (c *Case) GetId() string {
@@ -35,7 +35,7 @@ func (c *Case) GetValue() any {
 	return c.Value
 }
 
-func (c *Case) Validate(variableStore *models.VariableStore, args ...any) error {
+func (c *Case) Validate(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore, args ...any) error {
 	if len(args) == 0 {
 		if c.Type == "boolean_expression" {
 			return fmt.Errorf("case value should be constant")

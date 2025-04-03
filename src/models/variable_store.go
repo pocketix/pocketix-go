@@ -27,7 +27,7 @@ func (vs *VariableStore) GetVariable(name string) (*Variable, error) {
 	return &variable, nil
 }
 
-func (vs *VariableStore) SetVariable(name string, value any, valueType string) error {
+func (vs *VariableStore) SetVariable(name string, value any, valueType string, referenceValueStore *ReferencedValueStore) error {
 	variable, err := vs.GetVariable(name)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func (vs *VariableStore) SetVariable(name string, value any, valueType string) e
 		if err != nil {
 			return err
 		}
-		result, err := RValVariable.Value.Evaluate(vs)
+		result, err := RValVariable.Value.Evaluate(vs, referenceValueStore)
 		if err != nil {
 			return err
 		}

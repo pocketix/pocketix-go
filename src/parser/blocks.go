@@ -9,7 +9,7 @@ import (
 	"github.com/pocketix/pocketix-go/src/types"
 )
 
-func ParseBlockWithoutExecuting(block types.Block, variableStore *models.VariableStore) (commands.Command, error) {
+func ParseBlockWithoutExecuting(block types.Block, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (commands.Command, error) {
 	// var argumentTree *tree.TreeNode = nil
 
 	argumentTree := make([]*models.TreeNode, len(block.Arguments))
@@ -17,7 +17,7 @@ func ParseBlockWithoutExecuting(block types.Block, variableStore *models.Variabl
 	if len(block.Arguments) == 0 {
 		services.Logger.Println("Block has no arguments")
 	} else {
-		err := ParseArguments(block.Arguments, argumentTree, variableStore)
+		err := ParseArguments(block.Arguments, argumentTree, variableStore, referenceValueStore)
 		if err != nil {
 			return nil, err
 		}
@@ -26,7 +26,7 @@ func ParseBlockWithoutExecuting(block types.Block, variableStore *models.Variabl
 	var parsedCommands []commands.Command
 	var previousSubCommand commands.Command
 	for _, subBlock := range block.Body {
-		cmd, err := ParseBlockWithoutExecuting(subBlock, variableStore)
+		cmd, err := ParseBlockWithoutExecuting(subBlock, variableStore, referenceValueStore)
 		if err != nil {
 			return nil, err
 		}
@@ -66,11 +66,11 @@ func ParseBlockWithoutExecuting(block types.Block, variableStore *models.Variabl
 	if err != nil {
 		return nil, err
 	}
-	err = cmd.Validate(variableStore)
+	err = cmd.Validate(variableStore, referenceValueStore)
 	return cmd, err
 }
 
-func ParseBlocks(block types.Block, variableStore *models.VariableStore) (commands.Command, error) {
+func ParseBlocks(block types.Block, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (commands.Command, error) {
 	// var argumentTree *tree.TreeNode = nil
 
 	argumentTree := make([]*models.TreeNode, len(block.Arguments))
@@ -78,7 +78,7 @@ func ParseBlocks(block types.Block, variableStore *models.VariableStore) (comman
 	if len(block.Arguments) == 0 {
 		services.Logger.Println("Block has no arguments")
 	} else {
-		err := ParseArguments(block.Arguments, argumentTree, variableStore)
+		err := ParseArguments(block.Arguments, argumentTree, variableStore, referenceValueStore)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +89,7 @@ func ParseBlocks(block types.Block, variableStore *models.VariableStore) (comman
 	var previousSubCommand commands.Command
 
 	for _, subBlock := range block.Body {
-		cmd, err := ParseBlocks(subBlock, variableStore)
+		cmd, err := ParseBlocks(subBlock, variableStore, referenceValueStore)
 		if err != nil {
 			return nil, err
 		}
@@ -114,7 +114,7 @@ func ParseBlocks(block types.Block, variableStore *models.VariableStore) (comman
 			}
 		} else {
 			if previousSubCommand != nil {
-				_, err := previousSubCommand.Execute(variableStore)
+				_, err := previousSubCommand.Execute(variableStore, referenceValueStore)
 				if err != nil {
 					return nil, err
 				}
@@ -134,6 +134,6 @@ func ParseBlocks(block types.Block, variableStore *models.VariableStore) (comman
 		services.Logger.Println("Error creating command", err)
 		return nil, err
 	}
-	err = cmd.Validate(variableStore)
+	err = cmd.Validate(variableStore, referenceValueStore)
 	return cmd, err
 }

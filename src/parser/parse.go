@@ -26,7 +26,7 @@ func CheckMissingBlock(data []byte) error {
 	return nil
 }
 
-func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore) (*types.Program, error) {
+func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (*types.Program, error) {
 	var program types.Program
 
 	if err := CheckMissingBlock(data); err != nil {
@@ -37,13 +37,13 @@ func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore) (*t
 		return nil, err
 	}
 
-	if err := ParseVariables(program.Header.Variables, variableStore); err != nil {
+	if err := ParseVariables(program.Header.Variables, variableStore, referenceValueStore); err != nil {
 		return nil, err
 	}
 
 	var previousCommand commands.Command
 	for _, block := range program.Blocks {
-		cmd, err := ParseBlockWithoutExecuting(block, variableStore)
+		cmd, err := ParseBlockWithoutExecuting(block, variableStore, referenceValueStore)
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +74,7 @@ func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore) (*t
 	return &program, nil
 }
 
-func Parse(data []byte, variableStore *models.VariableStore) (*types.Program, error) {
+func Parse(data []byte, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (*types.Program, error) {
 	var program types.Program
 
 	if err := CheckMissingBlock(data); err != nil {
@@ -85,13 +85,13 @@ func Parse(data []byte, variableStore *models.VariableStore) (*types.Program, er
 		return nil, err
 	}
 
-	if err := ParseVariables(program.Header.Variables, variableStore); err != nil {
+	if err := ParseVariables(program.Header.Variables, variableStore, referenceValueStore); err != nil {
 		return nil, err
 	}
 
 	var previousCommand commands.Command
 	for _, block := range program.Blocks {
-		cmd, err := ParseBlocks(block, variableStore)
+		cmd, err := ParseBlocks(block, variableStore, referenceValueStore)
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +101,7 @@ func Parse(data []byte, variableStore *models.VariableStore) (*types.Program, er
 		} else if cmd.GetId() == "else" {
 			if previousCommand != nil {
 				previousCommand.(*commands.If).AddElseBlock(cmd)
-				_, err := previousCommand.Execute(variableStore)
+				_, err := previousCommand.Execute(variableStore, referenceValueStore)
 				if err != nil {
 					return nil, err
 				}
@@ -119,14 +119,14 @@ func Parse(data []byte, variableStore *models.VariableStore) (*types.Program, er
 			}
 		} else {
 			if previousCommand != nil {
-				_, err := previousCommand.Execute(variableStore)
+				_, err := previousCommand.Execute(variableStore, referenceValueStore)
 				if err != nil {
 					return nil, err
 				}
 				previousCommand = nil
 			}
 
-			_, err := cmd.Execute(variableStore)
+			_, err := cmd.Execute(variableStore, referenceValueStore)
 			if err != nil {
 				return nil, err
 			}
@@ -134,7 +134,7 @@ func Parse(data []byte, variableStore *models.VariableStore) (*types.Program, er
 	}
 
 	if previousCommand != nil {
-		_, err := previousCommand.Execute(variableStore)
+		_, err := previousCommand.Execute(variableStore, referenceValueStore)
 		if err != nil {
 			return nil, err
 		}

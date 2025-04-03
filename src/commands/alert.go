@@ -16,7 +16,7 @@ type Alert struct {
 	MessageType  string
 }
 
-func (a *Alert) Execute(variableStore *models.VariableStore) (bool, error) {
+func (a *Alert) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
 	services.Logger.Println("Executing alert")
 
 	if a.Method != "phone_number" && a.Method != "email" {
@@ -70,6 +70,6 @@ func (a *Alert) GetMessage() (string, string) {
 	return a.Message, a.MessageType
 }
 
-func (a *Alert) Validate(variableStore *models.VariableStore, args ...any) error {
+func (a *Alert) Validate(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore, args ...any) error {
 	return nil
 }

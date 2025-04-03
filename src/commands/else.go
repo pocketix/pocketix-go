@@ -10,10 +10,10 @@ type Else struct {
 	Block []Command
 }
 
-func (e *Else) Execute(variableStore *models.VariableStore) (bool, error) {
+func (e *Else) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
 	services.Logger.Println("Executing else")
 	for _, cmd := range e.Block {
-		if success, err := cmd.Execute(variableStore); err != nil {
+		if success, err := cmd.Execute(variableStore, referenceValueStore); err != nil {
 			return false, err
 		} else if success {
 			return true, nil
@@ -34,6 +34,6 @@ func (e *Else) GetArguments() *models.TreeNode {
 	return nil
 }
 
-func (e *Else) Validate(variableStore *models.VariableStore, args ...any) error {
+func (e *Else) Validate(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore, args ...any) error {
 	return nil
 }

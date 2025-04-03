@@ -79,7 +79,24 @@ func CommandFactory(id string, blocks []Command, tree []*models.TreeNode) (Comma
 			Message:      tree[2].Value.(string),
 			MessageType:  tree[2].Type,
 		}, nil
+	// Default case to handle device commands
+	default:
+		typeValueList := make([]TypeValue, len(tree))
+		for _, tree := range tree {
+			typeValue := TypeValue{
+				Type:  tree.Type,
+				Value: tree.Value,
+			}
+			typeValueList = append(typeValueList, typeValue)
+		}
+		deviceId, deviceCommand, err := models.FromReferencedTarget(id)
+		if err != nil {
+			return nil, err
+		}
+		return &DeviceCommand{
+			DeviceID:  deviceId,
+			Command:   deviceCommand,
+			Arguments: typeValueList,
+		}, nil
 	}
-
-	return nil, nil
 }

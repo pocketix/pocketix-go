@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/pocketix/pocketix-go/src/services"
 )
@@ -36,11 +37,12 @@ var typeValidators = map[string]func(any) error{
 	},
 }
 
-func InitTree(argumentType string, argumentValue any, args any, variableStore *VariableStore) (*TreeNode, error) {
+func InitTree(argumentType string, argumentValue any, args any, variableStore *VariableStore, referenceValueStore *ReferencedValueStore) (*TreeNode, error) {
 	t := TreeNode{}
 	t.Type = argumentType
 
-	parsedChildren, err := t.ParseChildren(args, variableStore)
+	factory := NewOperatorFactory()
+	parsedChildren, err := t.ParseChildren(args, factory, variableStore, referenceValueStore)
 	if err != nil {
 		return nil, err
 	}
@@ -49,10 +51,8 @@ func InitTree(argumentType string, argumentValue any, args any, variableStore *V
 	return &t, nil
 }
 
-func (a *TreeNode) ParseChildren(args any, variableStore *VariableStore) ([]*TreeNode, error) {
+func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, variableStore *VariableStore, referenceValueStore *ReferencedValueStore) ([]*TreeNode, error) {
 	services.Logger.Println("Parsing children", args)
-
-	factory := NewOperatorFactory()
 
 	argList, ok := args.([]any)
 	if !ok {
@@ -73,19 +73,24 @@ func (a *TreeNode) ParseChildren(args any, variableStore *VariableStore) ([]*Tre
 			services.Logger.Println("Argument is a list of values:", value)
 
 			child := &TreeNode{Value: argType}
-			childrenList, err := child.ParseChildren(value, variableStore)
+			childrenList, err := child.ParseChildren(value, operatorFactory, variableStore, referenceValueStore)
 			if err != nil {
 				return nil, err
 			}
 			child.Children = childrenList
 
-			err = child.ValidateNode(factory)
+			err = child.ValidateNode(operatorFactory)
 			if err != nil {
 				return nil, err
 			}
 			children = append(children, child)
 		} else {
 			services.Logger.Println("Argument is a single value:", argValue, "of type:", argType)
+
+			argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt", "device_variable"}
+			if !slices.Contains(argTypes, argType) {
+				return nil, fmt.Errorf("argument type %s is not supported", argType)
+			}
 
 			if err := ValidateType(argType, argValue); err != nil {
 				return nil, err
@@ -99,6 +104,13 @@ func (a *TreeNode) ParseChildren(args any, variableStore *VariableStore) ([]*Tre
 				}
 			} else {
 				children = append(children, &TreeNode{Value: argValue, Type: argType, ResultValue: argValue})
+			}
+			if argType == "device_variable" {
+				referencedValue, err := NewReferencedValue(argValue.(string))
+				if err != nil {
+					return nil, err
+				}
+				referenceValueStore.AddReferencedValue(argValue.(string), referencedValue)
 			}
 		}
 	}
@@ -119,7 +131,6 @@ func (a *TreeNode) ValidateNode(factory *OperatorFactory) error {
 			return nil
 		}
 	}
-
 	// This node's children are empty, therefore this node is leaf node and can validate it
 	return factory.ValidateOperator(*a)
 }
@@ -128,26 +139,26 @@ func (a *TreeNode) AddChild(child *TreeNode) {
 	a.Children = append(a.Children, child)
 }
 
-func (a *TreeNode) Evaluate(variableStore *VariableStore) (any, error) {
+func (a *TreeNode) Evaluate(variableStore *VariableStore, referenceValueStore *ReferencedValueStore) (any, error) {
 	operatorFactory := NewOperatorFactory()
-	result, err, _ := a.EvaluateNode(operatorFactory, variableStore)
+	result, err, _ := a.EvaluateNode(operatorFactory, variableStore, referenceValueStore)
 	return result, err
 }
 
-func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *VariableStore) (any, error, bool) {
+func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *VariableStore, referenceValueStore *ReferencedValueStore) (any, error, bool) {
 	if len(a.Children) == 0 {
-		return EvaluateArgumentsHelper(a, factory, variableStore)
+		return EvaluateArgumentsHelper(a, factory, variableStore, referenceValueStore)
 	}
 
 	if len(a.Children) == 1 {
-		return a.Children[0].EvaluateNode(factory, variableStore)
+		return a.Children[0].EvaluateNode(factory, variableStore, referenceValueStore)
 	}
 
 	evaluatedChildren := make([]any, 0, len(a.Children))
 
 	for _, child := range a.Children {
 		services.Logger.Println("Evaluating child", child.Value)
-		result, err, ok := child.EvaluateNode(factory, variableStore)
+		result, err, ok := child.EvaluateNode(factory, variableStore, referenceValueStore)
 		if err != nil {
 			services.Logger.Println("Error executing argument", a.Value)
 			return nil, err, false
@@ -158,18 +169,18 @@ func (a *TreeNode) EvaluateNode(factory *OperatorFactory, variableStore *Variabl
 	}
 
 	if len(evaluatedChildren) > 0 {
-		return EvaluateArgumentsHelper(a, factory, variableStore)
+		return EvaluateArgumentsHelper(a, factory, variableStore, referenceValueStore)
 	}
 
 	return nil, fmt.Errorf("error executing argument"), false
 }
 
-func EvaluateArgumentsHelper(node *TreeNode, factory *OperatorFactory, variableStore *VariableStore) (any, error, bool) {
+func EvaluateArgumentsHelper(node *TreeNode, factory *OperatorFactory, variableStore *VariableStore, referenceValueStore *ReferencedValueStore) (any, error, bool) {
 	if node.Value == nil || (node.Type != "string" && node.Type != "" && node.Type != "variable") {
 		return node.Value, nil, true
 	}
 
-	factoryResult, factoryErr := factory.EvaluateOperator(node.Value.(string), *node, variableStore)
+	factoryResult, factoryErr := factory.EvaluateOperator(node.Value.(string), *node, variableStore, referenceValueStore)
 	node.ResultValue = factoryResult
 	return factoryResult, factoryErr, factoryErr == nil
 }

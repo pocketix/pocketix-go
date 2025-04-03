@@ -232,7 +232,7 @@ func (o *OperatorFactory) ValidateOperator(node TreeNode) error {
 	return err
 }
 
-func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, variableStore *VariableStore) (any, error) {
+func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, variableStore *VariableStore, referenceValueStore *ReferencedValueStore) (any, error) {
 	if len(child.Children) == 0 {
 		if child.Type == "variable" {
 			// return child.ResultValue, -1, nil
@@ -244,6 +244,12 @@ func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, vari
 				return variable.Value.Value, nil
 			}
 			return variable.Value.ResultValue, nil
+		} else if child.Type == "device_variable" {
+			referencedValue, err := referenceValueStore.GetAndUpdateReferencedValue(child.Value.(string))
+			if err != nil {
+				return nil, err
+			}
+			return referencedValue.Value, nil
 		}
 		return child.Value, nil
 	}
