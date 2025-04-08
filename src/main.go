@@ -17,8 +17,15 @@ func main() {
 	variableStore := models.NewVariableStore()
 	referencedValueStore := models.NewReferencedValueStore()
 
-	_, err := parser.ParseWithoutExecuting(data, variableStore, referencedValueStore)
+	commandList, err := parser.Parse(data, variableStore, referencedValueStore)
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	for _, command := range commandList {
+		if _, err := command.Execute(variableStore, referencedValueStore); err != nil {
+			log.Fatalln(err)
+		}
+	}
+	services.Logger.Println("Execution completed successfully")
 }

@@ -26,26 +26,26 @@ func CheckMissingBlock(data []byte) error {
 	return nil
 }
 
-func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (*types.Program, error) {
+func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) error {
 	var program types.Program
 
 	if err := CheckMissingBlock(data); err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := json.Unmarshal(data, &program); err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := ParseVariables(program.Header.Variables, variableStore, referenceValueStore); err != nil {
-		return nil, err
+		return err
 	}
 
 	var previousCommand commands.Command
 	for _, block := range program.Blocks {
 		cmd, err := ParseBlockWithoutExecuting(block, variableStore, referenceValueStore)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if cmd.GetId() == "if" {
 			previousCommand = cmd
@@ -55,14 +55,14 @@ func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, ref
 				previousCommand = nil
 			} else {
 				services.Logger.Println("Error: Else without if")
-				return nil, fmt.Errorf("else without if")
+				return fmt.Errorf("else without if")
 			}
 		} else if cmd.GetId() == "elseif" {
 			if previousCommand != nil {
 				previousCommand.(*commands.If).AddElseIfBlock(cmd)
 			} else {
 				services.Logger.Println("Error: Elseif without if")
-				return nil, fmt.Errorf("elseif without if")
+				return fmt.Errorf("elseif without if")
 			}
 		} else {
 			if previousCommand != nil {
@@ -71,10 +71,10 @@ func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, ref
 		}
 	}
 
-	return &program, nil
+	return nil
 }
 
-func Parse(data []byte, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (*types.Program, error) {
+func Parse(data []byte, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) ([]commands.Command, error) {
 	var program types.Program
 
 	if err := CheckMissingBlock(data); err != nil {
@@ -89,6 +89,7 @@ func Parse(data []byte, variableStore *models.VariableStore, referenceValueStore
 		return nil, err
 	}
 
+	var commandList []commands.Command
 	var previousCommand commands.Command
 	for _, block := range program.Blocks {
 		cmd, err := ParseBlocks(block, variableStore, referenceValueStore)
@@ -101,10 +102,11 @@ func Parse(data []byte, variableStore *models.VariableStore, referenceValueStore
 		} else if cmd.GetId() == "else" {
 			if previousCommand != nil {
 				previousCommand.(*commands.If).AddElseBlock(cmd)
-				_, err := previousCommand.Execute(variableStore, referenceValueStore)
-				if err != nil {
-					return nil, err
-				}
+				commandList = append(commandList, previousCommand)
+				// _, err := previousCommand.Execute(variableStore, referenceValueStore)
+				// if err != nil {
+				// 	return nil, err
+				// }
 				previousCommand = nil
 			} else {
 				services.Logger.Println("Error: Else without if")
@@ -119,26 +121,29 @@ func Parse(data []byte, variableStore *models.VariableStore, referenceValueStore
 			}
 		} else {
 			if previousCommand != nil {
-				_, err := previousCommand.Execute(variableStore, referenceValueStore)
-				if err != nil {
-					return nil, err
-				}
+				commandList = append(commandList, previousCommand)
+				// _, err := previousCommand.Execute(variableStore, referenceValueStore)
+				// if err != nil {
+				// 	return nil, err
+				// }
 				previousCommand = nil
 			}
 
-			_, err := cmd.Execute(variableStore, referenceValueStore)
-			if err != nil {
-				return nil, err
-			}
+			commandList = append(commandList, cmd)
+			// _, err := cmd.Execute(variableStore, referenceValueStore)
+			// if err != nil {
+			// 	return nil, err
+			// }
 		}
 	}
 
 	if previousCommand != nil {
-		_, err := previousCommand.Execute(variableStore, referenceValueStore)
-		if err != nil {
-			return nil, err
-		}
+		commandList = append(commandList, previousCommand)
+		// _, err := previousCommand.Execute(variableStore, referenceValueStore)
+		// if err != nil {
+		// 	return nil, err
+		// }
 	}
 
-	return &program, nil
+	return commandList, nil
 }

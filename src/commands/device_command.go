@@ -1,6 +1,9 @@
 package commands
 
-import "github.com/pocketix/pocketix-go/src/models"
+import (
+	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/services"
+)
 
 type TypeValue struct {
 	Type  string
@@ -13,8 +16,8 @@ type DeviceCommand struct {
 	Arguments []TypeValue
 }
 
-// Execute is a command that sends a command to a device.
 func (d *DeviceCommand) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
+	services.Logger.Println("Executing DeviceCommand:", d.DeviceID, d.Command)
 	return true, nil
 }
 
