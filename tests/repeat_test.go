@@ -95,7 +95,7 @@ func TestRepeatWithVariable(t *testing.T) {
 	variable := models.Variable{
 		Name:  "count",
 		Type:  "number",
-		Value: &models.TreeNode{Type: "number", Value: 5, ResultValue: 5},
+		Value: &models.TreeNode{Type: "number", Value: float64(5), ResultValue: float64(5)},
 	}
 	variableStore.AddVariable(variable)
 
