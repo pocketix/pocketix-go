@@ -17,21 +17,25 @@ type Repeat struct {
 func (r *Repeat) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
 	services.Logger.Println("Executing repeat")
 
-	count := r.Count
-
-	if r.CountType == "variable" {
-		variable, err := variableStore.GetVariable(count.(string))
+	var count int
+	switch r.Count.(type) {
+	case float64:
+		count = int(r.Count.(float64))
+	case int:
+		count = r.Count.(int)
+	case string:
+		variable, err := variableStore.GetVariable(r.Count.(string))
 		if err != nil {
 			return false, err
 		}
-		count = variable.Value.Value.(int)
+		count = int(variable.Value.Value.(float64))
 	}
 
-	if count.(int) < 0 {
+	if count < 0 {
 		return false, fmt.Errorf("count cannot be negative")
 	}
 
-	for range count.(int) {
+	for range count {
 		if result, err := ExecuteCommands(r.Block, variableStore, referenceValueStore); err != nil {
 			return result, err
 		}

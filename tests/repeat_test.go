@@ -15,20 +15,25 @@ import (
 func MockRepeatExecute(r commands.Repeat, variableStore *models.VariableStore) (bool, int, error) {
 	iterations := 0
 
-	count := r.Count
-	if r.CountType == "variable" {
-		variable, err := variableStore.GetVariable(count.(string))
+	var count int
+	switch r.Count.(type) {
+	case float64:
+		count = int(r.Count.(float64))
+	case int:
+		count = r.Count.(int)
+	case string:
+		variable, err := variableStore.GetVariable(r.Count.(string))
 		if err != nil {
 			return false, -1, err
 		}
-		count = variable.Value.Value.(int)
+		count = int(variable.Value.Value.(float64))
 	}
 
-	if count.(int) < 0 {
+	if count < 0 {
 		return false, -1, fmt.Errorf("count cannot be negative")
 	}
 
-	for range count.(int) {
+	for range count {
 		iterations++
 		result, err := commands.ExecuteCommands(r.Block, nil, nil)
 		if err != nil {
@@ -44,7 +49,7 @@ func TestRepeatZeroTimes(t *testing.T) {
 
 	repeatStatement := commands.Repeat{
 		Id:    "repeat",
-		Count: 0,
+		Count: float64(0),
 		Block: []commands.Command{},
 	}
 
@@ -58,7 +63,7 @@ func TestRepeatTenTimes(t *testing.T) {
 
 	repeatStatement := commands.Repeat{
 		Id:    "repeat",
-		Count: 10,
+		Count: float64(10),
 		Block: []commands.Command{},
 	}
 
@@ -73,7 +78,7 @@ func TestRepeatNegativeCount(t *testing.T) {
 
 	repeatStatement := commands.Repeat{
 		Id:    "repeat",
-		Count: -1,
+		Count: float64(-1),
 		Block: []commands.Command{},
 	}
 
