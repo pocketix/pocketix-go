@@ -15,7 +15,7 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	data := services.OpenFile("../programs/complex/prog2.json")
 	variableStore := models.NewVariableStore()
 
-	commandsList, err := parser.Parse(data, variableStore, nil)
+	commandsList, err := parser.Parse(data, variableStore, nil, nil)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 	assert.NotNil(commandsList, "Commands list should not be nil")
 

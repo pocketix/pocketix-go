@@ -20,7 +20,7 @@ func TestParseIfWithoutArguments(t *testing.T) {
 		Arguments: []types.Argument{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.NotNil(cmd, "Command should be nil")
 	assert.Nil(err, "Error should not be nil")
@@ -45,12 +45,12 @@ func TestParseSimpleIf(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	ifStatement := cmd.(*commands.If)
+	ifStatement := cmd[0].(*commands.If)
 	assert.Equal(0, len(ifStatement.Block), "Expected 0 block, got %d", len(ifStatement.Block))
 
 	arguments := ifStatement.GetArguments()
@@ -90,12 +90,12 @@ func TestParseIfWithCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	ifStatement := cmd.(*commands.If)
+	ifStatement := cmd[0].(*commands.If)
 	arguments := ifStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
@@ -150,12 +150,12 @@ func TestParseIfWithComplexCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	ifStatement := cmd.(*commands.If)
+	ifStatement := cmd[0].(*commands.If)
 	arguments := ifStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
@@ -190,12 +190,12 @@ func TestParseElse(t *testing.T) {
 		Body:      []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	elseStatement := cmd.(*commands.Else)
+	elseStatement := cmd[0].(*commands.Else)
 	assert.Equal(0, len(elseStatement.Block), "Expected 0 block, got %d", len(elseStatement.Block))
 
 	arguments := elseStatement.GetArguments()
@@ -221,12 +221,12 @@ func TestParseElseif(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	elseifStatement := cmd.(*commands.ElseIf)
+	elseifStatement := cmd[0].(*commands.ElseIf)
 	assert.Equal(0, len(elseifStatement.Block), "Expected 0 block, got %d", len(elseifStatement.Block))
 
 	arguments := elseifStatement.GetArguments()
@@ -265,12 +265,12 @@ func TestParseElseifWithCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	elseifStatement := cmd.(*commands.ElseIf)
+	elseifStatement := cmd[0].(*commands.ElseIf)
 	arguments := elseifStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
@@ -295,12 +295,12 @@ func TestParseWhile(t *testing.T) {
 		Id: "while",
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	whileStatement := cmd.(*commands.While)
+	whileStatement := cmd[0].(*commands.While)
 	assert.Equal(0, len(whileStatement.Block), "Expected 0 block, got %d", len(whileStatement.Block))
 
 	arguments := whileStatement.GetArguments()
@@ -335,12 +335,12 @@ func TestParseWhileWithCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	whileStatement := cmd.(*commands.While)
+	whileStatement := cmd[0].(*commands.While)
 	arguments := whileStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
@@ -372,12 +372,12 @@ func TestParseRepeat(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	repeatStatement := cmd.(*commands.Repeat)
+	repeatStatement := cmd[0].(*commands.Repeat)
 	assert.Equal(0, len(repeatStatement.Block), "Expected 0 block, got %d", len(repeatStatement.Block))
 
 	arguments := repeatStatement.GetArguments()
@@ -405,12 +405,12 @@ func TestParseSetVariable(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	setVariableStatement := cmd.(*commands.SetVariable)
+	setVariableStatement := cmd[0].(*commands.SetVariable)
 	assert.Nil(setVariableStatement.GetArguments(), "Arguments should be nil")
 	assert.Nil(setVariableStatement.GetBody(), "Body should be nil")
 
@@ -464,12 +464,12 @@ func TestParseSwitch(t *testing.T) {
 		},
 	}
 
-	cmd, err := parser.ParseBlocks(block, variableStore, nil)
+	cmd, err := parser.ParseBlocks(block, variableStore, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	switchStatement := cmd.(*commands.Switch)
+	switchStatement := cmd[0].(*commands.Switch)
 
 	assert.Equal(2, len(switchStatement.Block), "Expected 2 block, got %d", len(switchStatement.Block))
 
@@ -512,12 +512,12 @@ func TestParseAlert(t *testing.T) {
 		},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil)
+	cmd, err := parser.ParseBlocks(block, nil, nil, nil)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	alertStatement := cmd.(*commands.Alert)
+	alertStatement := cmd[0].(*commands.Alert)
 
 	method := alertStatement.GetMethod()
 	assert.Equal(method, "phone_number", "Expected phone_number, got %v", method)
