@@ -1,0 +1,48 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {
+            "foo": [
+                {
+                    "id": "alert",
+                    "arguments": [
+                        {
+                            "type": "str_opt",
+                            "value": "phone_number"
+                        },
+                        {
+                            "type": "string",
+                            "value": "awd"
+                        },
+                        {
+                            "type": "string",
+                            "value": "awd"
+                        }
+                    ]
+                },
+                {
+                    "id": "alert",
+                    "arguments": [
+                        {
+                            "type": "str_opt",
+                            "value": "phone_number"
+                        },
+                        {
+                            "type": "string",
+                            "value": "awd"
+                        },
+                        {
+                            "type": "string",
+                            "value": "awd"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "block": [
+        {
+            "id": "foo"
+        }
+    ]
+}
