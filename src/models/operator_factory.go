@@ -215,7 +215,6 @@ func CompareValues(a, b any, comparator func(x, y float64) bool) (bool, error) {
 }
 
 func (o *OperatorFactory) ValidateOperator(node TreeNode) error {
-
 	opFunc, exists := o.operator[node.Value.(string)]
 	if !exists {
 		return fmt.Errorf("operator not supported: %s", node.Value)
@@ -227,8 +226,9 @@ func (o *OperatorFactory) ValidateOperator(node TreeNode) error {
 		if err != nil {
 			return fmt.Errorf("error evaluating comparison operator: %s", err)
 		}
+		return nil
 	}
-	_, err := NumericLocicaloperator(node, opFunc)
+	_, err := NumericLogicaloperator(node, opFunc)
 	return err
 }
 
@@ -264,11 +264,15 @@ func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, vari
 		return ComparisonOperator(child, opFunc)
 	}
 
-	return NumericLocicaloperator(child, opFunc)
+	return NumericLogicaloperator(child, opFunc)
 }
 
 func ComparisonOperator(child TreeNode, opFunc func(a, b any) (any, error)) (any, error) {
 	for i := range len(child.Children) - 1 {
+		if child.Children[i].Type == "device_variable" || child.Children[i+1].Type == "device_variable" {
+			continue
+		}
+
 		a := child.Children[i].ResultValue
 		b := child.Children[i+1].ResultValue
 
@@ -288,11 +292,17 @@ func ComparisonOperator(child TreeNode, opFunc func(a, b any) (any, error)) (any
 	return true, nil
 }
 
-func NumericLocicaloperator(child TreeNode, opFunc func(a, b any) (any, error)) (any, error) {
+func NumericLogicaloperator(child TreeNode, opFunc func(a, b any) (any, error)) (any, error) {
+	if child.Children[0].Type == "device_variable" {
+		return nil, nil
+	}
 	result := child.Children[0].ResultValue
 	var err error
 
 	for i := 1; i < len(child.Children); i++ {
+		if child.Children[i].Type == "device_variable" {
+			continue
+		}
 		b := child.Children[i].ResultValue
 
 		result, err = opFunc(result, b)
