@@ -4,7 +4,7 @@ import (
 	"github.com/pocketix/pocketix-go/src/models"
 )
 
-func CommandFactory(id string, blocks []Command, tree []*models.TreeNode) (Command, error) {
+func CommandFactory(id string, blocks []Command, tree []*models.TreeNode, procedureStore *models.ProcedureStore) (Command, error) {
 	switch id {
 	case "if":
 		if len(tree) == 0 {

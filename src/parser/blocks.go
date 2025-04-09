@@ -9,9 +9,7 @@ import (
 	"github.com/pocketix/pocketix-go/src/types"
 )
 
-func ParseBlockWithoutExecuting(block types.Block, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (commands.Command, error) {
-	// var argumentTree *tree.TreeNode = nil
-
+func ParseBlockWithoutExecuting(block types.Block, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) ([]commands.Command, error) {
 	argumentTree := make([]*models.TreeNode, len(block.Arguments))
 
 	if len(block.Arguments) == 0 {
@@ -26,25 +24,25 @@ func ParseBlockWithoutExecuting(block types.Block, variableStore *models.Variabl
 	var parsedCommands []commands.Command
 	var previousSubCommand commands.Command
 	for _, subBlock := range block.Body {
-		cmd, err := ParseBlockWithoutExecuting(subBlock, variableStore, referenceValueStore)
+		cmd, err := ParseBlockWithoutExecuting(subBlock, variableStore, procedureStore, referenceValueStore)
 		if err != nil {
 			return nil, err
 		}
 
-		if cmd.GetId() == "if" {
-			previousSubCommand = cmd
-		} else if cmd.GetId() == "else" {
+		if cmd[0].GetId() == "if" {
+			previousSubCommand = cmd[0]
+		} else if cmd[0].GetId() == "else" {
 			if previousSubCommand != nil {
-				previousSubCommand.(*commands.If).AddElseBlock(cmd)
+				previousSubCommand.(*commands.If).AddElseBlock(cmd[0])
 				parsedCommands = append(parsedCommands, previousSubCommand)
 				previousSubCommand = nil
 			} else {
 				services.Logger.Println("Error: Else without if")
 				return nil, fmt.Errorf("else without if")
 			}
-		} else if cmd.GetId() == "elseif" {
+		} else if cmd[0].GetId() == "elseif" {
 			if previousSubCommand != nil {
-				previousSubCommand.(*commands.If).AddElseIfBlock(cmd)
+				previousSubCommand.(*commands.If).AddElseIfBlock(cmd[0])
 			} else {
 				services.Logger.Println("Error: Elseif without if")
 				return nil, fmt.Errorf("elseif without if")
@@ -54,7 +52,7 @@ func ParseBlockWithoutExecuting(block types.Block, variableStore *models.Variabl
 				previousSubCommand = nil
 			}
 
-			parsedCommands = append(parsedCommands, cmd)
+			parsedCommands = append(parsedCommands, cmd[0])
 		}
 	}
 
@@ -62,17 +60,23 @@ func ParseBlockWithoutExecuting(block types.Block, variableStore *models.Variabl
 		parsedCommands = append(parsedCommands, previousSubCommand)
 	}
 
-	cmd, err := commands.CommandFactory(block.Id, parsedCommands, argumentTree)
+	if procedureStore != nil && procedureStore.Has(block.Id) {
+		procedure := procedureStore.Get(block.Id)
+		commandList, err := ParseProcedureBody(procedure, variableStore, procedureStore, referenceValueStore)
+		if err != nil {
+			return nil, err
+		}
+		return commandList, nil
+	}
+	cmd, err := commands.CommandFactory(block.Id, parsedCommands, argumentTree, procedureStore)
 	if err != nil {
 		return nil, err
 	}
 	err = cmd.Validate(variableStore, referenceValueStore)
-	return cmd, err
+	return []commands.Command{cmd}, err
 }
 
-func ParseBlocks(block types.Block, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (commands.Command, error) {
-	// var argumentTree *tree.TreeNode = nil
-
+func ParseBlocks(block types.Block, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) ([]commands.Command, error) {
 	argumentTree := make([]*models.TreeNode, len(block.Arguments))
 
 	if len(block.Arguments) == 0 {
@@ -89,10 +93,14 @@ func ParseBlocks(block types.Block, variableStore *models.VariableStore, referen
 	var previousSubCommand commands.Command
 
 	for _, subBlock := range block.Body {
-		cmd, err := ParseBlocks(subBlock, variableStore, referenceValueStore)
+		commandList, err := ParseBlocks(subBlock, variableStore, procedureStore, referenceValueStore)
 		if err != nil {
 			return nil, err
 		}
+		if len(commandList) != 1 {
+			continue
+		}
+		cmd := commandList[0]
 
 		if cmd.GetId() == "if" {
 			previousSubCommand = cmd
@@ -129,11 +137,19 @@ func ParseBlocks(block types.Block, variableStore *models.VariableStore, referen
 		parsedCommands = append(parsedCommands, previousSubCommand)
 	}
 
-	cmd, err := commands.CommandFactory(block.Id, parsedCommands, argumentTree)
+	if procedureStore != nil && procedureStore.Has(block.Id) {
+		procedure := procedureStore.Get(block.Id)
+		commandList, err := ParseProcedureBody(procedure, variableStore, procedureStore, referenceValueStore)
+		if err != nil {
+			return nil, err
+		}
+		return commandList, nil
+	}
+	cmd, err := commands.CommandFactory(block.Id, parsedCommands, argumentTree, procedureStore)
 	if err != nil {
 		services.Logger.Println("Error creating command", err)
 		return nil, err
 	}
 	err = cmd.Validate(variableStore, referenceValueStore)
-	return cmd, err
+	return []commands.Command{cmd}, err
 }

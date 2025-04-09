@@ -15,9 +15,10 @@ func main() {
 
 	data := services.OpenFile(*path)
 	variableStore := models.NewVariableStore()
+	procedureStore := models.NewProcedureStore()
 	referencedValueStore := models.NewReferencedValueStore()
 
-	commandList, err := parser.Parse(data, variableStore, referencedValueStore)
+	commandList, err := parser.Parse(data, variableStore, procedureStore, referencedValueStore)
 	if err != nil {
 		log.Fatalln(err)
 	}

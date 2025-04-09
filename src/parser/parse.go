@@ -26,27 +26,61 @@ func CheckMissingBlock(data []byte) error {
 	return nil
 }
 
-func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) error {
+func ParseHeader(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) (*types.Program, error) {
 	var program types.Program
 
 	if err := CheckMissingBlock(data); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := json.Unmarshal(data, &program); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := ParseVariables(program.Header.Variables, variableStore, referenceValueStore); err != nil {
+		return nil, err
+	}
+
+	if err := ParseProcedures(program.Header.Procedures, procedureStore, referenceValueStore); err != nil {
+		return nil, err
+	}
+
+	return &program, nil
+}
+
+func ParseProcedureBody(procedure models.Procedure, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) ([]commands.Command, error) {
+	var blocks []types.Block
+	if err := json.Unmarshal(procedure.Program, &blocks); err != nil {
+		return nil, err
+	}
+
+	var commandList []commands.Command
+	for _, block := range blocks {
+		cmd, err := ParseBlockWithoutExecuting(block, variableStore, procedureStore, referenceValueStore)
+		if err != nil {
+			return nil, err
+		}
+		commandList = append(commandList, cmd...)
+	}
+	return commandList, nil
+}
+
+func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) error {
+	program, err := ParseHeader(data, variableStore, procedureStore, referenceValueStore)
+	if err != nil {
 		return err
 	}
 
 	var previousCommand commands.Command
 	for _, block := range program.Blocks {
-		cmd, err := ParseBlockWithoutExecuting(block, variableStore, referenceValueStore)
+		commandList, err := ParseBlockWithoutExecuting(block, variableStore, procedureStore, referenceValueStore)
 		if err != nil {
 			return err
 		}
+		if len(commandList) != 1 {
+			continue
+		}
+		cmd := commandList[0]
 		if cmd.GetId() == "if" {
 			previousCommand = cmd
 		} else if cmd.GetId() == "else" {
@@ -74,28 +108,24 @@ func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, ref
 	return nil
 }
 
-func Parse(data []byte, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) ([]commands.Command, error) {
-	var program types.Program
-
-	if err := CheckMissingBlock(data); err != nil {
-		return nil, err
-	}
-
-	if err := json.Unmarshal(data, &program); err != nil {
-		return nil, err
-	}
-
-	if err := ParseVariables(program.Header.Variables, variableStore, referenceValueStore); err != nil {
+func Parse(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) ([]commands.Command, error) {
+	program, err := ParseHeader(data, variableStore, procedureStore, referenceValueStore)
+	if err != nil {
 		return nil, err
 	}
 
 	var commandList []commands.Command
 	var previousCommand commands.Command
 	for _, block := range program.Blocks {
-		cmd, err := ParseBlocks(block, variableStore, referenceValueStore)
+		blockList, err := ParseBlocks(block, variableStore, procedureStore, referenceValueStore)
 		if err != nil {
 			return nil, err
 		}
+		if len(blockList) != 1 {
+			commandList = append(commandList, blockList...)
+			continue
+		}
+		cmd := blockList[0]
 
 		if cmd.GetId() == "if" {
 			previousCommand = cmd
@@ -103,10 +133,6 @@ func Parse(data []byte, variableStore *models.VariableStore, referenceValueStore
 			if previousCommand != nil {
 				previousCommand.(*commands.If).AddElseBlock(cmd)
 				commandList = append(commandList, previousCommand)
-				// _, err := previousCommand.Execute(variableStore, referenceValueStore)
-				// if err != nil {
-				// 	return nil, err
-				// }
 				previousCommand = nil
 			} else {
 				services.Logger.Println("Error: Else without if")
@@ -122,27 +148,15 @@ func Parse(data []byte, variableStore *models.VariableStore, referenceValueStore
 		} else {
 			if previousCommand != nil {
 				commandList = append(commandList, previousCommand)
-				// _, err := previousCommand.Execute(variableStore, referenceValueStore)
-				// if err != nil {
-				// 	return nil, err
-				// }
 				previousCommand = nil
 			}
 
 			commandList = append(commandList, cmd)
-			// _, err := cmd.Execute(variableStore, referenceValueStore)
-			// if err != nil {
-			// 	return nil, err
-			// }
 		}
 	}
 
 	if previousCommand != nil {
 		commandList = append(commandList, previousCommand)
-		// _, err := previousCommand.Execute(variableStore, referenceValueStore)
-		// if err != nil {
-		// 	return nil, err
-		// }
 	}
 
 	return commandList, nil
