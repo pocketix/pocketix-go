@@ -16,8 +16,13 @@ func (rvStore *ReferencedValueStore) AddReferencedValue(referenceTarget string, 
 	rvStore.ReferencedValues[referenceTarget] = *referencedValue
 }
 
-func (rvStore *ReferencedValueStore) GetReferencedValues() map[string]ReferencedValue {
-	return rvStore.ReferencedValues
+func (rvStore *ReferencedValueStore) GetReferencedValues() map[string]string {
+	referencedValues := make(map[string]string)
+
+	for _, value := range rvStore.ReferencedValues {
+		referencedValues[value.DeviceID] = value.ParameterName
+	}
+	return referencedValues
 }
 
 // SetValuesToReferenced sets the values of the referenced values to the referenced value store.
