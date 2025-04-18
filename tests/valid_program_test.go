@@ -12,6 +12,7 @@ import (
 func TestEmptyProgram(t *testing.T) {
 	assert := assert.New(t)
 
+	commandHandlingStore := models.NewCommandsHandlingStore()
 	program := json.RawMessage(`
 	{
 		"header": {
@@ -22,7 +23,7 @@ func TestEmptyProgram(t *testing.T) {
 	}
 	`)
 
-	err := parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err := parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 }
@@ -30,6 +31,7 @@ func TestEmptyProgram(t *testing.T) {
 func TestWithoutBlock(t *testing.T) {
 	assert := assert.New(t)
 
+	commandHandlingStore := models.NewCommandsHandlingStore()
 	program := json.RawMessage(`
 	{
 		"header": {
@@ -39,7 +41,7 @@ func TestWithoutBlock(t *testing.T) {
 	}
 	`)
 
-	err := parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err := parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 }
@@ -47,13 +49,14 @@ func TestWithoutBlock(t *testing.T) {
 func TestWithoutHeader(t *testing.T) {
 	assert := assert.New(t)
 
+	commandHandlingStore := models.NewCommandsHandlingStore()
 	program := json.RawMessage(`
 	{
 		"block": []
 	}
 	`)
 
-	err := parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err := parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 }
@@ -62,6 +65,8 @@ func TestValidVariables(t *testing.T) {
 	assert := assert.New(t)
 
 	// Test valid variable types
+
+	commandHandlingStore := models.NewCommandsHandlingStore()
 	variableStore := models.NewVariableStore()
 	program := json.RawMessage(`
 	{
@@ -78,9 +83,10 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err := parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err := parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -97,9 +103,10 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -116,9 +123,10 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -149,11 +157,11 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
 	// Test unknown variable type
-	variableStore = models.NewVariableStore()
+
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -169,11 +177,11 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
 	// Test wrong value for string type
-	variableStore = models.NewVariableStore()
+
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -189,10 +197,9 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -208,11 +215,11 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
 	// Test wrong value for number type
-	variableStore = models.NewVariableStore()
+
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -228,10 +235,9 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -247,11 +253,11 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
 	// Test wrong value for boolean type
-	variableStore = models.NewVariableStore()
+
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -267,10 +273,9 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -286,11 +291,11 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
 	// Test expression variable with nonexistent variable
-	variableStore = models.NewVariableStore()
+
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -320,11 +325,11 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
 	// Test expression variable with wrong type
-	variableStore = models.NewVariableStore()
+
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -354,13 +359,14 @@ func TestValidVariables(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 }
 
 func TestValidIfStatement(t *testing.T) {
 	assert := assert.New(t)
 
+	commandHandlingStore := models.NewCommandsHandlingStore()
 	program := json.RawMessage(`
 	{
 		"header": {
@@ -396,9 +402,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err := parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err := parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore := models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -440,9 +447,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -479,10 +487,12 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
 	// Test if statement with invalid operand type
+
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -519,9 +529,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -563,9 +574,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -606,9 +618,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -625,9 +638,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -664,9 +678,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -727,9 +742,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should not be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -794,9 +810,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -885,9 +902,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -948,9 +966,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -1012,9 +1031,10 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -1076,13 +1096,14 @@ func TestValidIfStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 }
 
 func TestValidWhileStatement(t *testing.T) {
 	assert := assert.New(t)
 
+	commandHandlingStore := models.NewCommandsHandlingStore()
 	program := json.RawMessage(`
 	{
 		"header": {
@@ -1118,9 +1139,10 @@ func TestValidWhileStatement(t *testing.T) {
 	}
 	`)
 
-	err := parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err := parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1156,9 +1178,10 @@ func TestValidWhileStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err = parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore := models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -1200,13 +1223,14 @@ func TestValidWhileStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 }
 
 func TestValidRepeatStatement(t *testing.T) {
 	assert := assert.New(t)
 
+	commandHandlingStore := models.NewCommandsHandlingStore()
 	program := json.RawMessage(`
 	{
 		"header": {
@@ -1228,9 +1252,10 @@ func TestValidRepeatStatement(t *testing.T) {
 	}
 	`)
 
-	err := parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err := parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1252,9 +1277,10 @@ func TestValidRepeatStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err = parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1276,9 +1302,10 @@ func TestValidRepeatStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err = parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore := models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -1306,10 +1333,9 @@ func TestValidRepeatStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1336,10 +1362,9 @@ func TestValidRepeatStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1366,13 +1391,14 @@ func TestValidRepeatStatement(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 }
 
 func TestValidSwitch(t *testing.T) {
 	assert := assert.New(t)
 
+	commandHandlingStore := models.NewCommandsHandlingStore()
 	program := json.RawMessage(`
 	{
 		"header": {
@@ -1394,9 +1420,10 @@ func TestValidSwitch(t *testing.T) {
 	}
 	`)
 
-	err := parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err := parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1418,9 +1445,10 @@ func TestValidSwitch(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err = parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1442,9 +1470,10 @@ func TestValidSwitch(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err = parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should be nil, but got: %v", err)
 
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	variableStore := models.NewVariableStore()
 	program = json.RawMessage(`
 	{
@@ -1472,10 +1501,9 @@ func TestValidSwitch(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1513,10 +1541,9 @@ func TestValidSwitch(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1564,10 +1591,9 @@ func TestValidSwitch(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1605,10 +1631,9 @@ func TestValidSwitch(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1646,10 +1671,9 @@ func TestValidSwitch(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1687,10 +1711,9 @@ func TestValidSwitch(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 
-	variableStore = models.NewVariableStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1738,7 +1761,7 @@ func TestValidSwitch(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, nil)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.NotNil(err, "Error should not be nil, but got: %v", err)
 }
 
@@ -1746,7 +1769,8 @@ func TestValidProgramWithReferencedValue(t *testing.T) {
 	assert := assert.New(t)
 
 	variableStore := models.NewVariableStore()
-	referencedValueStore := models.NewReferencedValueStore()
+
+	commandHandlingStore := models.NewCommandsHandlingStore()
 	program := json.RawMessage(`
 	{
 		"header": {
@@ -1782,18 +1806,20 @@ func TestValidProgramWithReferencedValue(t *testing.T) {
 	}
 	`)
 
-	err := parser.ParseWithoutExecuting(program, variableStore, nil, referencedValueStore)
+	err := parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should not be nil, but got: %v", err)
 
-	referencedValues := referencedValueStore.GetReferencedValues()
+	referencedValues := commandHandlingStore.ReferencedValueStore.GetReferencedValues()
 	assert.Equal(1, len(referencedValues), "Expected 1 referenced value, but got: %d", len(referencedValues))
 
-	referencedValue := referencedValues["DistanceSensor-1"]
+	referencedValue := referencedValues["DistanceSensor-1.waterLevel"]
 	assert.NotNil(referencedValue, "Expected referenced value to be not nil, but got: %v", referencedValue)
-	assert.Equal("waterLevel", referencedValue, "Expected referenced value name to be 'waterLevel', but got: %s", referencedValue)
+	assert.Equal("DistanceSensor-1", referencedValue.DeviceID, "Expected device name to be 'DistanceSensor-1', but got: %s", referencedValue.DeviceID)
+	assert.Equal("waterLevel", referencedValue.ParameterName, "Expected referenced value name to be 'waterLevel', but got: %s", referencedValue.ParameterName)
 
 	variableStore = models.NewVariableStore()
-	referencedValueStore = models.NewReferencedValueStore()
+
+	commandHandlingStore = models.NewCommandsHandlingStore()
 	program = json.RawMessage(`
 	{
 		"header": {
@@ -1853,19 +1879,21 @@ func TestValidProgramWithReferencedValue(t *testing.T) {
 	}
 	`)
 
-	err = parser.ParseWithoutExecuting(program, variableStore, nil, referencedValueStore)
+	err = parser.ParseWithoutExecuting(program, variableStore, nil, commandHandlingStore)
 	assert.Nil(err, "Error should not be nil, but got: %v", err)
 
-	referencedValues = referencedValueStore.GetReferencedValues()
+	referencedValues = commandHandlingStore.ReferencedValueStore.GetReferencedValues()
 	assert.Equal(1, len(referencedValues), "Expected 1 referenced value, but got: %d", len(referencedValues))
-	referencedValue = referencedValues["DistanceSensor-1"]
+	referencedValue = referencedValues["DistanceSensor-1.waterLevel"]
 	assert.NotNil(referencedValue, "Expected referenced value to be not nil, but got: %v", referencedValue)
-	assert.Equal("waterLevel", referencedValue, "Expected referenced value name to be 'waterLevel', but got: %s", referencedValue)
+	assert.Equal("DistanceSensor-1", referencedValue.DeviceID, "Expected device name to be 'DistanceSensor-1', but got: %s", referencedValue.DeviceID)
+	assert.Equal("waterLevel", referencedValue.ParameterName, "Expected referenced value name to be 'waterLevel', but got: %s", referencedValue.ParameterName)
 }
 
 func TestValidDeviceCommand(t *testing.T) {
 	assert := assert.New(t)
 
+	commandHandlingStore := models.NewCommandsHandlingStore()
 	program := json.RawMessage(`
 	{
 		"header": {
@@ -1886,6 +1914,6 @@ func TestValidDeviceCommand(t *testing.T) {
 	}
 	`)
 
-	err := parser.ParseWithoutExecuting(program, nil, nil, nil)
+	err := parser.ParseWithoutExecuting(program, nil, nil, commandHandlingStore)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 }
