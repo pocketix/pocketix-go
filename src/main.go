@@ -16,15 +16,17 @@ func main() {
 	data := services.OpenFile(*path)
 	variableStore := models.NewVariableStore()
 	procedureStore := models.NewProcedureStore()
-	referencedValueStore := models.NewReferencedValueStore()
+	commandHandlingStore := models.NewCommandsHandlingStore()
 
-	commandList, err := parser.Parse(data, variableStore, procedureStore, referencedValueStore)
+	commandList, err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	services.Logger.Println(commandHandlingStore.CommandInvocationStore.Commands)
+
 	for _, command := range commandList {
-		if _, err := command.Execute(variableStore, referencedValueStore); err != nil {
+		if _, err := command.Execute(variableStore, commandHandlingStore.ReferencedValueStore); err != nil {
 			log.Fatalln(err)
 		}
 	}

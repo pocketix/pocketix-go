@@ -16,19 +16,40 @@ func (rvStore *ReferencedValueStore) AddReferencedValue(referenceTarget string, 
 	rvStore.ReferencedValues[referenceTarget] = *referencedValue
 }
 
-func (rvStore *ReferencedValueStore) GetReferencedValues() map[string]string {
-	referencedValues := make(map[string]string)
-
-	for _, value := range rvStore.ReferencedValues {
-		referencedValues[value.DeviceID] = value.ParameterName
-	}
-	return referencedValues
+func (rvStore *ReferencedValueStore) GetReferencedValues() map[string]ReferencedValue {
+	return rvStore.ReferencedValues
 }
 
-// SetValuesToReferenced sets the values of the referenced values to the referenced value store.
-// Values are then used in the command execution.
-func (rvStore *ReferencedValueStore) SetValuesToReferenced() {
+func (rvStore *ReferencedValueStore) SetValuesToReferenced(referencedValuesToUpdate []ReferenceValueResponseFromBackend) error {
+	for _, referencedValueToUpdate := range referencedValuesToUpdate {
+		referencedTarget := referencedValueToUpdate.DeviceID + "." + referencedValueToUpdate.SDType.SDParameters[0].ParameterID
+		referencedValue, ok := rvStore.ReferencedValues[referencedTarget]
+		if !ok {
+			return fmt.Errorf("referenced value %s not found", referencedTarget)
+		}
 
+		latestSnapshot := getLatestSnapshot(referencedValueToUpdate.SDParameterSnapshots)
+		if latestSnapshot.String != nil {
+			referencedValue.Value = *latestSnapshot.String
+			referencedValue.Type = "string"
+		} else if latestSnapshot.Number != nil {
+			referencedValue.Value = *latestSnapshot.Number
+			referencedValue.Type = "number"
+		} else if latestSnapshot.Boolean != nil {
+			referencedValue.Value = *latestSnapshot.Boolean
+			referencedValue.Type = "boolean"
+		} else {
+			return fmt.Errorf("no valid value found in the latest snapshot")
+		}
+		referencedValue.DeviceID = referencedValueToUpdate.DeviceID
+		referencedValue.ParameterName = referencedValueToUpdate.SDType.SDParameters[0].ParameterID
+		rvStore.ReferencedValues[referencedTarget] = referencedValue
+	}
+	return nil
+}
+
+func getLatestSnapshot(snapshots []SDParameterSnapshot) SDParameterSnapshot {
+	return snapshots[0]
 }
 
 // GetAndUpdateReferencedValue retrieves the value from the device and updates the referenced value in the store.

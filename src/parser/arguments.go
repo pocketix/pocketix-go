@@ -9,7 +9,7 @@ import (
 	"github.com/pocketix/pocketix-go/src/types"
 )
 
-func ParseArguments(rawArguments []types.Argument, argumentTree []*models.TreeNode, variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) error {
+func ParseArguments(rawArguments []types.Argument, argumentTree []*models.TreeNode, variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) error {
 	var args any
 	argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt"}
 
@@ -20,7 +20,7 @@ func ParseArguments(rawArguments []types.Argument, argumentTree []*models.TreeNo
 		if err := json.Unmarshal(arg.Value, &args); err != nil {
 			return err
 		}
-		tree, err := models.InitTree(arg.Type, arg.Value, args, variableStore, referenceValueStore)
+		tree, err := models.InitTree(arg.Type, arg.Value, args, variableStore, commandHandlingStore)
 		if err != nil {
 			return err
 		}

@@ -26,7 +26,7 @@ func CheckMissingBlock(data []byte) error {
 	return nil
 }
 
-func ParseHeader(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) (*types.Program, error) {
+func ParseHeader(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) (*types.Program, error) {
 	var program types.Program
 
 	if err := CheckMissingBlock(data); err != nil {
@@ -37,18 +37,18 @@ func ParseHeader(data []byte, variableStore *models.VariableStore, procedureStor
 		return nil, err
 	}
 
-	if err := ParseVariables(program.Header.Variables, variableStore, referenceValueStore); err != nil {
+	if err := ParseVariables(program.Header.Variables, variableStore, commandHandlingStore); err != nil {
 		return nil, err
 	}
 
-	if err := ParseProcedures(program.Header.Procedures, procedureStore, referenceValueStore); err != nil {
+	if err := ParseProcedures(program.Header.Procedures, procedureStore, commandHandlingStore); err != nil {
 		return nil, err
 	}
 
 	return &program, nil
 }
 
-func ParseProcedureBody(procedure models.Procedure, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) ([]commands.Command, error) {
+func ParseProcedureBody(procedure models.Procedure, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) ([]commands.Command, error) {
 	var blocks []types.Block
 	if err := json.Unmarshal(procedure.Program, &blocks); err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func ParseProcedureBody(procedure models.Procedure, variableStore *models.Variab
 
 	var commandList []commands.Command
 	for _, block := range blocks {
-		cmd, err := ParseBlockWithoutExecuting(block, variableStore, procedureStore, referenceValueStore)
+		cmd, err := ParseBlockWithoutExecuting(block, variableStore, procedureStore, commandHandlingStore)
 		if err != nil {
 			return nil, err
 		}
@@ -65,15 +65,15 @@ func ParseProcedureBody(procedure models.Procedure, variableStore *models.Variab
 	return commandList, nil
 }
 
-func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) error {
-	program, err := ParseHeader(data, variableStore, procedureStore, referenceValueStore)
+func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) error {
+	program, err := ParseHeader(data, variableStore, procedureStore, commandHandlingStore)
 	if err != nil {
 		return err
 	}
 
 	var previousCommand commands.Command
 	for _, block := range program.Blocks {
-		commandList, err := ParseBlockWithoutExecuting(block, variableStore, procedureStore, referenceValueStore)
+		commandList, err := ParseBlockWithoutExecuting(block, variableStore, procedureStore, commandHandlingStore)
 		if err != nil {
 			return err
 		}
@@ -108,8 +108,8 @@ func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, pro
 	return nil
 }
 
-func Parse(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) ([]commands.Command, error) {
-	program, err := ParseHeader(data, variableStore, procedureStore, referenceValueStore)
+func Parse(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) ([]commands.Command, error) {
+	program, err := ParseHeader(data, variableStore, procedureStore, commandHandlingStore)
 	if err != nil {
 		return nil, err
 	}
@@ -117,12 +117,15 @@ func Parse(data []byte, variableStore *models.VariableStore, procedureStore *mod
 	var commandList []commands.Command
 	var previousCommand commands.Command
 	for _, block := range program.Blocks {
-		blockList, err := ParseBlocks(block, variableStore, procedureStore, referenceValueStore)
+		blockList, err := ParseBlocks(block, variableStore, procedureStore, commandHandlingStore)
 		if err != nil {
 			return nil, err
 		}
 		if len(blockList) != 1 {
 			commandList = append(commandList, blockList...)
+			continue
+		}
+		if blockList == nil {
 			continue
 		}
 		cmd := blockList[0]

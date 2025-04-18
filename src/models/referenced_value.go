@@ -5,6 +5,35 @@ import (
 	"strings"
 )
 
+type ReferenceValueResponseFromBackend struct {
+	DeviceID             string                `json:"deviceId"`             // Device ID
+	SDType               SDType                `json:"sdType"`               // SD type
+	SDParameterSnapshots []SDParameterSnapshot `json:"sdParameterSnapshots"` // List of SD parameter snapshots
+}
+
+type SDType struct {
+	SDParameters []SDParameter `json:"sdParameters"` // List of SD parameters
+	SDCommands   []SDCommand   `json:"sdCommands"`   // List of SD commands
+}
+
+type SDParameter struct {
+	ParameterID         string `json:"parameterName"`       // Parameter name
+	ParameterDenotation string `json:"parameterDenotation"` // Parameter denotation
+}
+
+type SDCommand struct {
+	CommandID         string `json:"deviceId"`          // Device CommandID
+	CommandDenotation string `json:"commandDenotation"` // Command denotation
+}
+
+type SDParameterSnapshot struct {
+	DeviceID    string   `json:"deviceId"`
+	SDParameter string   `json:"sdParameter"`
+	String      *string  `json:"string,omitempty"`
+	Number      *float64 `json:"number,omitempty"`
+	Boolean     *bool    `json:"boolean,omitempty"`
+}
+
 type ReferencedValue struct {
 	DeviceID      string // Device ID
 	ParameterName string // Parameter name

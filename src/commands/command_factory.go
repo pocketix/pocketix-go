@@ -4,7 +4,7 @@ import (
 	"github.com/pocketix/pocketix-go/src/models"
 )
 
-func CommandFactory(id string, blocks []Command, tree []*models.TreeNode, procedureStore *models.ProcedureStore) (Command, error) {
+func CommandFactory(id string, blocks []Command, tree []*models.TreeNode, procedureStore *models.ProcedureStore, CommandInvocationStore *models.CommandInvocationStore) (Command, error) {
 	switch id {
 	case "if":
 		if len(tree) == 0 {
@@ -81,9 +81,9 @@ func CommandFactory(id string, blocks []Command, tree []*models.TreeNode, proced
 		}, nil
 	// Default case to handle device commands
 	default:
-		typeValueList := make([]TypeValue, len(tree))
+		typeValueList := make([]models.TypeValue, 0)
 		for _, tree := range tree {
-			typeValue := TypeValue{
+			typeValue := models.TypeValue{
 				Type:  tree.Type,
 				Value: tree.Value,
 			}
@@ -93,10 +93,11 @@ func CommandFactory(id string, blocks []Command, tree []*models.TreeNode, proced
 		if err != nil {
 			return nil, err
 		}
-		return &DeviceCommand{
+		CommandInvocationStore.AddCommand(models.DeviceCommand{
 			DeviceID:  deviceId,
 			Command:   deviceCommand,
 			Arguments: typeValueList,
-		}, nil
+		})
 	}
+	return nil, nil
 }

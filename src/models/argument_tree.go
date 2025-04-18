@@ -37,12 +37,12 @@ var typeValidators = map[string]func(any) error{
 	},
 }
 
-func InitTree(argumentType string, argumentValue any, args any, variableStore *VariableStore, referenceValueStore *ReferencedValueStore) (*TreeNode, error) {
+func InitTree(argumentType string, argumentValue any, args any, variableStore *VariableStore, commandHandlingStore *CommandsHandlingStore) (*TreeNode, error) {
 	t := TreeNode{}
 	t.Type = argumentType
 
 	factory := NewOperatorFactory()
-	parsedChildren, err := t.ParseChildren(args, factory, variableStore, referenceValueStore)
+	parsedChildren, err := t.ParseChildren(args, factory, variableStore, commandHandlingStore)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func InitTree(argumentType string, argumentValue any, args any, variableStore *V
 	return &t, nil
 }
 
-func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, variableStore *VariableStore, referenceValueStore *ReferencedValueStore) ([]*TreeNode, error) {
+func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, variableStore *VariableStore, commandHandlingStore *CommandsHandlingStore) ([]*TreeNode, error) {
 	services.Logger.Println("Parsing children", args)
 
 	argList, ok := args.([]any)
@@ -73,7 +73,7 @@ func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, var
 			services.Logger.Println("Argument is a list of values:", value)
 
 			child := &TreeNode{Value: argType}
-			childrenList, err := child.ParseChildren(value, operatorFactory, variableStore, referenceValueStore)
+			childrenList, err := child.ParseChildren(value, operatorFactory, variableStore, commandHandlingStore)
 			if err != nil {
 				return nil, err
 			}
@@ -110,7 +110,7 @@ func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, var
 				if err != nil {
 					return nil, err
 				}
-				referenceValueStore.AddReferencedValue(argValue.(string), referencedValue)
+				commandHandlingStore.ReferencedValueStore.AddReferencedValue(argValue.(string), referencedValue)
 			}
 		}
 	}

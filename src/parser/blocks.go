@@ -9,13 +9,13 @@ import (
 	"github.com/pocketix/pocketix-go/src/types"
 )
 
-func ParseBlockWithoutExecuting(block types.Block, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) ([]commands.Command, error) {
+func ParseBlockWithoutExecuting(block types.Block, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) ([]commands.Command, error) {
 	argumentTree := make([]*models.TreeNode, len(block.Arguments))
 
 	if len(block.Arguments) == 0 {
 		services.Logger.Println("Block has no arguments")
 	} else {
-		err := ParseArguments(block.Arguments, argumentTree, variableStore, referenceValueStore)
+		err := ParseArguments(block.Arguments, argumentTree, variableStore, commandHandlingStore)
 		if err != nil {
 			return nil, err
 		}
@@ -24,7 +24,7 @@ func ParseBlockWithoutExecuting(block types.Block, variableStore *models.Variabl
 	var parsedCommands []commands.Command
 	var previousSubCommand commands.Command
 	for _, subBlock := range block.Body {
-		cmd, err := ParseBlockWithoutExecuting(subBlock, variableStore, procedureStore, referenceValueStore)
+		cmd, err := ParseBlockWithoutExecuting(subBlock, variableStore, procedureStore, commandHandlingStore)
 		if err != nil {
 			return nil, err
 		}
@@ -62,27 +62,31 @@ func ParseBlockWithoutExecuting(block types.Block, variableStore *models.Variabl
 
 	if procedureStore != nil && procedureStore.Has(block.Id) {
 		procedure := procedureStore.Get(block.Id)
-		commandList, err := ParseProcedureBody(procedure, variableStore, procedureStore, referenceValueStore)
+		commandList, err := ParseProcedureBody(procedure, variableStore, procedureStore, commandHandlingStore)
 		if err != nil {
 			return nil, err
 		}
 		return commandList, nil
 	}
-	cmd, err := commands.CommandFactory(block.Id, parsedCommands, argumentTree, procedureStore)
+	cmd, err := commands.CommandFactory(block.Id, parsedCommands, argumentTree, procedureStore, commandHandlingStore.CommandInvocationStore)
 	if err != nil {
 		return nil, err
 	}
-	err = cmd.Validate(variableStore, referenceValueStore)
+	if cmd == nil {
+		services.Logger.Println("Command is nil, therefore it is device command")
+		return nil, nil
+	}
+	err = cmd.Validate(variableStore, commandHandlingStore.ReferencedValueStore)
 	return []commands.Command{cmd}, err
 }
 
-func ParseBlocks(block types.Block, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referenceValueStore *models.ReferencedValueStore) ([]commands.Command, error) {
+func ParseBlocks(block types.Block, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) ([]commands.Command, error) {
 	argumentTree := make([]*models.TreeNode, len(block.Arguments))
 
 	if len(block.Arguments) == 0 {
 		services.Logger.Println("Block has no arguments")
 	} else {
-		err := ParseArguments(block.Arguments, argumentTree, variableStore, referenceValueStore)
+		err := ParseArguments(block.Arguments, argumentTree, variableStore, commandHandlingStore)
 		if err != nil {
 			return nil, err
 		}
@@ -93,7 +97,7 @@ func ParseBlocks(block types.Block, variableStore *models.VariableStore, procedu
 	var previousSubCommand commands.Command
 
 	for _, subBlock := range block.Body {
-		commandList, err := ParseBlocks(subBlock, variableStore, procedureStore, referenceValueStore)
+		commandList, err := ParseBlocks(subBlock, variableStore, procedureStore, commandHandlingStore)
 		if err != nil {
 			return nil, err
 		}
@@ -122,7 +126,7 @@ func ParseBlocks(block types.Block, variableStore *models.VariableStore, procedu
 			}
 		} else {
 			if previousSubCommand != nil {
-				_, err := previousSubCommand.Execute(variableStore, referenceValueStore)
+				_, err := previousSubCommand.Execute(variableStore, commandHandlingStore.ReferencedValueStore)
 				if err != nil {
 					return nil, err
 				}
@@ -139,17 +143,21 @@ func ParseBlocks(block types.Block, variableStore *models.VariableStore, procedu
 
 	if procedureStore != nil && procedureStore.Has(block.Id) {
 		procedure := procedureStore.Get(block.Id)
-		commandList, err := ParseProcedureBody(procedure, variableStore, procedureStore, referenceValueStore)
+		commandList, err := ParseProcedureBody(procedure, variableStore, procedureStore, commandHandlingStore)
 		if err != nil {
 			return nil, err
 		}
 		return commandList, nil
 	}
-	cmd, err := commands.CommandFactory(block.Id, parsedCommands, argumentTree, procedureStore)
+	cmd, err := commands.CommandFactory(block.Id, parsedCommands, argumentTree, procedureStore, commandHandlingStore.CommandInvocationStore)
 	if err != nil {
 		services.Logger.Println("Error creating command", err)
 		return nil, err
 	}
-	err = cmd.Validate(variableStore, referenceValueStore)
+	if cmd == nil {
+		services.Logger.Println("Command is nil, therefore it is device command")
+		return nil, nil
+	}
+	err = cmd.Validate(variableStore, commandHandlingStore.ReferencedValueStore)
 	return []commands.Command{cmd}, err
 }
