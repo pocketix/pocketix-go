@@ -5,7 +5,7 @@ import (
 )
 
 type Command interface {
-	Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error)
+	Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error)
 	GetId() string
 	GetBody() []Command
 	GetArguments() *models.TreeNode

@@ -17,12 +17,12 @@ type SDType struct {
 }
 
 type SDParameter struct {
-	ParameterID         string `json:"parameterName"`       // Parameter name
+	ParameterID         uint32 `json:"parameterName"`       // Parameter name
 	ParameterDenotation string `json:"parameterDenotation"` // Parameter denotation
 }
 
 type SDCommand struct {
-	CommandID         string `json:"deviceId"`          // Device CommandID
+	CommandID         uint32 `json:"deviceId"`          // Device CommandID
 	CommandDenotation string `json:"commandDenotation"` // Command denotation
 }
 

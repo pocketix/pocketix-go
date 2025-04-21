@@ -87,7 +87,7 @@ func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, var
 		} else {
 			services.Logger.Println("Argument is a single value:", argValue, "of type:", argType)
 
-			argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt", "device_variable"}
+			argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt"} // insert "device_variable" type later
 			if !slices.Contains(argTypes, argType) {
 				return nil, fmt.Errorf("argument type %s is not supported", argType)
 			}
@@ -97,20 +97,20 @@ func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, var
 			}
 
 			if argType == "variable" {
-				if variable, err := variableStore.GetVariable(argValue.(string)); err != nil {
-					return nil, err
+				referencedValue, err := NewReferencedValue(argValue.(string))
+				if err == nil {
+					commandHandlingStore.ReferencedValueStore.AddReferencedValue(argValue.(string), referencedValue)
 				} else {
-					children = append(children, &TreeNode{Value: argValue, Type: argType, ResultValue: variable.Value.Value})
+					services.Logger.Println("Error creating referenced value:", err)
+					if variable, err := variableStore.GetVariable(argValue.(string)); err != nil {
+						return nil, err
+					} else {
+						children = append(children, &TreeNode{Value: argValue, Type: argType, ResultValue: variable.Value.Value})
+					}
 				}
+				// } else if argType == "device_variable" {}
 			} else {
 				children = append(children, &TreeNode{Value: argValue, Type: argType, ResultValue: argValue})
-			}
-			if argType == "device_variable" {
-				referencedValue, err := NewReferencedValue(argValue.(string))
-				if err != nil {
-					return nil, err
-				}
-				commandHandlingStore.ReferencedValueStore.AddReferencedValue(argValue.(string), referencedValue)
 			}
 		}
 	}

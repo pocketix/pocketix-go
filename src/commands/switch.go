@@ -14,7 +14,7 @@ type Switch struct {
 	Selector     any
 }
 
-func (s *Switch) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
+func (s *Switch) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
 	services.Logger.Println("Executing switch")
 	for _, c := range s.Block {
 		caseCommand := c.(*Case)
@@ -37,7 +37,7 @@ func (s *Switch) Execute(variableStore *models.VariableStore, referenceValueStor
 			caseValue = variable.Value
 		}
 		if caseValue == selectorValue {
-			caseCommand.Execute(variableStore, referenceValueStore)
+			caseCommand.Execute(variableStore, commandHandlingStore)
 			return true, nil
 		}
 	}

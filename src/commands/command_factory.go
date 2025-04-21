@@ -98,6 +98,9 @@ func CommandFactory(id string, blocks []Command, tree []*models.TreeNode, proced
 			Command:   deviceCommand,
 			Arguments: typeValueList,
 		})
+		return &DeviceCommand{
+			Id:        deviceId,
+			Arguments: tree[0],
+		}, nil
 	}
-	return nil, nil
 }

@@ -175,6 +175,7 @@ func TestEvaluateWithVariable(t *testing.T) {
 	assert := assert.New(t)
 
 	variableStore := models.NewVariableStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	variable := models.Variable{
 		Name:  "foo",
 		Type:  "number",
@@ -190,7 +191,7 @@ func TestEvaluateWithVariable(t *testing.T) {
 	}, variableStore, nil)
 	assert.Nil(err, "Error should be nil")
 
-	result, err := root.Evaluate(variableStore, nil)
+	result, err := root.Evaluate(variableStore, referencedValueStore)
 	boolResult, boolErr := utils.ToBool(result)
 
 	assert.Nil(err, "Error should be nil")

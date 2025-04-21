@@ -27,7 +27,7 @@ func TestSetReferencedValues(t *testing.T) {
 			SDType: models.SDType{
 				SDParameters: []models.SDParameter{
 					{
-						ParameterID:         "test",
+						ParameterID:         1,
 						ParameterDenotation: "test",
 					},
 				},

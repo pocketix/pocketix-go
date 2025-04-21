@@ -14,9 +14,9 @@ type Case struct {
 	Value any
 }
 
-func (c *Case) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
+func (c *Case) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
 	services.Logger.Println("Executing case", c.Value)
-	return ExecuteCommands(c.Block, variableStore, referenceValueStore)
+	return ExecuteCommands(c.Block, variableStore, commandHandlingStore)
 }
 
 func (c *Case) GetId() string {

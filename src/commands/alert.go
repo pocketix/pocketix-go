@@ -16,7 +16,7 @@ type Alert struct {
 	MessageType  string
 }
 
-func (a *Alert) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
+func (a *Alert) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
 	services.Logger.Println("Executing alert")
 
 	if a.Method != "phone_number" && a.Method != "email" {

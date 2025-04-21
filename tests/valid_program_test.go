@@ -1788,7 +1788,7 @@ func TestValidProgramWithReferencedValue(t *testing.T) {
 							{
 								"value": [
 									{
-										"type": "device_variable",
+										"type": "variable",
 										"value": "DistanceSensor-1.waterLevel"
 									},
 									{
@@ -1837,7 +1837,7 @@ func TestValidProgramWithReferencedValue(t *testing.T) {
 							{
 								"value": [
 									{
-										"type": "device_variable",
+										"type": "variable",
 										"value": "DistanceSensor-1.waterLevel"
 									},
 									{
@@ -1861,7 +1861,7 @@ func TestValidProgramWithReferencedValue(t *testing.T) {
 							{
 								"value": [
 									{
-										"type": "device_variable",
+										"type": "variable",
 										"value": "DistanceSensor-1.waterLevel"
 									},
 									{

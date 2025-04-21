@@ -22,7 +22,7 @@ func (rvStore *ReferencedValueStore) GetReferencedValues() map[string]Referenced
 
 func (rvStore *ReferencedValueStore) SetValuesToReferenced(referencedValuesToUpdate []ReferenceValueResponseFromBackend) error {
 	for _, referencedValueToUpdate := range referencedValuesToUpdate {
-		referencedTarget := referencedValueToUpdate.DeviceID + "." + referencedValueToUpdate.SDType.SDParameters[0].ParameterID
+		referencedTarget := referencedValueToUpdate.DeviceID + "." + referencedValueToUpdate.SDType.SDParameters[0].ParameterDenotation
 		referencedValue, ok := rvStore.ReferencedValues[referencedTarget]
 		if !ok {
 			return fmt.Errorf("referenced value %s not found", referencedTarget)
@@ -42,7 +42,7 @@ func (rvStore *ReferencedValueStore) SetValuesToReferenced(referencedValuesToUpd
 			return fmt.Errorf("no valid value found in the latest snapshot")
 		}
 		referencedValue.DeviceID = referencedValueToUpdate.DeviceID
-		referencedValue.ParameterName = referencedValueToUpdate.SDType.SDParameters[0].ParameterID
+		referencedValue.ParameterName = referencedValueToUpdate.SDType.SDParameters[0].ParameterDenotation
 		rvStore.ReferencedValues[referencedTarget] = referencedValue
 	}
 	return nil

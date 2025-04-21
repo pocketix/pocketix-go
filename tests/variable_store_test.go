@@ -175,6 +175,7 @@ func TestExpressionVariableNotFound(t *testing.T) {
 	assert := assert.New(t)
 
 	variableStore := models.NewVariableStore()
+	referencedValueStore := models.NewReferencedValueStore()
 
 	variable := models.Variable{
 		Name: "variable",
@@ -192,7 +193,7 @@ func TestExpressionVariableNotFound(t *testing.T) {
 
 	assert.Nil(err, "Expected nil, got %v", err)
 
-	_, err = result.Value.Evaluate(variableStore, nil)
+	_, err = result.Value.Evaluate(variableStore, referencedValueStore)
 
 	assert.NotNil(err, "Expected not nil, got nil")
 }
@@ -201,6 +202,7 @@ func TestExpressionVariableWithAnotherVariable(t *testing.T) {
 	assert := assert.New(t)
 
 	variableStore := models.NewVariableStore()
+	referencedValueStore := models.NewReferencedValueStore()
 
 	fooVar := models.Variable{
 		Name:  "foo",
@@ -225,7 +227,7 @@ func TestExpressionVariableWithAnotherVariable(t *testing.T) {
 	result, err := variableStore.GetVariable("bar")
 	assert.Nil(err, "Expected nil, got %v", err)
 
-	expressionResult, err := result.Value.Evaluate(variableStore, nil)
+	expressionResult, err := result.Value.Evaluate(variableStore, referencedValueStore)
 	assert.Nil(err, "Expected nil, got %v", err)
 
 	boolResult, boolErr := utils.ToBool(expressionResult)
@@ -237,6 +239,7 @@ func TestExpressionVariableWithAnotherVariableNested(t *testing.T) {
 	assert := assert.New(t)
 
 	variableStore := models.NewVariableStore()
+	referencedValueStore := models.NewReferencedValueStore()
 
 	fooVar := models.Variable{
 		Name:  "foo",
@@ -272,7 +275,7 @@ func TestExpressionVariableWithAnotherVariableNested(t *testing.T) {
 	result, err := variableStore.GetVariable("var")
 	assert.Nil(err, "Expected nil, got %v", err)
 
-	expressionResult, err := result.Value.Evaluate(variableStore, nil)
+	expressionResult, err := result.Value.Evaluate(variableStore, referencedValueStore)
 	assert.Nil(err, "Expected nil, got %v", err)
 
 	boolResult, boolErr := utils.ToBool(expressionResult)

@@ -235,22 +235,21 @@ func (o *OperatorFactory) ValidateOperator(node TreeNode) error {
 func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, variableStore *VariableStore, referenceValueStore *ReferencedValueStore) (any, error) {
 	if len(child.Children) == 0 {
 		if child.Type == "variable" {
-			// return child.ResultValue, -1, nil
-			variable, err := variableStore.GetVariable(child.Value.(string))
-			if err != nil {
-				return nil, err
-			}
-			if variable.Value.ResultValue == nil {
-				return variable.Value.Value, nil
-			}
-			return variable.Value.ResultValue, nil
-		} else if child.Type == "device_variable" {
 			referencedValue, err := referenceValueStore.GetAndUpdateReferencedValue(child.Value.(string))
-			if err != nil {
-				return nil, err
+			if err == nil {
+				return referencedValue.Value, nil
+			} else {
+				variable, err := variableStore.GetVariable(child.Value.(string))
+				if err != nil {
+					return nil, err
+				}
+				if variable.Value.ResultValue == nil {
+					return variable.Value.Value, nil
+				}
+				return variable.Value.ResultValue, nil
 			}
-			return referencedValue.Value, nil
 		}
+		// if child.Type == "device_variable" {}
 		return child.Value, nil
 	}
 
@@ -269,9 +268,11 @@ func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, vari
 
 func ComparisonOperator(child TreeNode, opFunc func(a, b any) (any, error)) (any, error) {
 	for i := range len(child.Children) - 1 {
-		if child.Children[i].Type == "device_variable" || child.Children[i+1].Type == "device_variable" {
-			continue
-		}
+		// This part is commented out because it is not needed for now
+		// Could be ussed in the future when the device variables will have a specific type
+		// if child.Children[i].Type == "device_variable" || child.Children[i+1].Type == "device_variable" {
+		// 	continue
+		// }
 
 		a := child.Children[i].ResultValue
 		b := child.Children[i+1].ResultValue
@@ -293,16 +294,16 @@ func ComparisonOperator(child TreeNode, opFunc func(a, b any) (any, error)) (any
 }
 
 func NumericLogicaloperator(child TreeNode, opFunc func(a, b any) (any, error)) (any, error) {
-	if child.Children[0].Type == "device_variable" {
+	if child.Children[0].Type == "variable" {
 		return nil, nil
 	}
 	result := child.Children[0].ResultValue
 	var err error
 
 	for i := 1; i < len(child.Children); i++ {
-		if child.Children[i].Type == "device_variable" {
-			continue
-		}
+		// if child.Children[i].Type == "device_variable" {
+		// 	continue
+		// }
 		b := child.Children[i].ResultValue
 
 		result, err = opFunc(result, b)

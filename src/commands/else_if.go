@@ -12,9 +12,9 @@ type ElseIf struct {
 	Arguments *models.TreeNode
 }
 
-func (e *ElseIf) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
+func (e *ElseIf) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
 	services.Logger.Println("Executing else if")
-	if result, err := e.Arguments.Evaluate(variableStore, referenceValueStore); err != nil {
+	if result, err := e.Arguments.Evaluate(variableStore, commandHandlingStore.ReferencedValueStore); err != nil {
 		services.Logger.Println("Error executing else if arguments", err)
 	} else {
 		if boolResult, boolErr := utils.ToBool(result); boolErr != nil {
@@ -23,7 +23,7 @@ func (e *ElseIf) Execute(variableStore *models.VariableStore, referenceValueStor
 		} else if boolResult {
 			services.Logger.Println("Else if is true, can execute body")
 			for _, cmd := range e.Block {
-				if success, err := cmd.Execute(variableStore, referenceValueStore); err != nil {
+				if success, err := cmd.Execute(variableStore, commandHandlingStore); err != nil {
 					return false, err
 				} else if success {
 					return true, nil

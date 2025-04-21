@@ -14,9 +14,9 @@ type If struct {
 	ElseBlock    Else
 }
 
-func (i *If) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
+func (i *If) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
 	services.Logger.Println("Executing if")
-	result, err := i.Arguments.Evaluate(variableStore, referenceValueStore)
+	result, err := i.Arguments.Evaluate(variableStore, commandHandlingStore.ReferencedValueStore)
 	if err != nil {
 		services.Logger.Println("Error executing if arguments", err)
 		return false, err
@@ -26,11 +26,11 @@ func (i *If) Execute(variableStore *models.VariableStore, referenceValueStore *m
 		return false, boolErr
 	} else if boolResult {
 		services.Logger.Println("If is true, can execute body")
-		return ExecuteCommands(i.Block, variableStore, referenceValueStore)
+		return ExecuteCommands(i.Block, variableStore, commandHandlingStore)
 	}
 
 	for i, elseIfBlock := range i.IfElseBlocks {
-		if success, err := elseIfBlock.Execute(variableStore, referenceValueStore); err != nil {
+		if success, err := elseIfBlock.Execute(variableStore, commandHandlingStore); err != nil {
 			return success, err
 		} else if success {
 			services.Logger.Println("Else if block", i, "executed successfully")
@@ -39,7 +39,7 @@ func (i *If) Execute(variableStore *models.VariableStore, referenceValueStore *m
 	}
 
 	if i.ElseBlock.Id != "" {
-		return i.ElseBlock.Execute(variableStore, referenceValueStore)
+		return i.ElseBlock.Execute(variableStore, commandHandlingStore)
 	}
 	return false, nil
 }

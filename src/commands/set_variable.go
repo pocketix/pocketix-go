@@ -13,9 +13,9 @@ type SetVariable struct {
 	RValType string
 }
 
-func (s *SetVariable) Execute(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore) (bool, error) {
+func (s *SetVariable) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
 	services.Logger.Println("Setting variable", s.LVal)
-	err := variableStore.SetVariable(s.LVal, s.RVal, s.RValType, referenceValueStore)
+	err := variableStore.SetVariable(s.LVal, s.RVal, s.RValType, commandHandlingStore.ReferencedValueStore)
 	if err != nil {
 		return false, err
 	}

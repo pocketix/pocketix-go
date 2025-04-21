@@ -126,7 +126,7 @@ func ParseBlocks(block types.Block, variableStore *models.VariableStore, procedu
 			}
 		} else {
 			if previousSubCommand != nil {
-				_, err := previousSubCommand.Execute(variableStore, commandHandlingStore.ReferencedValueStore)
+				_, err := previousSubCommand.Execute(variableStore, commandHandlingStore)
 				if err != nil {
 					return nil, err
 				}

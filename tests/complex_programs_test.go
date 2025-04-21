@@ -22,7 +22,7 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	assert.NotNil(commandsList, "Commands list should not be nil")
 
 	for _, command := range commandsList {
-		_, err := command.Execute(variableStore, nil)
+		_, err := command.Execute(variableStore, commandHandlingStore)
 		assert.Nil(err, "Error should be nil, but got: %v", err)
 	}
 

@@ -23,10 +23,10 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	services.Logger.Println(commandHandlingStore.CommandInvocationStore.Commands)
+	services.Logger.Println("Commands:", commandHandlingStore.CommandInvocationStore.Commands)
 
 	for _, command := range commandList {
-		if _, err := command.Execute(variableStore, commandHandlingStore.ReferencedValueStore); err != nil {
+		if _, err := command.Execute(variableStore, commandHandlingStore); err != nil {
 			log.Fatalln(err)
 		}
 	}
