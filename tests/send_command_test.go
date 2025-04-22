@@ -42,12 +42,11 @@ func TestSendCommandWithArguments(t *testing.T) {
 	assert.Equal("Device-1", dc.DeviceID, "Device ID should be 'Device-1', but got: %s", dc.DeviceID)
 	assert.Equal("Command", dc.Command, "Command should be 'Command', but got: %s", dc.Command)
 	assert.NotNil(parameterSnapshotsToUpdate, "Parameter snapshots should not be nil, but got: %v", parameterSnapshotsToUpdate)
-	assert.Equal(1, len(*parameterSnapshotsToUpdate), "Parameter snapshots length should be 1, but got: %d", len(*parameterSnapshotsToUpdate))
-	assert.Equal("Device-1", (*parameterSnapshotsToUpdate)[0].DeviceID, "Device ID in parameter snapshots should be 'Device-1', but got: %s", (*parameterSnapshotsToUpdate)[0].DeviceID)
-	assert.Equal("Command", (*parameterSnapshotsToUpdate)[0].SDParameter, "Command in parameter snapshots should be 'Command', but got: %s", (*parameterSnapshotsToUpdate)[0].SDParameter)
-	assert.Equal("Test", *(*parameterSnapshotsToUpdate)[0].String, "String value in parameter snapshots should be 'Test', but got: %s", *(*parameterSnapshotsToUpdate)[0].String)
-	assert.Nil((*parameterSnapshotsToUpdate)[0].Number, "Number value in parameter snapshots should be nil, but got: %v", (*parameterSnapshotsToUpdate)[0].Number)
-	assert.Nil((*parameterSnapshotsToUpdate)[0].Boolean, "Boolean value in parameter snapshots should be nil, but got: %v", (*parameterSnapshotsToUpdate)[0].Boolean)
+	assert.Equal("Device-1", (*parameterSnapshotsToUpdate).DeviceID, "Device ID in parameter snapshots should be 'Device-1', but got: %s", (*parameterSnapshotsToUpdate).DeviceID)
+	assert.Equal("Command", (*parameterSnapshotsToUpdate).SDParameter, "Command in parameter snapshots should be 'Command', but got: %s", (*parameterSnapshotsToUpdate).SDParameter)
+	assert.Equal("Test", *(*parameterSnapshotsToUpdate).String, "String value in parameter snapshots should be 'Test', but got: %s", *(*parameterSnapshotsToUpdate).String)
+	assert.Nil((*parameterSnapshotsToUpdate).Number, "Number value in parameter snapshots should be nil, but got: %v", (*parameterSnapshotsToUpdate).Number)
+	assert.Nil((*parameterSnapshotsToUpdate).Boolean, "Boolean value in parameter snapshots should be nil, but got: %v", (*parameterSnapshotsToUpdate).Boolean)
 }
 
 func TestSendTwoCommands(t *testing.T) {
@@ -82,10 +81,9 @@ func TestSendTwoCommands(t *testing.T) {
 	assert.Equal("Device-2", deviceCmd.DeviceID, "Device ID should be 'Device-2', but got: %s", deviceCmd.DeviceID)
 	assert.Equal("Command-2", deviceCmd.Command, "Command should be 'Command-2', but got: %s", deviceCmd.Command)
 	assert.NotNil(parameterSnapshotsToUpdate, "Parameter snapshots should not be nil, but got: %v", parameterSnapshotsToUpdate)
-	assert.Equal(1, len(*parameterSnapshotsToUpdate), "Parameter snapshots length should be 1, but got: %d", len(*parameterSnapshotsToUpdate))
-	assert.Equal("Device-2", (*parameterSnapshotsToUpdate)[0].DeviceID, "Device ID in parameter snapshots should be 'Device-2', but got: %s", (*parameterSnapshotsToUpdate)[0].DeviceID)
-	assert.Equal("Command-2", (*parameterSnapshotsToUpdate)[0].SDParameter, "Command in parameter snapshots should be 'Command-2', but got: %s", (*parameterSnapshotsToUpdate)[0].SDParameter)
-	assert.Nil((*parameterSnapshotsToUpdate)[0].String, "String value in parameter snapshots should be nil, but got: %v", (*parameterSnapshotsToUpdate)[0].String)
-	assert.Equal(10.0, *(*parameterSnapshotsToUpdate)[0].Number, "Number value in parameter snapshots should be 10.0, but got: %f", *(*parameterSnapshotsToUpdate)[0].Number)
-	assert.Nil((*parameterSnapshotsToUpdate)[0].Boolean, "Boolean value in parameter snapshots should be nil, but got: %v", (*parameterSnapshotsToUpdate)[0].Boolean)
+	assert.Equal("Device-2", (*parameterSnapshotsToUpdate).DeviceID, "Device ID in parameter snapshots should be 'Device-2', but got: %s", (*parameterSnapshotsToUpdate).DeviceID)
+	assert.Equal("Command-2", (*parameterSnapshotsToUpdate).SDParameter, "Command in parameter snapshots should be 'Command-2', but got: %s", (*parameterSnapshotsToUpdate).SDParameter)
+	assert.Nil((*parameterSnapshotsToUpdate).String, "String value in parameter snapshots should be nil, but got: %v", (*parameterSnapshotsToUpdate).String)
+	assert.Equal(10.0, *(*parameterSnapshotsToUpdate).Number, "Number value in parameter snapshots should be 10.0, but got: %f", *(*parameterSnapshotsToUpdate).Number)
+	assert.Nil((*parameterSnapshotsToUpdate).Boolean, "Boolean value in parameter snapshots should be nil, but got: %v", (*parameterSnapshotsToUpdate).Boolean)
 }
