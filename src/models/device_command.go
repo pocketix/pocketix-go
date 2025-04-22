@@ -12,34 +12,31 @@ type TypeValue struct {
 type DeviceCommand struct {
 	DeviceID  string
 	Command   string
-	Arguments []TypeValue
+	Arguments []TypeValue // list of arguments, for now only one argument is assumed
 }
 
-func (dc *DeviceCommand) SendCommandToDevice() (*DeviceCommand, *[]SDParameterSnapshot, error) {
+func (dc *DeviceCommand) SendCommandToDevice() (*DeviceCommand, *SDParameterSnapshot, error) {
 	if len(dc.Arguments) == 0 {
 		return dc, nil, nil
 	}
-	sdParameterSnapshots := make([]SDParameterSnapshot, 0)
-	for _, argument := range dc.Arguments {
-		var sdParameterSnapshot SDParameterSnapshot
+	var sdParameterSnapshot SDParameterSnapshot
+	argument := dc.Arguments[0]
 
-		switch argument.Type {
-		case "string":
-			value := argument.Value.(string)
-			sdParameterSnapshot.String = &value
-		case "number":
-			value := argument.Value.(float64)
-			sdParameterSnapshot.Number = &value
-		case "boolean":
-			value := argument.Value.(bool)
-			argument.Value = value
-		default:
-			return nil, nil, fmt.Errorf("unsupported type: %s", argument.Type)
-		}
-
-		sdParameterSnapshot.DeviceID = dc.DeviceID
-		sdParameterSnapshot.SDParameter = dc.Command
-		sdParameterSnapshots = append(sdParameterSnapshots, sdParameterSnapshot)
+	switch argument.Type {
+	case "string":
+		value := argument.Value.(string)
+		sdParameterSnapshot.String = &value
+	case "number":
+		value := argument.Value.(float64)
+		sdParameterSnapshot.Number = &value
+	case "boolean":
+		value := argument.Value.(bool)
+		argument.Value = value
+	default:
+		return nil, nil, fmt.Errorf("unsupported type: %s", argument.Type)
 	}
-	return dc, &sdParameterSnapshots, nil
+
+	sdParameterSnapshot.DeviceID = dc.DeviceID
+	sdParameterSnapshot.SDParameter = dc.Command
+	return dc, &sdParameterSnapshot, nil
 }
