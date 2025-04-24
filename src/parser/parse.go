@@ -48,7 +48,13 @@ func ParseHeader(data []byte, variableStore *models.VariableStore, procedureStor
 	return &program, nil
 }
 
-func ParseProcedureBody(procedure models.Procedure, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) ([]commands.Command, error) {
+func ParseProcedureBody(
+	procedure models.Procedure,
+	variableStore *models.VariableStore,
+	procedureStore *models.ProcedureStore,
+	commandHandlingStore *models.CommandsHandlingStore,
+	collector commands.Collector,
+) ([]commands.Command, error) {
 	var blocks []types.Block
 	if err := json.Unmarshal(procedure.Program, &blocks); err != nil {
 		return nil, err
@@ -56,111 +62,95 @@ func ParseProcedureBody(procedure models.Procedure, variableStore *models.Variab
 
 	var commandList []commands.Command
 	for _, block := range blocks {
-		cmd, err := ParseBlockWithoutExecuting(block, variableStore, procedureStore, commandHandlingStore)
+		statement, err := ParseBlocks(block, variableStore, procedureStore, commandHandlingStore, collector)
 		if err != nil {
 			return nil, err
 		}
-		commandList = append(commandList, cmd...)
+		commandList = append(commandList, statement...)
 	}
 	return commandList, nil
 }
 
-func ParseWithoutExecuting(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) error {
+// Parse parses the given program data and validates the blocks.
+//
+// Parameters:
+//   - data: the program data in JSON format.
+//   - variableStore: store for variables to use for parsing.
+//   - procedureStore: store for procedure definitions.
+//   - commandHandlingStore: store for command-related services.
+//   - appendBlock: callback to receive parsed command(s) in AST form.
+//     This callback is empty when there is no need to execute the commands (e.g. when saving the program or updating).
+//
+// Returns:
+//   - error: nil if parsing was successful, or an error if there was a problem.
+func Parse(
+	data []byte,
+	variableStore *models.VariableStore,
+	procedureStore *models.ProcedureStore,
+	commandHandlingStore *models.CommandsHandlingStore,
+	collector commands.Collector,
+) error {
 	program, err := ParseHeader(data, variableStore, procedureStore, commandHandlingStore)
 	if err != nil {
 		return err
 	}
 
-	var previousCommand commands.Command
+	var previousStatement commands.Command
 	for _, block := range program.Blocks {
-		commandList, err := ParseBlockWithoutExecuting(block, variableStore, procedureStore, commandHandlingStore)
+		subAst := make([]commands.Command, 0)
+		blockCollector := collector.NewCollectorBasedOnType(collector.Type(), &subAst)
+
+		statementList, err := ParseBlocks(block, variableStore, procedureStore, commandHandlingStore, blockCollector)
 		if err != nil {
 			return err
 		}
-		if len(commandList) != 1 {
+		// If the ParseBlocksRecursively returns a list of statements, it means that the block is a procedure call,
+		// it appends the statements to the statement list and continues.
+		if len(statementList) != 1 {
+			for _, statement := range statementList {
+				// appendBlock(statement)
+				collector.Collect(statement)
+			}
 			continue
 		}
-		cmd := commandList[0]
-		if cmd.GetId() == "if" {
-			previousCommand = cmd
-		} else if cmd.GetId() == "else" {
-			if previousCommand != nil {
-				previousCommand.(*commands.If).AddElseBlock(cmd)
-				previousCommand = nil
+		if statementList == nil {
+			continue
+		}
+		statement := statementList[0]
+
+		if statement.GetId() == "if" {
+			previousStatement = statement
+		} else if statement.GetId() == "else" {
+			if previousStatement != nil {
+				previousStatement.(*commands.If).AddElseBlock(statement)
+				// appendBlock(previousStatement)
+				collector.Collect(previousStatement)
+				previousStatement = nil
 			} else {
 				services.Logger.Println("Error: Else without if")
 				return fmt.Errorf("else without if")
 			}
-		} else if cmd.GetId() == "elseif" {
-			if previousCommand != nil {
-				previousCommand.(*commands.If).AddElseIfBlock(cmd)
+		} else if statement.GetId() == "elseif" {
+			if previousStatement != nil {
+				previousStatement.(*commands.If).AddElseIfBlock(statement)
 			} else {
 				services.Logger.Println("Error: Elseif without if")
 				return fmt.Errorf("elseif without if")
 			}
 		} else {
-			if previousCommand != nil {
-				previousCommand = nil
+			if previousStatement != nil {
+				// appendBlock(previousStatement)
+				collector.Collect(previousStatement)
+				previousStatement = nil
 			}
+
+			// appendBlock(statement)
+			collector.Collect(statement)
 		}
 	}
-
+	if previousStatement != nil {
+		// appendBlock(previousStatement)
+		collector.Collect(previousStatement)
+	}
 	return nil
-}
-
-func Parse(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) ([]commands.Command, error) {
-	program, err := ParseHeader(data, variableStore, procedureStore, commandHandlingStore)
-	if err != nil {
-		return nil, err
-	}
-
-	var commandList []commands.Command
-	var previousCommand commands.Command
-	for _, block := range program.Blocks {
-		blockList, err := ParseBlocks(block, variableStore, procedureStore, commandHandlingStore)
-		if err != nil {
-			return nil, err
-		}
-		if len(blockList) != 1 {
-			commandList = append(commandList, blockList...)
-			continue
-		}
-		if blockList == nil {
-			continue
-		}
-		cmd := blockList[0]
-
-		if cmd.GetId() == "if" {
-			previousCommand = cmd
-		} else if cmd.GetId() == "else" {
-			if previousCommand != nil {
-				previousCommand.(*commands.If).AddElseBlock(cmd)
-				commandList = append(commandList, previousCommand)
-				previousCommand = nil
-			} else {
-				services.Logger.Println("Error: Else without if")
-				return nil, fmt.Errorf("else without if")
-			}
-		} else if cmd.GetId() == "elseif" {
-			if previousCommand != nil {
-				previousCommand.(*commands.If).AddElseIfBlock(cmd)
-			} else {
-				services.Logger.Println("Error: Elseif without if")
-				return nil, fmt.Errorf("elseif without if")
-			}
-		} else {
-			if previousCommand != nil {
-				commandList = append(commandList, previousCommand)
-				previousCommand = nil
-			}
-
-			commandList = append(commandList, cmd)
-		}
-	}
-
-	if previousCommand != nil {
-		commandList = append(commandList, previousCommand)
-	}
-
-	return commandList, nil
 }
