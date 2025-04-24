@@ -1,0 +1,92 @@
+{
+    "header": {
+        "userVariables": {
+            "foo": {
+                "type": "string",
+                "value": "abc"
+            }
+        },
+        "userProcedures": {
+            "set": [
+                {
+                    "id": "setvar",
+                    "arguments": [
+                        {
+                            "type": "variable",
+                            "value": "foo"
+                        },
+                        {
+                            "type": "string",
+                            "value": "xyz"
+                        }
+                    ]
+                },
+                {
+                    "id": "alert",
+                    "arguments": [
+                        {
+                            "type": "str_opt",
+                            "value": "phone_number"
+                        },
+                        {
+                            "type": "string",
+                            "value": "123"
+                        },
+                        {
+                            "type": "string",
+                            "value": "abc"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "block": [
+        {
+            "id": "if",
+            "block": [
+                {
+                    "id": "set"
+                }
+            ],
+            "arguments": [
+                {
+                    "type": "boolean_expression",
+                    "value": [
+                        {
+                            "value": [
+                                {
+                                    "type": "variable",
+                                    "value": "foo"
+                                },
+                                {
+                                    "type": "string",
+                                    "value": "abc"
+                                }
+                            ],
+                            "type": "==="
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "else",
+            "block": [
+                {
+                    "id": "setvar",
+                    "arguments": [
+                        {
+                            "type": "variable",
+                            "value": "foo"
+                        },
+                        {
+                            "type": "string",
+                            "value": "mno"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
