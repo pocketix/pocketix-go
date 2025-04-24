@@ -3,6 +3,7 @@ package tests
 import (
 	"testing"
 
+	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/parser"
 	"github.com/pocketix/pocketix-go/src/services"
@@ -17,12 +18,13 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	procedureStore := models.NewProcedureStore()
 	commandHandlingStore := models.NewCommandsHandlingStore()
 
-	commandsList, err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore)
+	statementAST := make([]commands.Command, 0)
+	err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore, &commands.ASTCollector{Target: &statementAST})
 	assert.Nil(err, "Error should be nil, but got: %v", err)
-	assert.NotNil(commandsList, "Commands list should not be nil")
+	assert.NotNil(statementAST, "Commands list should not be nil")
 
-	for _, command := range commandsList {
-		_, err := command.Execute(variableStore, commandHandlingStore)
+	for _, statement := range statementAST {
+		_, err := statement.Execute(variableStore, commandHandlingStore)
 		assert.Nil(err, "Error should be nil, but got: %v", err)
 	}
 
