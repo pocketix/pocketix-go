@@ -3,8 +3,8 @@ package tests
 import (
 	"testing"
 
-	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/statements"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,14 +17,14 @@ func TestEvaluateIf_SingleValue(t *testing.T) {
 	expected := []bool{true, false, true, false, true, false, false, true}
 
 	for i, value := range data {
-		ifStatement := commands.If{
+		ifStatement := statements.If{
 			Id: "if",
 			Arguments: &models.TreeNode{
 				Value: "boolean_expression", Children: []*models.TreeNode{
 					{Value: value, ResultValue: value, Type: types[i]},
 				},
 			},
-			Block: []commands.Command{},
+			Block: []statements.Statement{},
 		}
 
 		result, err := ifStatement.Execute(nil, commandHandlingStore)
@@ -39,7 +39,7 @@ func TestEvaluateIf_SimpleCondition(t *testing.T) {
 	assert := assert.New(t)
 
 	commandHandlingStore := models.NewCommandsHandlingStore()
-	ifStatement := commands.If{
+	ifStatement := statements.If{
 		Id: "if",
 		Arguments: &models.TreeNode{
 			Value: "boolean_expression", Children: []*models.TreeNode{
@@ -49,7 +49,7 @@ func TestEvaluateIf_SimpleCondition(t *testing.T) {
 				}},
 			},
 		},
-		Block: []commands.Command{},
+		Block: []statements.Statement{},
 	}
 
 	result, err := ifStatement.Execute(nil, commandHandlingStore)
@@ -70,7 +70,7 @@ func TestEvaluateIfWithVariable(t *testing.T) {
 	}
 	variableStore.AddVariable(variable)
 
-	ifStatement := commands.If{
+	ifStatement := statements.If{
 		Id: "if",
 		Arguments: &models.TreeNode{
 			Value: "boolean_expression", Children: []*models.TreeNode{
@@ -80,7 +80,7 @@ func TestEvaluateIfWithVariable(t *testing.T) {
 				}},
 			},
 		},
-		Block: []commands.Command{},
+		Block: []statements.Statement{},
 	}
 
 	result, err := ifStatement.Execute(variableStore, commandHandlingStore)

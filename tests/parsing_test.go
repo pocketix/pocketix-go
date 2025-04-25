@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/parser"
+	"github.com/pocketix/pocketix-go/src/statements"
 	"github.com/pocketix/pocketix-go/src/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +21,7 @@ func TestParseIfWithoutArguments(t *testing.T) {
 		Arguments: []types.Argument{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.NotNil(cmd, "Command should be nil")
 	assert.Nil(err, "Error should not be nil")
@@ -47,12 +47,12 @@ func TestParseSimpleIf(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	ifStatement := cmd[0].(*commands.If)
+	ifStatement := cmd[0].(*statements.If)
 	assert.Equal(0, len(ifStatement.Block), "Expected 0 block, got %d", len(ifStatement.Block))
 
 	arguments := ifStatement.GetArguments()
@@ -93,12 +93,12 @@ func TestParseIfWithCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	ifStatement := cmd[0].(*commands.If)
+	ifStatement := cmd[0].(*statements.If)
 	arguments := ifStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
@@ -154,12 +154,12 @@ func TestParseIfWithComplexCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	ifStatement := cmd[0].(*commands.If)
+	ifStatement := cmd[0].(*statements.If)
 	arguments := ifStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
@@ -195,12 +195,12 @@ func TestParseElse(t *testing.T) {
 		Body:      []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	elseStatement := cmd[0].(*commands.Else)
+	elseStatement := cmd[0].(*statements.Else)
 	assert.Equal(0, len(elseStatement.Block), "Expected 0 block, got %d", len(elseStatement.Block))
 
 	arguments := elseStatement.GetArguments()
@@ -227,12 +227,12 @@ func TestParseElseif(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	elseifStatement := cmd[0].(*commands.ElseIf)
+	elseifStatement := cmd[0].(*statements.ElseIf)
 	assert.Equal(0, len(elseifStatement.Block), "Expected 0 block, got %d", len(elseifStatement.Block))
 
 	arguments := elseifStatement.GetArguments()
@@ -272,12 +272,12 @@ func TestParseElseifWithCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	elseifStatement := cmd[0].(*commands.ElseIf)
+	elseifStatement := cmd[0].(*statements.ElseIf)
 	arguments := elseifStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
@@ -303,12 +303,12 @@ func TestParseWhile(t *testing.T) {
 		Id: "while",
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	whileStatement := cmd[0].(*commands.While)
+	whileStatement := cmd[0].(*statements.While)
 	assert.Equal(0, len(whileStatement.Block), "Expected 0 block, got %d", len(whileStatement.Block))
 
 	arguments := whileStatement.GetArguments()
@@ -344,12 +344,12 @@ func TestParseWhileWithCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	whileStatement := cmd[0].(*commands.While)
+	whileStatement := cmd[0].(*statements.While)
 	arguments := whileStatement.GetArguments()
 
 	assert.NotNil(arguments, "Arguments should not be nil")
@@ -382,12 +382,12 @@ func TestParseRepeat(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	repeatStatement := cmd[0].(*commands.Repeat)
+	repeatStatement := cmd[0].(*statements.Repeat)
 	assert.Equal(0, len(repeatStatement.Block), "Expected 0 block, got %d", len(repeatStatement.Block))
 
 	arguments := repeatStatement.GetArguments()
@@ -416,12 +416,12 @@ func TestParseSetVariable(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	setVariableStatement := cmd[0].(*commands.SetVariable)
+	setVariableStatement := cmd[0].(*statements.SetVariable)
 	assert.Nil(setVariableStatement.GetArguments(), "Arguments should be nil")
 	assert.Nil(setVariableStatement.GetBody(), "Body should be nil")
 
@@ -476,12 +476,12 @@ func TestParseSwitch(t *testing.T) {
 		},
 	}
 
-	cmd, err := parser.ParseBlocks(block, variableStore, nil, commandHandlingStore, &commands.ASTCollector{Target: &[]commands.Command{}})
+	cmd, err := parser.ParseBlocks(block, variableStore, nil, commandHandlingStore, &statements.ASTCollector{Target: &[]statements.Statement{}})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	switchStatement := cmd[0].(*commands.Switch)
+	switchStatement := cmd[0].(*statements.Switch)
 
 	assert.Equal(2, len(switchStatement.Block), "Expected 2 block, got %d", len(switchStatement.Block))
 
@@ -490,13 +490,13 @@ func TestParseSwitch(t *testing.T) {
 	assert.Equal(selectorValue, "foo", "Selector should be foo, got %v", selectorValue)
 	assert.Equal(selectorType, "variable", "Selector type should be variable, got %v", selectorType)
 
-	case1 := switchStatement.Block[0].(*commands.Case)
+	case1 := switchStatement.Block[0].(*statements.Case)
 	case1Value := case1.GetValue()
 
 	assert.Equal(0, len(case1.Block), "Expected 0 block, got %d", len(case1.Block))
 	assert.Equal(case1Value, "foo", "Expected foo, got %v", case1Value)
 
-	case2 := switchStatement.Block[1].(*commands.Case)
+	case2 := switchStatement.Block[1].(*statements.Case)
 	case2Value := case2.GetValue()
 
 	assert.Equal(0, len(case2.Block), "Expected 0 block, got %d", len(case2.Block))
@@ -525,12 +525,12 @@ func TestParseAlert(t *testing.T) {
 		},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &commands.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
 
-	alertStatement := cmd[0].(*commands.Alert)
+	alertStatement := cmd[0].(*statements.Alert)
 
 	method := alertStatement.GetMethod()
 	assert.Equal(method, "phone_number", "Expected phone_number, got %v", method)

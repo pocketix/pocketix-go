@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/statements"
 	"github.com/stretchr/testify/assert"
 )
 
 // MockRepeatExecute is a mock implementation of the Repeat.Execute method.
 // This funcion uses the same logic as the original implementation,
 // but it has been modified with iterations to make it testable.
-func MockRepeatExecute(r commands.Repeat, variableStore *models.VariableStore) (bool, int, error) {
+func MockRepeatExecute(r statements.Repeat, variableStore *models.VariableStore) (bool, int, error) {
 	iterations := 0
 
 	var count int
@@ -35,7 +35,7 @@ func MockRepeatExecute(r commands.Repeat, variableStore *models.VariableStore) (
 
 	for range count {
 		iterations++
-		result, err := commands.ExecuteCommands(r.Block, nil, nil)
+		result, err := statements.ExecuteCommands(r.Block, nil, nil)
 		if err != nil {
 			return result, -1, err
 		}
@@ -47,10 +47,10 @@ func MockRepeatExecute(r commands.Repeat, variableStore *models.VariableStore) (
 func TestRepeatZeroTimes(t *testing.T) {
 	assert := assert.New(t)
 
-	repeatStatement := commands.Repeat{
+	repeatStatement := statements.Repeat{
 		Id:    "repeat",
 		Count: float64(0),
-		Block: []commands.Command{},
+		Block: []statements.Statement{},
 	}
 
 	result, err := repeatStatement.Execute(nil, nil)
@@ -61,10 +61,10 @@ func TestRepeatZeroTimes(t *testing.T) {
 func TestRepeatTenTimes(t *testing.T) {
 	assert := assert.New(t)
 
-	repeatStatement := commands.Repeat{
+	repeatStatement := statements.Repeat{
 		Id:    "repeat",
 		Count: float64(10),
-		Block: []commands.Command{},
+		Block: []statements.Statement{},
 	}
 
 	result, iterations, err := MockRepeatExecute(repeatStatement, nil)
@@ -76,10 +76,10 @@ func TestRepeatTenTimes(t *testing.T) {
 func TestRepeatNegativeCount(t *testing.T) {
 	assert := assert.New(t)
 
-	repeatStatement := commands.Repeat{
+	repeatStatement := statements.Repeat{
 		Id:    "repeat",
 		Count: float64(-1),
-		Block: []commands.Command{},
+		Block: []statements.Statement{},
 	}
 
 	result, err := repeatStatement.Execute(nil, nil)
@@ -99,11 +99,11 @@ func TestRepeatWithVariable(t *testing.T) {
 	}
 	variableStore.AddVariable(variable)
 
-	repeatStatement := commands.Repeat{
+	repeatStatement := statements.Repeat{
 		Id:        "repeat",
 		Count:     "count",
 		CountType: "variable",
-		Block:     []commands.Command{},
+		Block:     []statements.Statement{},
 	}
 
 	result, iterations, err := MockRepeatExecute(repeatStatement, variableStore)

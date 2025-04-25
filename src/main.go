@@ -4,10 +4,10 @@ import (
 	"flag"
 	"log"
 
-	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/parser"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/statements"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	commandHandlingStore := models.NewCommandsHandlingStore()
 
 	// ast := make([]commands.Command, 0)
-	err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore, &commands.NoOpCollector{})
+	err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore, &statements.NoOpCollector{})
 
 	// err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore, func(c commands.Command) {})
 

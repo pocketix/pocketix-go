@@ -3,16 +3,16 @@ package tests
 import (
 	"testing"
 
-	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/statements"
 	"github.com/stretchr/testify/assert"
 )
 
 // MockWhileExecute is a mock implementation of the While.Execute method.
 // This funcion uses the same logic as the original implementation,
 // but it has been modified with iterations to make it testable.
-func MockWhileExecute(variableStore *models.VariableStore, w commands.While) (bool, int, error) {
+func MockWhileExecute(variableStore *models.VariableStore, w statements.While) (bool, int, error) {
 	iterations := 0
 	result := true
 
@@ -23,7 +23,7 @@ func MockWhileExecute(variableStore *models.VariableStore, w commands.While) (bo
 		// 	return false, err
 		// }
 		if result {
-			if success, err := commands.ExecuteCommands(w.Block, variableStore, nil); err != nil {
+			if success, err := statements.ExecuteCommands(w.Block, variableStore, nil); err != nil {
 				return success, -1, err
 			} else if !success {
 				return success, -1, nil
@@ -46,7 +46,7 @@ func TestExecuteWhileFalse(t *testing.T) {
 	assert := assert.New(t)
 
 	commandHandlingStore := models.NewCommandsHandlingStore()
-	whileStatement := commands.While{
+	whileStatement := statements.While{
 		Id: "while",
 		Arguments: &models.TreeNode{
 			Value: "boolean_expression",
@@ -54,7 +54,7 @@ func TestExecuteWhileFalse(t *testing.T) {
 				{Value: false, ResultValue: false, Type: "boolean"},
 			},
 		},
-		Block: []commands.Command{},
+		Block: []statements.Statement{},
 	}
 
 	result, err := whileStatement.Execute(nil, commandHandlingStore)
@@ -67,7 +67,7 @@ func TestExecuteWhileFalse(t *testing.T) {
 func TestExecuteWhileWithFalseCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	whileStatement := commands.While{
+	whileStatement := statements.While{
 		Id: "while",
 		Arguments: &models.TreeNode{
 			Value: "boolean_expression",
@@ -78,7 +78,7 @@ func TestExecuteWhileWithFalseCondition(t *testing.T) {
 				}},
 			},
 		},
-		Block: []commands.Command{},
+		Block: []statements.Statement{},
 	}
 
 	variableStore := models.VariableStore{}
@@ -94,9 +94,9 @@ func TestExecuteWhileWithIterations(t *testing.T) {
 	assert := assert.New(t)
 
 	// Arguments are not used in this test case, mock execute function will be used instead.
-	whileStatement := commands.While{
+	whileStatement := statements.While{
 		Id:    "while",
-		Block: []commands.Command{},
+		Block: []statements.Statement{},
 	}
 
 	variableStore := models.VariableStore{}
@@ -119,14 +119,14 @@ func TestExecuteWhileWithVariable(t *testing.T) {
 	}
 	variableStore.AddVariable(variable)
 
-	whileStatement := commands.While{
+	whileStatement := statements.While{
 		Id: "while",
 		Arguments: &models.TreeNode{
 			Value: "boolean_expression", Children: []*models.TreeNode{
 				{Value: "var", ResultValue: "var", Type: "variable"},
 			},
 		},
-		Block: []commands.Command{},
+		Block: []statements.Statement{},
 	}
 
 	commandHandlingStore := models.NewCommandsHandlingStore()

@@ -4,7 +4,7 @@ import (
 	"github.com/pocketix/pocketix-go/src/models"
 )
 
-func CommandFactory(
+func StatementFactory(
 	id string,
 	blocks []Statement,
 	tree []*models.TreeNode,

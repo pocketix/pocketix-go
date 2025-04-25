@@ -3,10 +3,10 @@ package tests
 import (
 	"testing"
 
-	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/parser"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/statements"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,8 +18,8 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	procedureStore := models.NewProcedureStore()
 	commandHandlingStore := models.NewCommandsHandlingStore()
 
-	statementAST := make([]commands.Command, 0)
-	err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore, &commands.ASTCollector{Target: &statementAST})
+	statementAST := make([]statements.Statement, 0)
+	err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore, &statements.ASTCollector{Target: &statementAST})
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 	assert.NotNil(statementAST, "Commands list should not be nil")
 

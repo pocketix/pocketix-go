@@ -3,14 +3,14 @@ package tests
 import (
 	"testing"
 
-	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/statements"
 	"github.com/stretchr/testify/assert"
 )
 
-func MockSwitchExecute(variableStore *models.VariableStore, s commands.Switch) (bool, any, error) {
+func MockSwitchExecute(variableStore *models.VariableStore, s statements.Switch) (bool, any, error) {
 	for _, c := range s.Block {
-		caseCommand := c.(*commands.Case)
+		caseCommand := c.(*statements.Case)
 		selectorValue := s.Selector
 		caseValue := caseCommand.Value
 
@@ -40,9 +40,9 @@ func MockSwitchExecute(variableStore *models.VariableStore, s commands.Switch) (
 func TestExecuteEmptySwitch(t *testing.T) {
 	assert := assert.New(t)
 
-	switchStatement := commands.Switch{
+	switchStatement := statements.Switch{
 		Id:           "switch",
-		Block:        []commands.Command{},
+		Block:        []statements.Statement{},
 		SelectorType: "string",
 		Selector:     "value",
 	}
@@ -57,12 +57,12 @@ func TestExecuteEmptySwitch(t *testing.T) {
 func TestExecuteSwitchWithOneCase(t *testing.T) {
 	assert := assert.New(t)
 
-	switchStatement := commands.Switch{
+	switchStatement := statements.Switch{
 		Id: "switch",
-		Block: []commands.Command{
-			&commands.Case{
+		Block: []statements.Statement{
+			&statements.Case{
 				Id:    "case",
-				Block: []commands.Command{},
+				Block: []statements.Statement{},
 				Value: "value",
 				Type:  "string",
 			},
@@ -89,18 +89,18 @@ func TestExecuteSwitchWithVariableSelector(t *testing.T) {
 	}
 	variableStore.AddVariable(variable)
 
-	switchStatement := commands.Switch{
+	switchStatement := statements.Switch{
 		Id: "switch",
-		Block: []commands.Command{
-			&commands.Case{
+		Block: []statements.Statement{
+			&statements.Case{
 				Id:    "case",
-				Block: []commands.Command{},
+				Block: []statements.Statement{},
 				Value: "test",
 				Type:  "string",
 			},
-			&commands.Case{
+			&statements.Case{
 				Id:    "case",
-				Block: []commands.Command{},
+				Block: []statements.Statement{},
 				Value: "value",
 				Type:  "string",
 			},

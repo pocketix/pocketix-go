@@ -3,15 +3,15 @@ package tests
 import (
 	"testing"
 
-	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/statements"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestExecuteAlertPhoneNumber(t *testing.T) {
 	assert := assert.New(t)
 
-	alert := &commands.Alert{
+	alert := &statements.Alert{
 		Id:           "alert",
 		Method:       "phone_number",
 		Receiver:     "1234567890",
@@ -29,7 +29,7 @@ func TestExecuteAlertPhoneNumber(t *testing.T) {
 func TestExecuteAlertEmail(t *testing.T) {
 	assert := assert.New(t)
 
-	alert := &commands.Alert{
+	alert := &statements.Alert{
 		Id:           "alert",
 		Method:       "email",
 		Receiver:     "mail@mail.com",
@@ -55,7 +55,7 @@ func TestExecuteAlertVariableReceiver(t *testing.T) {
 	variableStore := models.NewVariableStore()
 	variableStore.AddVariable(variable)
 
-	alert := &commands.Alert{
+	alert := &statements.Alert{
 		Id:           "alert",
 		Method:       "phone_number",
 		Receiver:     "receiver",
@@ -85,7 +85,7 @@ func TestExecuteAlertVariableMessage(t *testing.T) {
 	variableStore := models.NewVariableStore()
 	variableStore.AddVariable(*variable)
 
-	alert := &commands.Alert{
+	alert := &statements.Alert{
 		Id:           "alert",
 		Method:       "phone_number",
 		Receiver:     "1234567890",
@@ -107,7 +107,7 @@ func TestExecuteAlertVariableMessage(t *testing.T) {
 func TestExecuteAlertInvalidMethod(t *testing.T) {
 	assert := assert.New(t)
 
-	alert := &commands.Alert{
+	alert := &statements.Alert{
 		Id:           "alert",
 		Method:       "invalid_method",
 		Receiver:     "1234567890",

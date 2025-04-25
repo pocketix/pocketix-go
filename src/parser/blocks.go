@@ -3,9 +3,9 @@ package parser
 import (
 	"fmt"
 
-	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/statements"
 	"github.com/pocketix/pocketix-go/src/types"
 )
 
@@ -25,8 +25,8 @@ func ParseBlocks(
 	variableStore *models.VariableStore,
 	procedureStore *models.ProcedureStore,
 	commandHandlingStore *models.CommandsHandlingStore,
-	collector commands.Collector,
-) ([]commands.Command, error) {
+	collector statements.Collector,
+) ([]statements.Statement, error) {
 	argumentTree := make([]*models.TreeNode, len(block.Arguments))
 
 	if len(block.Arguments) != 0 {
@@ -36,12 +36,12 @@ func ParseBlocks(
 		}
 	}
 
-	// var parsedCommands []commands.Command
-	var previousSubCommand commands.Command
+	// var parsedCommands []statements.Statement
+	var previousSubCommand statements.Statement
 
 	for _, subBlock := range block.Body {
 		// Parse nested blocks
-		subAst := make([]commands.Command, 0)
+		subAst := make([]statements.Statement, 0)
 		blockCollector := collector.NewCollectorBasedOnType(collector.Type(), &subAst)
 
 		statementList, err := ParseBlocks(subBlock, variableStore, procedureStore, commandHandlingStore, blockCollector)
@@ -60,7 +60,7 @@ func ParseBlocks(
 			previousSubCommand = cmd
 		} else if cmd.GetId() == "else" {
 			if previousSubCommand != nil {
-				previousSubCommand.(*commands.If).AddElseBlock(cmd)
+				previousSubCommand.(*statements.If).AddElseBlock(cmd)
 				collector.Collect(previousSubCommand)
 				// parsedCommands = append(parsedCommands, previousSubCommand)
 				previousSubCommand = nil
@@ -70,7 +70,7 @@ func ParseBlocks(
 			}
 		} else if cmd.GetId() == "elseif" {
 			if previousSubCommand != nil {
-				previousSubCommand.(*commands.If).AddElseIfBlock(cmd)
+				previousSubCommand.(*statements.If).AddElseIfBlock(cmd)
 			} else {
 				services.Logger.Println("Error: Elseif without if")
 				return nil, fmt.Errorf("elseif without if")
@@ -100,7 +100,7 @@ func ParseBlocks(
 		}
 		return statementList, nil
 	}
-	cmd, err := commands.CommandFactory(block.Id, *collector.GetTarget(), argumentTree, procedureStore, commandHandlingStore.CommandInvocationStore)
+	cmd, err := statements.StatementFactory(block.Id, *collector.GetTarget(), argumentTree, procedureStore, commandHandlingStore.CommandInvocationStore)
 	if err != nil {
 		services.Logger.Println("Error creating command", err)
 		return nil, err
@@ -110,5 +110,5 @@ func ParseBlocks(
 		return nil, nil
 	}
 	err = cmd.Validate(variableStore, commandHandlingStore.ReferencedValueStore)
-	return []commands.Command{cmd}, err
+	return []statements.Statement{cmd}, err
 }

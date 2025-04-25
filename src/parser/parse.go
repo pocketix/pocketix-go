@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/pocketix/pocketix-go/src/commands"
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/statements"
 	"github.com/pocketix/pocketix-go/src/types"
 )
 
@@ -53,14 +53,14 @@ func ParseProcedureBody(
 	variableStore *models.VariableStore,
 	procedureStore *models.ProcedureStore,
 	commandHandlingStore *models.CommandsHandlingStore,
-	collector commands.Collector,
-) ([]commands.Command, error) {
+	collector statements.Collector,
+) ([]statements.Statement, error) {
 	var blocks []types.Block
 	if err := json.Unmarshal(procedure.Program, &blocks); err != nil {
 		return nil, err
 	}
 
-	var commandList []commands.Command
+	var commandList []statements.Statement
 	for _, block := range blocks {
 		statement, err := ParseBlocks(block, variableStore, procedureStore, commandHandlingStore, collector)
 		if err != nil {
@@ -88,16 +88,16 @@ func Parse(
 	variableStore *models.VariableStore,
 	procedureStore *models.ProcedureStore,
 	commandHandlingStore *models.CommandsHandlingStore,
-	collector commands.Collector,
+	collector statements.Collector,
 ) error {
 	program, err := ParseHeader(data, variableStore, procedureStore, commandHandlingStore)
 	if err != nil {
 		return err
 	}
 
-	var previousStatement commands.Command
+	var previousStatement statements.Statement
 	for _, block := range program.Blocks {
-		subAst := make([]commands.Command, 0)
+		subAst := make([]statements.Statement, 0)
 		blockCollector := collector.NewCollectorBasedOnType(collector.Type(), &subAst)
 
 		statementList, err := ParseBlocks(block, variableStore, procedureStore, commandHandlingStore, blockCollector)
@@ -122,7 +122,7 @@ func Parse(
 			previousStatement = statement
 		} else if statement.GetId() == "else" {
 			if previousStatement != nil {
-				previousStatement.(*commands.If).AddElseBlock(statement)
+				previousStatement.(*statements.If).AddElseBlock(statement)
 				// appendBlock(previousStatement)
 				collector.Collect(previousStatement)
 				previousStatement = nil
@@ -132,7 +132,7 @@ func Parse(
 			}
 		} else if statement.GetId() == "elseif" {
 			if previousStatement != nil {
-				previousStatement.(*commands.If).AddElseIfBlock(statement)
+				previousStatement.(*statements.If).AddElseIfBlock(statement)
 			} else {
 				services.Logger.Println("Error: Elseif without if")
 				return fmt.Errorf("elseif without if")
