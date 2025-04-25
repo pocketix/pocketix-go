@@ -30,10 +30,6 @@ func (e *Else) GetBody() []Statement {
 	return e.Block
 }
 
-func (e *Else) GetArguments() *models.TreeNode {
-	return nil
-}
-
 func (e *Else) Validate(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore, args ...any) error {
 	return nil
 }

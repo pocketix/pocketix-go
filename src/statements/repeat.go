@@ -51,10 +51,6 @@ func (r *Repeat) GetBody() []Statement {
 	return r.Block
 }
 
-func (r *Repeat) GetArguments() *models.TreeNode {
-	return nil
-}
-
 func (r *Repeat) GetCount() any {
 	return r.Count
 }

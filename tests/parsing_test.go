@@ -202,9 +202,6 @@ func TestParseElse(t *testing.T) {
 
 	elseStatement := cmd[0].(*statements.Else)
 	assert.Equal(0, len(elseStatement.Block), "Expected 0 block, got %d", len(elseStatement.Block))
-
-	arguments := elseStatement.GetArguments()
-	assert.Nil(arguments, "Arguments should be nil")
 }
 
 func TestParseElseif(t *testing.T) {
@@ -390,9 +387,6 @@ func TestParseRepeat(t *testing.T) {
 	repeatStatement := cmd[0].(*statements.Repeat)
 	assert.Equal(0, len(repeatStatement.Block), "Expected 0 block, got %d", len(repeatStatement.Block))
 
-	arguments := repeatStatement.GetArguments()
-	assert.Nil(arguments, "Arguments should be nil")
-
 	count := repeatStatement.GetCount()
 	assert.Equal(count, float64(10), "Expected 10, got %d", count)
 }
@@ -422,8 +416,6 @@ func TestParseSetVariable(t *testing.T) {
 	assert.NotNil(cmd, "Command should not be nil")
 
 	setVariableStatement := cmd[0].(*statements.SetVariable)
-	assert.Nil(setVariableStatement.GetArguments(), "Arguments should be nil")
-	assert.Nil(setVariableStatement.GetBody(), "Body should be nil")
 
 	LVal, LValType := setVariableStatement.GetLVal(), setVariableStatement.GetLValType()
 	assert.Equal(LVal, "foo", "Expected foo, got %v", LVal)

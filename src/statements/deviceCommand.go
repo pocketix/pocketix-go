@@ -20,10 +20,6 @@ func (d *DeviceCommand) GetId() string {
 	return d.Id
 }
 
-func (d *DeviceCommand) GetBody() []Statement {
-	return nil
-}
-
 func (d *DeviceCommand) GetArguments() *models.TreeNode {
 	return d.Arguments
 }

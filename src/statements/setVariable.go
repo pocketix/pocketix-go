@@ -26,14 +26,6 @@ func (s *SetVariable) GetId() string {
 	return s.Id
 }
 
-func (s *SetVariable) GetBody() []Statement {
-	return nil
-}
-
-func (s *SetVariable) GetArguments() *models.TreeNode {
-	return nil
-}
-
 func (s *SetVariable) GetLVal() string {
 	return s.LVal
 }

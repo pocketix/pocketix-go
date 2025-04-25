@@ -50,14 +50,6 @@ func (a *Alert) GetId() string {
 	return a.Id
 }
 
-func (a *Alert) GetBody() []Statement {
-	return nil
-}
-
-func (a *Alert) GetArguments() *models.TreeNode {
-	return nil
-}
-
 func (a *Alert) GetMethod() string {
 	return a.Method
 }

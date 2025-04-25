@@ -52,10 +52,6 @@ func (s *Switch) GetBody() []Statement {
 	return []Statement{}
 }
 
-func (s *Switch) GetArguments() *models.TreeNode {
-	return nil
-}
-
 func (s *Switch) GetSelector() (any, string) {
 	return s.Selector, s.SelectorType
 }

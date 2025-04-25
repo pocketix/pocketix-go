@@ -27,10 +27,6 @@ func (c *Case) GetBody() []Statement {
 	return c.Block
 }
 
-func (c *Case) GetArguments() *models.TreeNode {
-	return nil
-}
-
 func (c *Case) GetValue() any {
 	return c.Value
 }
