@@ -26,7 +26,9 @@ func (w *While) Execute(variableStore *models.VariableStore, commandHandlingStor
 			return false, boolErr
 		} else if boolResult {
 			services.Logger.Println("While is true, can execute body")
-			return ExecuteStatements(w.Block, variableStore, commandHandlingStore)
+			if success, err := ExecuteStatements(w.Block, variableStore, commandHandlingStore); err != nil {
+				return success, err
+			}
 		} else {
 			services.Logger.Println("While is false, breaking")
 			break
