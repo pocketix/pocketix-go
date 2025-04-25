@@ -1,4 +1,4 @@
-package commands
+package statements
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ type Repeat struct {
 	Id        string
 	Count     any
 	CountType string
-	Block     []Command
+	Block     []Statement
 }
 
 func (r *Repeat) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
@@ -47,7 +47,7 @@ func (r *Repeat) GetId() string {
 	return r.Id
 }
 
-func (r *Repeat) GetBody() []Command {
+func (r *Repeat) GetBody() []Statement {
 	return r.Block
 }
 

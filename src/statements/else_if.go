@@ -1,4 +1,4 @@
-package commands
+package statements
 
 import (
 	"github.com/pocketix/pocketix-go/src/models"
@@ -8,7 +8,7 @@ import (
 
 type ElseIf struct {
 	Id        string
-	Block     []Command
+	Block     []Statement
 	Arguments *models.TreeNode
 }
 
@@ -39,7 +39,7 @@ func (e *ElseIf) GetId() string {
 	return e.Id
 }
 
-func (e *ElseIf) GetBody() []Command {
+func (e *ElseIf) GetBody() []Statement {
 	return e.Block
 }
 

@@ -1,4 +1,4 @@
-package commands
+package statements
 
 import (
 	"github.com/pocketix/pocketix-go/src/models"
@@ -8,7 +8,7 @@ import (
 
 type While struct {
 	Id        string
-	Block     []Command
+	Block     []Statement
 	Arguments *models.TreeNode
 }
 
@@ -45,7 +45,7 @@ func (w *While) GetId() string {
 	return w.Id
 }
 
-func (w *While) GetBody() []Command {
+func (w *While) GetBody() []Statement {
 	return w.Block
 }
 

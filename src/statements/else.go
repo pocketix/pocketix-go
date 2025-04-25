@@ -1,4 +1,4 @@
-package commands
+package statements
 
 import (
 	"github.com/pocketix/pocketix-go/src/models"
@@ -7,7 +7,7 @@ import (
 
 type Else struct {
 	Id    string
-	Block []Command
+	Block []Statement
 }
 
 func (e *Else) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
@@ -26,7 +26,7 @@ func (e *Else) GetId() string {
 	return e.Id
 }
 
-func (e *Else) GetBody() []Command {
+func (e *Else) GetBody() []Statement {
 	return e.Block
 }
 

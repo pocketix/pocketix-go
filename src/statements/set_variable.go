@@ -1,4 +1,4 @@
-package commands
+package statements
 
 import (
 	"github.com/pocketix/pocketix-go/src/models"
@@ -26,7 +26,7 @@ func (s *SetVariable) GetId() string {
 	return s.Id
 }
 
-func (s *SetVariable) GetBody() []Command {
+func (s *SetVariable) GetBody() []Statement {
 	return nil
 }
 

@@ -1,4 +1,4 @@
-package commands
+package statements
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 type Case struct {
 	Id    string
-	Block []Command
+	Block []Statement
 	Type  string
 	Value any
 }
@@ -23,7 +23,7 @@ func (c *Case) GetId() string {
 	return c.Id
 }
 
-func (c *Case) GetBody() []Command {
+func (c *Case) GetBody() []Statement {
 	return c.Block
 }
 

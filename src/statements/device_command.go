@@ -1,4 +1,4 @@
-package commands
+package statements
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ func (d *DeviceCommand) GetId() string {
 	return d.Id
 }
 
-func (d *DeviceCommand) GetBody() []Command {
+func (d *DeviceCommand) GetBody() []Statement {
 	return nil
 }
 

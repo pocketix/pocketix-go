@@ -1,4 +1,4 @@
-package commands
+package statements
 
 import (
 	"fmt"
@@ -50,7 +50,7 @@ func (a *Alert) GetId() string {
 	return a.Id
 }
 
-func (a *Alert) GetBody() []Command {
+func (a *Alert) GetBody() []Statement {
 	return nil
 }
 

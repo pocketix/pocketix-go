@@ -1,4 +1,4 @@
-package commands
+package statements
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 type Switch struct {
 	Id           string
-	Block        []Command
+	Block        []Statement
 	SelectorType string
 	Selector     any
 }
@@ -48,8 +48,8 @@ func (s *Switch) GetId() string {
 	return s.Id
 }
 
-func (s *Switch) GetBody() []Command {
-	return []Command{}
+func (s *Switch) GetBody() []Statement {
+	return []Statement{}
 }
 
 func (s *Switch) GetArguments() *models.TreeNode {

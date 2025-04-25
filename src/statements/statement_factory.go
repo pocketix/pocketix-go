@@ -1,10 +1,16 @@
-package commands
+package statements
 
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 )
 
-func CommandFactory(id string, blocks []Command, tree []*models.TreeNode, procedureStore *models.ProcedureStore, CommandInvocationStore *models.CommandInvocationStore) (Command, error) {
+func CommandFactory(
+	id string,
+	blocks []Statement,
+	tree []*models.TreeNode,
+	procedureStore *models.ProcedureStore,
+	CommandInvocationStore *models.CommandInvocationStore,
+) (Statement, error) {
 	switch id {
 	case "if":
 		if len(tree) == 0 {
