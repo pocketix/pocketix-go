@@ -23,7 +23,7 @@ func MockWhileExecute(variableStore *models.VariableStore, w statements.While) (
 		// 	return false, err
 		// }
 		if result {
-			if success, err := statements.ExecuteCommands(w.Block, variableStore, nil); err != nil {
+			if success, err := statements.ExecuteStatements(w.Block, variableStore, nil); err != nil {
 				return success, -1, err
 			} else if !success {
 				return success, -1, nil

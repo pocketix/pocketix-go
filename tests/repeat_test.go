@@ -35,7 +35,7 @@ func MockRepeatExecute(r statements.Repeat, variableStore *models.VariableStore)
 
 	for range count {
 		iterations++
-		result, err := statements.ExecuteCommands(r.Block, nil, nil)
+		result, err := statements.ExecuteStatements(r.Block, nil, nil)
 		if err != nil {
 			return result, -1, err
 		}
