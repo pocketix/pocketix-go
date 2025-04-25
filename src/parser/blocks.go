@@ -15,7 +15,8 @@ import (
 //   - block: the block to parse.
 //   - variableStore: store for variables to use for parsing.
 //   - procedureStore: store for procedure definitions.
-//   - commandHandlingStore: store for command-related services.
+//   - commandHandlingStore: store for command handling.
+//   - collector: collector for statements.
 //
 // Returns:
 //   - an AST of statements.
@@ -36,8 +37,7 @@ func ParseBlocks(
 		}
 	}
 
-	// var parsedCommands []statements.Statement
-	var previousSubCommand statements.Statement
+	var previousSubStatement statements.Statement
 
 	for _, subBlock := range block.Body {
 		// Parse nested blocks
@@ -54,42 +54,38 @@ func ParseBlocks(
 			}
 			continue
 		}
-		cmd := statementList[0]
+		statement := statementList[0]
 
-		if cmd.GetId() == "if" {
-			previousSubCommand = cmd
-		} else if cmd.GetId() == "else" {
-			if previousSubCommand != nil {
-				previousSubCommand.(*statements.If).AddElseBlock(cmd)
-				collector.Collect(previousSubCommand)
-				// parsedCommands = append(parsedCommands, previousSubCommand)
-				previousSubCommand = nil
+		if statement.GetId() == "if" {
+			previousSubStatement = statement
+		} else if statement.GetId() == "else" {
+			if previousSubStatement != nil {
+				previousSubStatement.(*statements.If).AddElseBlock(statement)
+				collector.Collect(previousSubStatement)
+				previousSubStatement = nil
 			} else {
 				services.Logger.Println("Error: Else without if")
 				return nil, fmt.Errorf("else without if")
 			}
-		} else if cmd.GetId() == "elseif" {
-			if previousSubCommand != nil {
-				previousSubCommand.(*statements.If).AddElseIfBlock(cmd)
+		} else if statement.GetId() == "elseif" {
+			if previousSubStatement != nil {
+				previousSubStatement.(*statements.If).AddElseIfBlock(statement)
 			} else {
 				services.Logger.Println("Error: Elseif without if")
 				return nil, fmt.Errorf("elseif without if")
 			}
 		} else {
-			if previousSubCommand != nil {
-				collector.Collect(previousSubCommand)
-				// parsedCommands = append(parsedCommands, previousSubCommand)
-				previousSubCommand = nil
+			if previousSubStatement != nil {
+				collector.Collect(previousSubStatement)
+				previousSubStatement = nil
 			}
 
-			collector.Collect(cmd)
-			// parsedCommands = append(parsedCommands, cmd)
+			collector.Collect(statement)
 		}
 	}
 
-	if previousSubCommand != nil {
-		collector.Collect(previousSubCommand)
-		// parsedCommands = append(parsedCommands, previousSubCommand)
+	if previousSubStatement != nil {
+		collector.Collect(previousSubStatement)
 	}
 
 	if procedureStore != nil && procedureStore.Has(block.Id) {
@@ -100,15 +96,15 @@ func ParseBlocks(
 		}
 		return statementList, nil
 	}
-	cmd, err := statements.StatementFactory(block.Id, *collector.GetTarget(), argumentTree, procedureStore, commandHandlingStore.CommandInvocationStore)
+	statement, err := statements.StatementFactory(block.Id, *collector.GetTarget(), argumentTree, procedureStore, commandHandlingStore.CommandInvocationStore)
 	if err != nil {
-		services.Logger.Println("Error creating command", err)
+		services.Logger.Println("Error creating statement", err)
 		return nil, err
 	}
-	if cmd == nil {
-		services.Logger.Println("Command is nil, therefore it is device command")
+	if statement == nil {
+		services.Logger.Println("Statement is nil, therefore it is device statement")
 		return nil, nil
 	}
-	err = cmd.Validate(variableStore, commandHandlingStore.ReferencedValueStore)
-	return []statements.Statement{cmd}, err
+	err = statement.Validate(variableStore, commandHandlingStore.ReferencedValueStore)
+	return []statements.Statement{statement}, err
 }

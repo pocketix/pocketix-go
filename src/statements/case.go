@@ -16,7 +16,7 @@ type Case struct {
 
 func (c *Case) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
 	services.Logger.Println("Executing case", c.Value)
-	return ExecuteCommands(c.Block, variableStore, commandHandlingStore)
+	return ExecuteStatements(c.Block, variableStore, commandHandlingStore)
 }
 
 func (c *Case) GetId() string {

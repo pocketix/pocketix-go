@@ -36,7 +36,7 @@ func (r *Repeat) Execute(variableStore *models.VariableStore, commandHandlingSto
 	}
 
 	for range count {
-		if result, err := ExecuteCommands(r.Block, variableStore, commandHandlingStore); err != nil {
+		if result, err := ExecuteStatements(r.Block, variableStore, commandHandlingStore); err != nil {
 			return result, err
 		}
 	}

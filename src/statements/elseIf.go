@@ -22,14 +22,7 @@ func (e *ElseIf) Execute(variableStore *models.VariableStore, commandHandlingSto
 			return false, boolErr
 		} else if boolResult {
 			services.Logger.Println("Else if is true, can execute body")
-			for _, cmd := range e.Block {
-				if success, err := cmd.Execute(variableStore, commandHandlingStore); err != nil {
-					return false, err
-				} else if success {
-					return true, nil
-				}
-			}
-			return true, nil
+			return ExecuteStatements(e.Block, variableStore, commandHandlingStore)
 		}
 	}
 	return false, nil

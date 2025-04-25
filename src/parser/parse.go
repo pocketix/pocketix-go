@@ -78,8 +78,7 @@ func ParseProcedureBody(
 //   - variableStore: store for variables to use for parsing.
 //   - procedureStore: store for procedure definitions.
 //   - commandHandlingStore: store for command-related services.
-//   - appendBlock: callback to receive parsed command(s) in AST form.
-//     This callback is empty when there is no need to execute the commands (e.g. when saving the program or updating).
+//   - collector: collector for statements.
 //
 // Returns:
 //   - error: nil if parsing was successful, or an error if there was a problem.

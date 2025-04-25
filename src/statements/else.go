@@ -12,14 +12,7 @@ type Else struct {
 
 func (e *Else) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
 	services.Logger.Println("Executing else")
-	for _, cmd := range e.Block {
-		if success, err := cmd.Execute(variableStore, commandHandlingStore); err != nil {
-			return false, err
-		} else if success {
-			return true, nil
-		}
-	}
-	return true, nil
+	return ExecuteStatements(e.Block, variableStore, commandHandlingStore)
 }
 
 func (e *Else) GetId() string {

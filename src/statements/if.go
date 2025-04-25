@@ -26,7 +26,7 @@ func (i *If) Execute(variableStore *models.VariableStore, commandHandlingStore *
 		return false, boolErr
 	} else if boolResult {
 		services.Logger.Println("If is true, can execute body")
-		return ExecuteCommands(i.Block, variableStore, commandHandlingStore)
+		return ExecuteStatements(i.Block, variableStore, commandHandlingStore)
 	}
 
 	for i, elseIfBlock := range i.IfElseBlocks {

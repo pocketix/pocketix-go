@@ -17,9 +17,9 @@ type Switch struct {
 func (s *Switch) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
 	services.Logger.Println("Executing switch")
 	for _, c := range s.Block {
-		caseCommand := c.(*Case)
+		caseStatement := c.(*Case)
 		selectorValue := s.Selector
-		caseValue := caseCommand.Value
+		caseValue := caseStatement.Value
 
 		if s.SelectorType == "variable" {
 			variable, err := variableStore.GetVariable(s.Selector.(string))
@@ -29,7 +29,7 @@ func (s *Switch) Execute(variableStore *models.VariableStore, commandHandlingSto
 			selectorValue = variable.Value
 		}
 
-		if caseCommand.Type == "variable" {
+		if caseStatement.Type == "variable" {
 			variable, err := variableStore.GetVariable(caseValue.(string))
 			if err != nil {
 				return false, err
@@ -37,7 +37,7 @@ func (s *Switch) Execute(variableStore *models.VariableStore, commandHandlingSto
 			caseValue = variable.Value
 		}
 		if caseValue == selectorValue {
-			caseCommand.Execute(variableStore, commandHandlingStore)
+			caseStatement.Execute(variableStore, commandHandlingStore)
 			return true, nil
 		}
 	}
@@ -61,10 +61,10 @@ func (s *Switch) Validate(variableStore *models.VariableStore, referenceValueSto
 		return fmt.Errorf("invalid selector type: %s", s.SelectorType)
 	}
 
-	for _, command := range s.Block {
-		caseCommand, ok := command.(*Case)
+	for _, statement := range s.Block {
+		caseStatement, ok := statement.(*Case)
 		if !ok {
-			return fmt.Errorf("invalid command in switch block: %T", command)
+			return fmt.Errorf("invalid statement in switch block: %T", statement)
 		}
 
 		// Can only validate variable type, boolean_expression could be validated only at runtime
@@ -73,7 +73,7 @@ func (s *Switch) Validate(variableStore *models.VariableStore, referenceValueSto
 			if err != nil {
 				return err
 			}
-			err = caseCommand.Validate(variableStore, referenceValueStore, variable.Type)
+			err = caseStatement.Validate(variableStore, referenceValueStore, variable.Type)
 			if err != nil {
 				return err
 			}
