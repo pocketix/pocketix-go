@@ -103,11 +103,10 @@ func Parse(
 		if err != nil {
 			return err
 		}
-		// If the ParseBlocksRecursively returns a list of statements, it means that the block is a procedure call,
+		// If the ParseBlocks returns a list of statements, it means that the block is a procedure call,
 		// it appends the statements to the statement list and continues.
 		if len(statementList) != 1 {
 			for _, statement := range statementList {
-				// appendBlock(statement)
 				collector.Collect(statement)
 			}
 			continue
@@ -122,7 +121,6 @@ func Parse(
 		} else if statement.GetId() == "else" {
 			if previousStatement != nil {
 				previousStatement.(*statements.If).AddElseBlock(statement)
-				// appendBlock(previousStatement)
 				collector.Collect(previousStatement)
 				previousStatement = nil
 			} else {
@@ -138,17 +136,14 @@ func Parse(
 			}
 		} else {
 			if previousStatement != nil {
-				// appendBlock(previousStatement)
 				collector.Collect(previousStatement)
 				previousStatement = nil
 			}
 
-			// appendBlock(statement)
 			collector.Collect(statement)
 		}
 	}
 	if previousStatement != nil {
-		// appendBlock(previousStatement)
 		collector.Collect(previousStatement)
 	}
 	return nil
