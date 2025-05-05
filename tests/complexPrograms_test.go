@@ -32,3 +32,34 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 	assert.Equal(float64(5), variable.Value.Value, "Variable value should be 5, but got: %v", variable.Value.Value)
 }
+
+func MockResolveParameterFunctionComplexProgram(deviceUID string, paramDenotation string) (any, string, error) {
+	return 230.0, "number", nil
+}
+
+func TestExecuteProgramWithReferencedValue(t *testing.T) {
+	assert := assert.New(t)
+
+	data := services.OpenFile("../programs/complex/prog5.json")
+	variableStore := models.NewVariableStore()
+	procedureStore := models.NewProcedureStore()
+	commandHandlingStore := models.NewCommandsHandlingStore()
+	commandHandlingStore.ReferencedValueStore.SetResolveParameterFunction(MockResolveParameterFunctionComplexProgram)
+	statementAST := make([]statements.Statement, 0)
+
+	err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore, &statements.ASTCollector{Target: &statementAST})
+	assert.Nil(err, "Error should be nil, but got: %v", err)
+	assert.NotNil(statementAST, "Commands list should not be nil")
+
+	for _, statement := range statementAST {
+		_, err := statement.Execute(variableStore, commandHandlingStore)
+		assert.Nil(err, "Error should be nil, but got: %v", err)
+	}
+
+	referencedValue, err := commandHandlingStore.ReferencedValueStore.GetReferencedValueFromStore("DistanceSensor-1.waterLevel")
+	assert.Nil(err, "Error should be nil, but got: %v", err)
+	assert.Equal("DistanceSensor-1", referencedValue.DeviceID, "Device ID should be DistanceSensor-1, but got: %v", referencedValue.DeviceID)
+	assert.Equal("waterLevel", referencedValue.ParameterName, "Parameter name should be waterLevel, but got: %v", referencedValue.ParameterName)
+	assert.Equal("number", referencedValue.Type, "Type should be number, but got: %v", referencedValue.Type)
+	assert.Equal(230.0, referencedValue.Value, "Value should be 230.0, but got: %v", referencedValue.Value)
+}
