@@ -8,8 +8,14 @@ import (
 )
 
 // func(deviceUID string, paramDenotation string) (any, error)
-func MockResolveParameterFunction(deviceUID string, paramDenotation string) (any, string, error) {
-	return 10.0, "number", nil
+func MockResolveParameterFunction(deviceUID string, paramDenotation string, infoType string) (models.SDInformationFromBackend, error) {
+	return models.SDInformationFromBackend{
+		DeviceUID: deviceUID,
+		Snapshot: models.SDParameterSnapshot{
+			SDParameter: paramDenotation,
+			Number:      func(v float64) *float64 { return &v }(10.0),
+		},
+	}, nil
 }
 
 func TestSetReferencedValues(t *testing.T) {
@@ -27,11 +33,15 @@ func TestSetReferencedValues(t *testing.T) {
 	assert.Equal("", referencedValueStore.GetReferencedValues()["Device-1.test"].Type)
 	assert.Equal(nil, referencedValueStore.GetReferencedValues()["Device-1.test"].Value)
 
-	parameterValue, valueType, err := referencedValueStore.ResolveParameterFunction("Device-1", "test")
+	sdInformation, err := referencedValueStore.ResolveDeviceInformationFunction("Device-1", "test", "sdParameter")
 	assert.Nil(err)
-	assert.Equal(10.0, parameterValue)
-	assert.Equal("number", valueType)
-	referencedValueStore.SetReferencedValue("Device-1.test", parameterValue, valueType)
+	assert.Equal("Device-1", sdInformation.DeviceUID)
+	assert.Equal("test", sdInformation.Snapshot.SDParameter)
+	assert.Equal(10.0, *sdInformation.Snapshot.Number)
+
+	value, err := referencedValueStore.SetReferencedValue("Device-1.test", sdInformation.Snapshot)
+	assert.Nil(err)
+	assert.Equal(10.0, value)
 
 	assert.Equal(10.0, referencedValueStore.GetReferencedValues()["Device-1.test"].Value)
 	assert.Equal("number", referencedValueStore.GetReferencedValues()["Device-1.test"].Type)

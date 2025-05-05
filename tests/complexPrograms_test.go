@@ -33,8 +33,14 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	assert.Equal(float64(5), variable.Value.Value, "Variable value should be 5, but got: %v", variable.Value.Value)
 }
 
-func MockResolveParameterFunctionComplexProgram(deviceUID string, paramDenotation string) (any, string, error) {
-	return 230.0, "number", nil
+func MockResolveParameterFunctionComplexProgram(deviceUID string, paramDenotation string, infoType string) (models.SDInformationFromBackend, error) {
+	return models.SDInformationFromBackend{
+		DeviceUID: deviceUID,
+		Snapshot: models.SDParameterSnapshot{
+			SDParameter: paramDenotation,
+			Number:      func(v float64) *float64 { return &v }(230.0),
+		},
+	}, nil
 }
 
 func TestExecuteProgramWithReferencedValue(t *testing.T) {
