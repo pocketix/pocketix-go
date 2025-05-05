@@ -87,22 +87,17 @@ func StatementFactory(
 		}, nil
 	// Default case to handle device commands
 	default:
-		typeValueList := make([]models.TypeValue, 0)
-		for _, tree := range tree {
-			typeValue := models.TypeValue{
-				Type:  tree.Type,
-				Value: tree.Value,
-			}
-			typeValueList = append(typeValueList, typeValue)
-		}
 		deviceId, deviceCommand, err := models.FromReferencedTarget(id)
 		if err != nil {
 			return nil, err
 		}
 		CommandInvocationStore.AddCommand(models.DeviceCommand{
-			DeviceID:  deviceId,
-			Command:   deviceCommand,
-			Arguments: typeValueList,
+			DeviceUID:         deviceId,
+			CommandDenotation: deviceCommand,
+			Arguments: models.TypeValue{
+				Type:  tree[0].Type,
+				Value: tree[0].Value,
+			},
 		})
 		return &DeviceCommand{
 			Id:        deviceId,

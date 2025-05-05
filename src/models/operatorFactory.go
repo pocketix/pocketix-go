@@ -237,18 +237,15 @@ func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, vari
 		if child.Type == "variable" {
 			referencedValue, err := referenceValueStore.GetReferencedValueFromStore(child.Value.(string))
 			if err == nil {
-				sdParameterValue, valueType, err := referenceValueStore.ResolveParameterFunction(referencedValue.DeviceID, referencedValue.ParameterName)
+				sdInformation, err := referenceValueStore.ResolveDeviceInformationFunction(referencedValue.DeviceID, referencedValue.ParameterName, "sdParameter")
 				if err != nil {
 					return nil, err
 				}
-				if sdParameterValue == nil {
-					return nil, fmt.Errorf("referenced value %s not found", child.Value)
-				}
-				err = referenceValueStore.SetReferencedValue(child.Value.(string), sdParameterValue, valueType)
+				value, err := referenceValueStore.SetReferencedValue(child.Value.(string), sdInformation.Snapshot)
 				if err != nil {
 					return nil, err
 				}
-				return sdParameterValue, nil
+				return value, nil
 			} else if variable, err := variableStore.GetVariable(child.Value.(string)); err == nil {
 				if variable.Value.ResultValue == nil {
 					return variable.Value.Value, nil

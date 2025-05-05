@@ -21,13 +21,7 @@ type SDParameter struct {
 	ParameterDenotation string `json:"parameterDenotation"` // Parameter denotation
 }
 
-type SDCommand struct {
-	CommandID         uint32 `json:"deviceId"`          // Device CommandID
-	CommandDenotation string `json:"commandDenotation"` // Command denotation
-}
-
 type SDParameterSnapshot struct {
-	DeviceID    string   `json:"deviceId"`
 	SDParameter string   `json:"sdParameter"`
 	String      *string  `json:"string,omitempty"`
 	Number      *float64 `json:"number,omitempty"`
@@ -39,6 +33,12 @@ type ReferencedValue struct {
 	ParameterName string // Parameter name
 	Type          string // Type of the value
 	Value         any    // Value of the referenced value
+}
+
+type SDInformationFromBackend struct {
+	DeviceUID string              `json:"deviceId"`            // Device ID
+	Snapshot  SDParameterSnapshot `json:"sdParameterSnapshot"` // SD parameter snapshot
+	Command   SDCommand           `json:"sdCommand"`           // SD command
 }
 
 func FromReferencedTarget(referencedTarget string) (string, string, error) {

@@ -34,17 +34,12 @@ func (d *DeviceCommand) DeviceCommand2ModelsDeviceCommand(commandHandlingStore *
 		return models.DeviceCommand{}, fmt.Errorf("invalid device command id %s", d.Id)
 	}
 
-	argumentsList := make([]models.TypeValue, 0)
-	for _, arg := range d.Arguments.Children {
-		argumentsList = append(argumentsList, models.TypeValue{
-			Type:  arg.Type,
-			Value: arg.Value,
-		})
-	}
-
 	return models.DeviceCommand{
-		DeviceID:  splittedDeviceId[0],
-		Command:   splittedDeviceId[1],
-		Arguments: argumentsList,
+		DeviceUID:         splittedDeviceId[0],
+		CommandDenotation: splittedDeviceId[1],
+		Arguments: models.TypeValue{
+			Type:  d.Arguments.Type,
+			Value: d.Arguments.Value,
+		},
 	}, nil
 }

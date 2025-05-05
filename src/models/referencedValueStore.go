@@ -3,8 +3,8 @@ package models
 import "fmt"
 
 type ReferencedValueStore struct {
-	ReferencedValues         map[string]ReferencedValue
-	ResolveParameterFunction func(deviceUID string, paramDenotation string) (any, string, error)
+	ReferencedValues                 map[string]ReferencedValue
+	ResolveDeviceInformationFunction func(deviceUID string, paramDenotation string, infoType string) (SDInformationFromBackend, error)
 }
 
 func NewReferencedValueStore() *ReferencedValueStore {
@@ -61,17 +61,27 @@ func (rvStore *ReferencedValueStore) GetReferencedValueFromStore(referencedTarge
 	return &referencedValue, nil
 }
 
-func (rvStore *ReferencedValueStore) SetReferencedValue(referenceTarget string, value any, valueType string) error {
+func (rvStore *ReferencedValueStore) SetReferencedValue(referenceTarget string, snapshot SDParameterSnapshot) (any, error) {
 	referencedValue, ok := rvStore.ReferencedValues[referenceTarget]
 	if !ok {
-		return fmt.Errorf("referenced value %s not found", referenceTarget)
+		return nil, fmt.Errorf("referenced value %s not found", referenceTarget)
 	}
-	referencedValue.Value = value
-	referencedValue.Type = valueType
+	if snapshot.String != nil {
+		referencedValue.Value = *snapshot.String
+		referencedValue.Type = "string"
+	} else if snapshot.Number != nil {
+		referencedValue.Value = *snapshot.Number
+		referencedValue.Type = "number"
+	} else if snapshot.Boolean != nil {
+		referencedValue.Value = *snapshot.Boolean
+		referencedValue.Type = "boolean"
+	} else {
+		return nil, fmt.Errorf("no valid value found in the snapshot")
+	}
 	rvStore.ReferencedValues[referenceTarget] = referencedValue
-	return nil
+	return referencedValue.Value, nil
 }
 
-func (rvStore *ReferencedValueStore) SetResolveParameterFunction(fn func(deviceUID string, paramDenotation string) (any, string, error)) {
-	rvStore.ResolveParameterFunction = fn
+func (rvStore *ReferencedValueStore) SetResolveParameterFunction(fn func(deviceUID string, paramDenotation string, infoType string) (SDInformationFromBackend, error)) {
+	rvStore.ResolveDeviceInformationFunction = fn
 }
