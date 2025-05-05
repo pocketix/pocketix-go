@@ -1,0 +1,50 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "if",
+            "block": [
+                {
+                    "id": "alert",
+                    "arguments": [
+                        {
+                            "type": "str_opt",
+                            "value": "phone_number"
+                        },
+                        {
+                            "type": "string",
+                            "value": "123"
+                        },
+                        {
+                            "type": "string",
+                            "value": "ABC"
+                        }
+                    ]
+                }
+            ],
+            "arguments": [
+                {
+                    "type": "boolean_expression",
+                    "value": [
+                        {
+                            "value": [
+                                {
+                                    "type": "number",
+                                    "value": 240
+                                },
+                                {
+                                    "type": "variable",
+                                    "value": "DistanceSensor-1.waterLevel"
+                                }
+                            ],
+                            "type": ">"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
