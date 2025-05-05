@@ -3,7 +3,8 @@ package models
 import "fmt"
 
 type ReferencedValueStore struct {
-	ReferencedValues map[string]ReferencedValue
+	ReferencedValues         map[string]ReferencedValue
+	ResolveParameterFunction func(deviceUID string, paramDenotation string) (any, string, error)
 }
 
 func NewReferencedValueStore() *ReferencedValueStore {
@@ -52,11 +53,25 @@ func getLatestSnapshot(snapshots []SDParameterSnapshot) SDParameterSnapshot {
 	return snapshots[0]
 }
 
-// GetAndUpdateReferencedValue retrieves the value from the device and updates the referenced value in the store.
-func (rvStore *ReferencedValueStore) GetAndUpdateReferencedValue(referencedTarget string) (*ReferencedValue, error) {
+func (rvStore *ReferencedValueStore) GetReferencedValueFromStore(referencedTarget string) (*ReferencedValue, error) {
 	referencedValue, ok := rvStore.ReferencedValues[referencedTarget]
 	if !ok {
 		return nil, fmt.Errorf("referenced value %s not found", referencedTarget)
 	}
 	return &referencedValue, nil
+}
+
+func (rvStore *ReferencedValueStore) SetReferencedValue(referenceTarget string, value any, valueType string) error {
+	referencedValue, ok := rvStore.ReferencedValues[referenceTarget]
+	if !ok {
+		return fmt.Errorf("referenced value %s not found", referenceTarget)
+	}
+	referencedValue.Value = value
+	referencedValue.Type = valueType
+	rvStore.ReferencedValues[referenceTarget] = referencedValue
+	return nil
+}
+
+func (rvStore *ReferencedValueStore) SetResolveParameterFunction(fn func(deviceUID string, paramDenotation string) (any, string, error)) {
+	rvStore.ResolveParameterFunction = fn
 }

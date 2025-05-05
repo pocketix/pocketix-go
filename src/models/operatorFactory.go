@@ -235,19 +235,27 @@ func (o *OperatorFactory) ValidateOperator(node TreeNode) error {
 func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, variableStore *VariableStore, referenceValueStore *ReferencedValueStore) (any, error) {
 	if len(child.Children) == 0 {
 		if child.Type == "variable" {
-			referencedValue, err := referenceValueStore.GetAndUpdateReferencedValue(child.Value.(string))
+			referencedValue, err := referenceValueStore.GetReferencedValueFromStore(child.Value.(string))
 			if err == nil {
-				return referencedValue.Value, nil
-			} else {
-				variable, err := variableStore.GetVariable(child.Value.(string))
+				sdParameterValue, valueType, err := referenceValueStore.ResolveParameterFunction(referencedValue.DeviceID, referencedValue.ParameterName)
 				if err != nil {
 					return nil, err
 				}
+				if sdParameterValue == nil {
+					return nil, fmt.Errorf("referenced value %s not found", child.Value)
+				}
+				err = referenceValueStore.SetReferencedValue(child.Value.(string), sdParameterValue, valueType)
+				if err != nil {
+					return nil, err
+				}
+				return sdParameterValue, nil
+			} else if variable, err := variableStore.GetVariable(child.Value.(string)); err == nil {
 				if variable.Value.ResultValue == nil {
 					return variable.Value.Value, nil
 				}
 				return variable.Value.ResultValue, nil
 			}
+			return nil, fmt.Errorf("referenced value %s or variable not found", child.Value)
 		}
 		// if child.Type == "device_variable" {}
 		return child.Value, nil
@@ -273,6 +281,10 @@ func ComparisonOperator(child TreeNode, opFunc func(a, b any) (any, error)) (any
 		// if child.Children[i].Type == "device_variable" || child.Children[i+1].Type == "device_variable" {
 		// 	continue
 		// }
+		if (child.Children[i].ResultValue == nil && child.Children[i].Type == "variable") ||
+			(child.Children[i+1].ResultValue == nil && child.Children[i+1].Type == "variable") {
+			continue
+		}
 
 		a := child.Children[i].ResultValue
 		b := child.Children[i+1].ResultValue
