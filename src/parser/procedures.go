@@ -6,7 +6,7 @@ import (
 	"github.com/pocketix/pocketix-go/src/models"
 )
 
-func ParseProcedures(data json.RawMessage, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) error {
+func ParseProcedures(data json.RawMessage, procedureStore *models.ProcedureStore) error {
 	var procedures map[string]json.RawMessage
 
 	if err := json.Unmarshal(data, &procedures); err != nil {

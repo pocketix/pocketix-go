@@ -5,9 +5,9 @@ import (
 )
 
 type Statement interface {
-	Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error)
+	Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error)
 	GetId() string
-	Validate(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore, args ...any) error
+	Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error
 }
 
 type BodyStatement interface {

@@ -45,7 +45,7 @@ func MockWhileExecute(variableStore *models.VariableStore, w statements.While) (
 func TestExecuteWhileFalse(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	whileStatement := statements.While{
 		Id: "while",
 		Arguments: &models.TreeNode{
@@ -57,7 +57,7 @@ func TestExecuteWhileFalse(t *testing.T) {
 		Block: []statements.Statement{},
 	}
 
-	result, err := whileStatement.Execute(nil, commandHandlingStore)
+	result, err := whileStatement.Execute(nil, referencedValueStore)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(result, "Result should not be nil")
@@ -82,8 +82,8 @@ func TestExecuteWhileWithFalseCondition(t *testing.T) {
 	}
 
 	variableStore := models.VariableStore{}
-	commandHandlingStore := models.NewCommandsHandlingStore()
-	result, err := whileStatement.Execute(&variableStore, commandHandlingStore)
+	referencedValueStore := models.NewReferencedValueStore()
+	result, err := whileStatement.Execute(&variableStore, referencedValueStore)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(result, "Result should not be nil")
@@ -129,8 +129,8 @@ func TestExecuteWhileWithVariable(t *testing.T) {
 		Block: []statements.Statement{},
 	}
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
-	result, err := whileStatement.Execute(variableStore, commandHandlingStore)
+	referencedValueStore := models.NewReferencedValueStore()
+	result, err := whileStatement.Execute(variableStore, referencedValueStore)
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(result, "Result should not be nil")

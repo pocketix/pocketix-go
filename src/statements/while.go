@@ -12,11 +12,11 @@ type While struct {
 	Arguments *models.TreeNode
 }
 
-func (w *While) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
+func (w *While) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error) {
 	services.Logger.Println("Executing while")
 
 	for {
-		result, err := w.Arguments.Evaluate(variableStore, commandHandlingStore.ReferencedValueStore)
+		result, err := w.Arguments.Evaluate(variableStore, referencedValueStore)
 		if err != nil {
 			services.Logger.Println("Error executing while arguments", err)
 			return false, err
@@ -26,7 +26,7 @@ func (w *While) Execute(variableStore *models.VariableStore, commandHandlingStor
 			return false, boolErr
 		} else if boolResult {
 			services.Logger.Println("While is true, can execute body")
-			if success, err := ExecuteStatements(w.Block, variableStore, commandHandlingStore); err != nil {
+			if success, err := ExecuteStatements(w.Block, variableStore, referencedValueStore); err != nil {
 				return success, err
 			}
 		} else {
@@ -50,6 +50,6 @@ func (w *While) GetArguments() *models.TreeNode {
 	return w.Arguments
 }
 
-func (w *While) Validate(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore, args ...any) error {
+func (w *While) Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error {
 	return nil
 }

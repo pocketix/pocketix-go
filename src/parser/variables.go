@@ -9,7 +9,7 @@ import (
 	"github.com/pocketix/pocketix-go/src/services"
 )
 
-func ParseVariables(data json.RawMessage, variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) error {
+func ParseVariables(data json.RawMessage, variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) error {
 	var variables map[string]any
 	argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt"}
 
@@ -40,7 +40,7 @@ func ParseVariables(data json.RawMessage, variableStore *models.VariableStore, c
 			})
 			continue
 		}
-		tree, err := models.InitTree(varType.(string), varValue, varValue, variableStore, commandHandlingStore)
+		tree, err := models.InitTree(varType.(string), varValue, varValue, variableStore, referencedValueStore)
 		if err != nil {
 			return err
 		}
@@ -53,7 +53,7 @@ func ParseVariables(data json.RawMessage, variableStore *models.VariableStore, c
 	}
 
 	for _, expressionVariable := range expressionVariables {
-		tree, err := models.InitTree(expressionVariable.Type, expressionVariable.Value, expressionVariable.Value, variableStore, commandHandlingStore)
+		tree, err := models.InitTree(expressionVariable.Type, expressionVariable.Value, expressionVariable.Value, variableStore, referencedValueStore)
 		if err != nil {
 			return err
 		}

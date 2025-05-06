@@ -12,9 +12,9 @@ type ElseIf struct {
 	Arguments *models.TreeNode
 }
 
-func (e *ElseIf) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
+func (e *ElseIf) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error) {
 	services.Logger.Println("Executing else if")
-	if result, err := e.Arguments.Evaluate(variableStore, commandHandlingStore.ReferencedValueStore); err != nil {
+	if result, err := e.Arguments.Evaluate(variableStore, referencedValueStore); err != nil {
 		services.Logger.Println("Error executing else if arguments", err)
 	} else {
 		if boolResult, boolErr := utils.ToBool(result); boolErr != nil {
@@ -22,7 +22,7 @@ func (e *ElseIf) Execute(variableStore *models.VariableStore, commandHandlingSto
 			return false, boolErr
 		} else if boolResult {
 			services.Logger.Println("Else if is true, can execute body")
-			return ExecuteStatements(e.Block, variableStore, commandHandlingStore)
+			return ExecuteStatements(e.Block, variableStore, referencedValueStore)
 		}
 	}
 	return false, nil
@@ -40,6 +40,6 @@ func (e *ElseIf) GetArguments() *models.TreeNode {
 	return e.Arguments
 }
 
-func (e *ElseIf) Validate(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore, args ...any) error {
+func (e *ElseIf) Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error {
 	return nil
 }

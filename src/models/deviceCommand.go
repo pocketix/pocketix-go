@@ -13,7 +13,7 @@ type SDCommand struct {
 type SDCommandInvocation struct {
 	DeviceID          string `json:"deviceId"`          // Device CommandID
 	CommandDenotation string `json:"commandDenotation"` // Command
-	Payload           string `json:"payload"`           // Payload
+	Payload           string `json:"payload,omitempty"` // Payload
 	InvocationTime    string `json:"invocationTime"`    // Invocation time
 }
 
@@ -36,7 +36,6 @@ func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation SDInformatio
 		return &SDCommandInvocation{
 			DeviceID:          sdInstanceInformation.DeviceUID,
 			CommandDenotation: command.CommandDenotation,
-			Payload:           "",
 			InvocationTime:    time.Now().Format(time.RFC3339),
 		}, nil
 	}

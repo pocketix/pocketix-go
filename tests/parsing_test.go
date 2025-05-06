@@ -14,14 +14,14 @@ import (
 func TestParseIfWithoutArguments(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id:        "if",
 		Body:      []types.Block{},
 		Arguments: []types.Argument{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.NotNil(cmd, "Command should be nil")
 	assert.Nil(err, "Error should not be nil")
@@ -30,7 +30,7 @@ func TestParseIfWithoutArguments(t *testing.T) {
 func TestParseSimpleIf(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id: "if",
 		Arguments: []types.Argument{
@@ -47,7 +47,7 @@ func TestParseSimpleIf(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -67,7 +67,7 @@ func TestParseSimpleIf(t *testing.T) {
 func TestParseIfWithCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id: "if",
 		Arguments: []types.Argument{
@@ -93,7 +93,7 @@ func TestParseIfWithCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -119,7 +119,7 @@ func TestParseIfWithCondition(t *testing.T) {
 func TestParseIfWithComplexCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id: "if",
 		Arguments: []types.Argument{
@@ -154,7 +154,7 @@ func TestParseIfWithComplexCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -188,14 +188,14 @@ func TestParseIfWithComplexCondition(t *testing.T) {
 func TestParseElse(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id:        "else",
 		Arguments: []types.Argument{},
 		Body:      []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -207,7 +207,7 @@ func TestParseElse(t *testing.T) {
 func TestParseElseif(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id: "elseif",
 		Arguments: []types.Argument{
@@ -224,7 +224,7 @@ func TestParseElseif(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -243,7 +243,7 @@ func TestParseElseif(t *testing.T) {
 func TestParseElseifWithCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id: "elseif",
 		Arguments: []types.Argument{
@@ -269,7 +269,7 @@ func TestParseElseifWithCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -295,12 +295,12 @@ func TestParseElseifWithCondition(t *testing.T) {
 func TestParseWhile(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id: "while",
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -315,7 +315,7 @@ func TestParseWhile(t *testing.T) {
 func TestParseWhileWithCondition(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id: "while",
 		Arguments: []types.Argument{
@@ -341,7 +341,7 @@ func TestParseWhileWithCondition(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -367,7 +367,7 @@ func TestParseWhileWithCondition(t *testing.T) {
 func TestParseRepeat(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id: "repeat",
 		Arguments: []types.Argument{
@@ -379,7 +379,7 @@ func TestParseRepeat(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -394,7 +394,7 @@ func TestParseRepeat(t *testing.T) {
 func TestParseSetVariable(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id: "setvar",
 		Arguments: []types.Argument{
@@ -410,7 +410,7 @@ func TestParseSetVariable(t *testing.T) {
 		Body: []types.Block{},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -429,7 +429,7 @@ func TestParseSetVariable(t *testing.T) {
 func TestParseSwitch(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	variableStore := models.NewVariableStore()
 	variable := models.Variable{
 		Name:  "foo",
@@ -468,7 +468,7 @@ func TestParseSwitch(t *testing.T) {
 		},
 	}
 
-	cmd, err := parser.ParseBlocks(block, variableStore, nil, commandHandlingStore, &statements.ASTCollector{Target: &[]statements.Statement{}})
+	cmd, err := parser.ParseBlocks(block, variableStore, nil, referencedValueStore, &statements.ASTCollector{Target: &[]statements.Statement{}})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")
@@ -498,7 +498,7 @@ func TestParseSwitch(t *testing.T) {
 func TestParseAlert(t *testing.T) {
 	assert := assert.New(t)
 
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 	block := types.Block{
 		Id: "alert",
 		Arguments: []types.Argument{
@@ -517,7 +517,7 @@ func TestParseAlert(t *testing.T) {
 		},
 	}
 
-	cmd, err := parser.ParseBlocks(block, nil, nil, commandHandlingStore, &statements.NoOpCollector{})
+	cmd, err := parser.ParseBlocks(block, nil, nil, referencedValueStore, &statements.NoOpCollector{})
 
 	assert.Nil(err, "Error should be nil")
 	assert.NotNil(cmd, "Command should not be nil")

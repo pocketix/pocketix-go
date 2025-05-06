@@ -16,15 +16,15 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	data := services.OpenFile("../programs/complex/prog2.json")
 	variableStore := models.NewVariableStore()
 	procedureStore := models.NewProcedureStore()
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 
 	statementAST := make([]statements.Statement, 0)
-	err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore, &statements.ASTCollector{Target: &statementAST})
+	err := parser.Parse(data, variableStore, procedureStore, referencedValueStore, &statements.ASTCollector{Target: &statementAST})
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 	assert.NotNil(statementAST, "Commands list should not be nil")
 
 	for _, statement := range statementAST {
-		_, err := statement.Execute(variableStore, commandHandlingStore)
+		_, err := statement.Execute(variableStore, referencedValueStore)
 		assert.Nil(err, "Error should be nil, but got: %v", err)
 	}
 
@@ -49,20 +49,20 @@ func TestExecuteProgramWithReferencedValue(t *testing.T) {
 	data := services.OpenFile("../programs/complex/prog5.json")
 	variableStore := models.NewVariableStore()
 	procedureStore := models.NewProcedureStore()
-	commandHandlingStore := models.NewCommandsHandlingStore()
-	commandHandlingStore.ReferencedValueStore.SetResolveParameterFunction(MockResolveParameterFunctionComplexProgram)
+	referencedValueStore := models.NewReferencedValueStore()
+	referencedValueStore.SetResolveParameterFunction(MockResolveParameterFunctionComplexProgram)
 	statementAST := make([]statements.Statement, 0)
 
-	err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore, &statements.ASTCollector{Target: &statementAST})
+	err := parser.Parse(data, variableStore, procedureStore, referencedValueStore, &statements.ASTCollector{Target: &statementAST})
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 	assert.NotNil(statementAST, "Commands list should not be nil")
 
 	for _, statement := range statementAST {
-		_, err := statement.Execute(variableStore, commandHandlingStore)
+		_, err := statement.Execute(variableStore, referencedValueStore)
 		assert.Nil(err, "Error should be nil, but got: %v", err)
 	}
 
-	referencedValue, err := commandHandlingStore.ReferencedValueStore.GetReferencedValueFromStore("DistanceSensor-1.waterLevel")
+	referencedValue, err := referencedValueStore.GetReferencedValueFromStore("DistanceSensor-1.waterLevel")
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 	assert.Equal("DistanceSensor-1", referencedValue.DeviceID, "Device ID should be DistanceSensor-1, but got: %v", referencedValue.DeviceID)
 	assert.Equal("waterLevel", referencedValue.ParameterName, "Parameter name should be waterLevel, but got: %v", referencedValue.ParameterName)
