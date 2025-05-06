@@ -37,12 +37,12 @@ var typeValidators = map[string]func(any) error{
 	},
 }
 
-func InitTree(argumentType string, argumentValue any, args any, variableStore *VariableStore, commandHandlingStore *CommandsHandlingStore) (*TreeNode, error) {
+func InitTree(argumentType string, argumentValue any, args any, variableStore *VariableStore, referencedValueStore *ReferencedValueStore) (*TreeNode, error) {
 	t := TreeNode{}
 	t.Type = argumentType
 
 	factory := NewOperatorFactory()
-	parsedChildren, err := t.ParseChildren(args, factory, variableStore, commandHandlingStore)
+	parsedChildren, err := t.ParseChildren(args, factory, variableStore, referencedValueStore)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func InitTree(argumentType string, argumentValue any, args any, variableStore *V
 	return &t, nil
 }
 
-func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, variableStore *VariableStore, commandHandlingStore *CommandsHandlingStore) ([]*TreeNode, error) {
+func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, variableStore *VariableStore, referencedValueStore *ReferencedValueStore) ([]*TreeNode, error) {
 	services.Logger.Println("Parsing children", args)
 
 	argList, ok := args.([]any)
@@ -73,7 +73,7 @@ func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, var
 			services.Logger.Println("Argument is a list of values:", value)
 
 			child := &TreeNode{Value: argType}
-			childrenList, err := child.ParseChildren(value, operatorFactory, variableStore, commandHandlingStore)
+			childrenList, err := child.ParseChildren(value, operatorFactory, variableStore, referencedValueStore)
 			if err != nil {
 				return nil, err
 			}
@@ -99,7 +99,7 @@ func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, var
 			if argType == "variable" {
 				referencedValue, err := NewReferencedValue(argValue.(string))
 				if err == nil {
-					commandHandlingStore.ReferencedValueStore.AddReferencedValue(argValue.(string), referencedValue)
+					referencedValueStore.AddReferencedValue(argValue.(string), referencedValue)
 					children = append(children, &TreeNode{Value: argValue, Type: argType, ResultValue: referencedValue.Value})
 				} else {
 					services.Logger.Println("Error creating referenced value:", err)

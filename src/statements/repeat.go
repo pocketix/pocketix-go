@@ -14,7 +14,7 @@ type Repeat struct {
 	Block     []Statement
 }
 
-func (r *Repeat) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
+func (r *Repeat) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error) {
 	services.Logger.Println("Executing repeat")
 
 	var count int
@@ -36,7 +36,7 @@ func (r *Repeat) Execute(variableStore *models.VariableStore, commandHandlingSto
 	}
 
 	for range count {
-		if result, err := ExecuteStatements(r.Block, variableStore, commandHandlingStore); err != nil {
+		if result, err := ExecuteStatements(r.Block, variableStore, referencedValueStore); err != nil {
 			return result, err
 		}
 	}
@@ -59,7 +59,7 @@ func (r *Repeat) GetCountType() string {
 	return r.CountType
 }
 
-func (r *Repeat) Validate(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore, args ...any) error {
+func (r *Repeat) Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error {
 	if r.CountType == "variable" {
 		variable, err := variableStore.GetVariable(r.Count.(string))
 		if err != nil {

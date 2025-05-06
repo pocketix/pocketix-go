@@ -25,13 +25,13 @@ func ParseBlocks(
 	block types.Block,
 	variableStore *models.VariableStore,
 	procedureStore *models.ProcedureStore,
-	commandHandlingStore *models.CommandsHandlingStore,
+	referencedValueStore *models.ReferencedValueStore,
 	collector statements.Collector,
 ) ([]statements.Statement, error) {
 	argumentTree := make([]*models.TreeNode, len(block.Arguments))
 
 	if len(block.Arguments) != 0 {
-		err := ParseArguments(block.Arguments, argumentTree, variableStore, commandHandlingStore)
+		err := ParseArguments(block.Arguments, argumentTree, variableStore, referencedValueStore)
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +44,7 @@ func ParseBlocks(
 		subAst := make([]statements.Statement, 0)
 		blockCollector := collector.NewCollectorBasedOnType(collector.Type(), &subAst)
 
-		statementList, err := ParseBlocks(subBlock, variableStore, procedureStore, commandHandlingStore, blockCollector)
+		statementList, err := ParseBlocks(subBlock, variableStore, procedureStore, referencedValueStore, blockCollector)
 		if err != nil {
 			return nil, err
 		}
@@ -90,13 +90,13 @@ func ParseBlocks(
 
 	if procedureStore != nil && procedureStore.Has(block.Id) {
 		procedure := procedureStore.Get(block.Id)
-		statementList, err := ParseProcedureBody(procedure, variableStore, procedureStore, commandHandlingStore, collector)
+		statementList, err := ParseProcedureBody(procedure, variableStore, procedureStore, referencedValueStore, collector)
 		if err != nil {
 			return nil, err
 		}
 		return statementList, nil
 	}
-	statement, err := statements.StatementFactory(block.Id, *collector.GetTarget(), argumentTree, procedureStore, commandHandlingStore.CommandInvocationStore)
+	statement, err := statements.StatementFactory(block.Id, *collector.GetTarget(), argumentTree, procedureStore)
 	if err != nil {
 		services.Logger.Println("Error creating statement", err)
 		return nil, err
@@ -105,6 +105,6 @@ func ParseBlocks(
 		services.Logger.Println("Statement is nil, therefore it is device statement")
 		return nil, nil
 	}
-	err = statement.Validate(variableStore, commandHandlingStore.ReferencedValueStore)
+	err = statement.Validate(variableStore, referencedValueStore)
 	return []statements.Statement{statement}, err
 }

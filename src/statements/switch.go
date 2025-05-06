@@ -14,7 +14,7 @@ type Switch struct {
 	Selector     any
 }
 
-func (s *Switch) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
+func (s *Switch) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error) {
 	services.Logger.Println("Executing switch")
 	for _, c := range s.Block {
 		caseStatement := c.(*Case)
@@ -37,7 +37,7 @@ func (s *Switch) Execute(variableStore *models.VariableStore, commandHandlingSto
 			caseValue = variable.Value
 		}
 		if caseValue == selectorValue {
-			caseStatement.Execute(variableStore, commandHandlingStore)
+			caseStatement.Execute(variableStore, referencedValueStore)
 			return true, nil
 		}
 	}
@@ -56,7 +56,7 @@ func (s *Switch) GetSelector() (any, string) {
 	return s.Selector, s.SelectorType
 }
 
-func (s *Switch) Validate(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore, args ...any) error {
+func (s *Switch) Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error {
 	if s.SelectorType != "variable" && s.SelectorType != "boolean_expression" {
 		return fmt.Errorf("invalid selector type: %s", s.SelectorType)
 	}
@@ -73,7 +73,7 @@ func (s *Switch) Validate(variableStore *models.VariableStore, referenceValueSto
 			if err != nil {
 				return err
 			}
-			err = caseStatement.Validate(variableStore, referenceValueStore, variable.Type)
+			err = caseStatement.Validate(variableStore, referencedValueStore, variable.Type)
 			if err != nil {
 				return err
 			}

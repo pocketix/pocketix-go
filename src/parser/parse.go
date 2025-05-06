@@ -26,7 +26,7 @@ func CheckMissingBlock(data []byte) error {
 	return nil
 }
 
-func ParseHeader(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, commandHandlingStore *models.CommandsHandlingStore) (*types.Program, error) {
+func ParseHeader(data []byte, variableStore *models.VariableStore, procedureStore *models.ProcedureStore, referencedValueStore *models.ReferencedValueStore) (*types.Program, error) {
 	var program types.Program
 
 	if err := CheckMissingBlock(data); err != nil {
@@ -37,11 +37,11 @@ func ParseHeader(data []byte, variableStore *models.VariableStore, procedureStor
 		return nil, err
 	}
 
-	if err := ParseVariables(program.Header.Variables, variableStore, commandHandlingStore); err != nil {
+	if err := ParseVariables(program.Header.Variables, variableStore, referencedValueStore); err != nil {
 		return nil, err
 	}
 
-	if err := ParseProcedures(program.Header.Procedures, procedureStore, commandHandlingStore); err != nil {
+	if err := ParseProcedures(program.Header.Procedures, procedureStore); err != nil {
 		return nil, err
 	}
 
@@ -52,7 +52,7 @@ func ParseProcedureBody(
 	procedure models.Procedure,
 	variableStore *models.VariableStore,
 	procedureStore *models.ProcedureStore,
-	commandHandlingStore *models.CommandsHandlingStore,
+	referencedValueStore *models.ReferencedValueStore,
 	collector statements.Collector,
 ) ([]statements.Statement, error) {
 	var blocks []types.Block
@@ -62,7 +62,7 @@ func ParseProcedureBody(
 
 	var commandList []statements.Statement
 	for _, block := range blocks {
-		statement, err := ParseBlocks(block, variableStore, procedureStore, commandHandlingStore, collector)
+		statement, err := ParseBlocks(block, variableStore, procedureStore, referencedValueStore, collector)
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +77,7 @@ func ParseProcedureBody(
 //   - data: the program data in JSON format.
 //   - variableStore: store for variables to use for parsing.
 //   - procedureStore: store for procedure definitions.
-//   - commandHandlingStore: store for command-related services.
+//   - referencedValueStore: store for command-related services.
 //   - collector: collector for statements.
 //
 // Returns:
@@ -86,10 +86,10 @@ func Parse(
 	data []byte,
 	variableStore *models.VariableStore,
 	procedureStore *models.ProcedureStore,
-	commandHandlingStore *models.CommandsHandlingStore,
+	referencedValueStore *models.ReferencedValueStore,
 	collector statements.Collector,
 ) error {
-	program, err := ParseHeader(data, variableStore, procedureStore, commandHandlingStore)
+	program, err := ParseHeader(data, variableStore, procedureStore, referencedValueStore)
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func Parse(
 		subAst := make([]statements.Statement, 0)
 		blockCollector := collector.NewCollectorBasedOnType(collector.Type(), &subAst)
 
-		statementList, err := ParseBlocks(block, variableStore, procedureStore, commandHandlingStore, blockCollector)
+		statementList, err := ParseBlocks(block, variableStore, procedureStore, referencedValueStore, blockCollector)
 		if err != nil {
 			return err
 		}

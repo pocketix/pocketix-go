@@ -13,9 +13,9 @@ type SetVariable struct {
 	RValType string
 }
 
-func (s *SetVariable) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
+func (s *SetVariable) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error) {
 	services.Logger.Println("Setting variable", s.LVal)
-	err := variableStore.SetVariable(s.LVal, s.RVal, s.RValType, commandHandlingStore.ReferencedValueStore)
+	err := variableStore.SetVariable(s.LVal, s.RVal, s.RValType, referencedValueStore)
 	if err != nil {
 		return false, err
 	}
@@ -42,6 +42,6 @@ func (s *SetVariable) GetRValType() string {
 	return s.RValType
 }
 
-func (s *SetVariable) Validate(variableStore *models.VariableStore, referenceValueStore *models.ReferencedValueStore, args ...any) error {
+func (s *SetVariable) Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error {
 	return nil
 }
