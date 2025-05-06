@@ -116,31 +116,10 @@ func Parse(
 		}
 		statement := statementList[0]
 
-		if statement.GetId() == "if" {
-			previousStatement = statement
-		} else if statement.GetId() == "else" {
-			if previousStatement != nil {
-				previousStatement.(*statements.If).AddElseBlock(statement)
-				collector.Collect(previousStatement)
-				previousStatement = nil
-			} else {
-				services.Logger.Println("Error: Else without if")
-				return fmt.Errorf("else without if")
-			}
-		} else if statement.GetId() == "elseif" {
-			if previousStatement != nil {
-				previousStatement.(*statements.If).AddElseIfBlock(statement)
-			} else {
-				services.Logger.Println("Error: Elseif without if")
-				return fmt.Errorf("elseif without if")
-			}
-		} else {
-			if previousStatement != nil {
-				collector.Collect(previousStatement)
-				previousStatement = nil
-			}
-
-			collector.Collect(statement)
+		err = HandleIfStatement(statement, &previousStatement, collector.Collect)
+		if err != nil {
+			services.Logger.Println("Error handling if statement", err)
+			return err
 		}
 	}
 	if previousStatement != nil {

@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
 	"github.com/pocketix/pocketix-go/src/statements"
@@ -56,32 +54,37 @@ func ParseBlocks(
 		}
 		statement := statementList[0]
 
-		if statement.GetId() == "if" {
-			previousSubStatement = statement
-		} else if statement.GetId() == "else" {
-			if previousSubStatement != nil {
-				previousSubStatement.(*statements.If).AddElseBlock(statement)
-				collector.Collect(previousSubStatement)
-				previousSubStatement = nil
-			} else {
-				services.Logger.Println("Error: Else without if")
-				return nil, fmt.Errorf("else without if")
-			}
-		} else if statement.GetId() == "elseif" {
-			if previousSubStatement != nil {
-				previousSubStatement.(*statements.If).AddElseIfBlock(statement)
-			} else {
-				services.Logger.Println("Error: Elseif without if")
-				return nil, fmt.Errorf("elseif without if")
-			}
-		} else {
-			if previousSubStatement != nil {
-				collector.Collect(previousSubStatement)
-				previousSubStatement = nil
-			}
-
-			collector.Collect(statement)
+		err = HandleIfStatement(statement, &previousSubStatement, collector.Collect)
+		if err != nil {
+			services.Logger.Println("Error handling if statement", err)
+			return nil, err
 		}
+		// if statement.GetId() == "if" {
+		// 	previousSubStatement = statement
+		// } else if statement.GetId() == "else" {
+		// 	if previousSubStatement != nil {
+		// 		previousSubStatement.(*statements.If).AddElseBlock(statement)
+		// 		collector.Collect(previousSubStatement)
+		// 		previousSubStatement = nil
+		// 	} else {
+		// 		services.Logger.Println("Error: Else without if")
+		// 		return nil, fmt.Errorf("else without if")
+		// 	}
+		// } else if statement.GetId() == "elseif" {
+		// 	if previousSubStatement != nil {
+		// 		previousSubStatement.(*statements.If).AddElseIfBlock(statement)
+		// 	} else {
+		// 		services.Logger.Println("Error: Elseif without if")
+		// 		return nil, fmt.Errorf("elseif without if")
+		// 	}
+		// } else {
+		// 	if previousSubStatement != nil {
+		// 		collector.Collect(previousSubStatement)
+		// 		previousSubStatement = nil
+		// 	}
+
+		// 	collector.Collect(statement)
+		// }
 	}
 
 	if previousSubStatement != nil {
