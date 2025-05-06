@@ -85,7 +85,7 @@ func StatementFactory(
 			Message:      tree[2].Value.(string),
 			MessageType:  tree[2].Type,
 		}, nil
-	case "devicetype":
+	case "deviceType":
 		return &DeviceType{
 			Id:       id,
 			Type:     tree[0].Value.(string),
@@ -98,9 +98,9 @@ func StatementFactory(
 			return nil, err
 		}
 		CommandInvocationStore.AddCommand(models.DeviceCommand{
-			DeviceID:  deviceId,
-			Command:   deviceCommand,
-			Arguments: []models.TypeValue{{Type: tree[0].Type, Value: tree[0].Value}},
+			DeviceUID:         deviceId,
+			CommandDenotation: deviceCommand,
+			Arguments:         models.TypeValue{Type: tree[0].Type, Value: tree[0].Value},
 		})
 		return &DeviceCommand{
 			Id:        deviceId,
