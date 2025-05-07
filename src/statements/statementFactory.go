@@ -9,7 +9,6 @@ func StatementFactory(
 	blocks []Statement,
 	tree []*models.TreeNode,
 	procedureStore *models.ProcedureStore,
-	referencedValueStore *models.ReferencedValueStore,
 ) (Statement, error) {
 	switch id {
 	case "if":
