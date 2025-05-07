@@ -83,12 +83,12 @@ func main() {
 	// Parse the modified program
 	variableStore := models.NewVariableStore()
 	procedureStore := models.NewProcedureStore()
-	commandHandlingStore := models.NewCommandsHandlingStore()
+	referencedValueStore := models.NewReferencedValueStore()
 
-	// ast := make([]commands.Command, 0)
-	err = parser.Parse(modifiedData, variableStore, procedureStore, commandHandlingStore, &statements.NoOpCollector{})
+	ast := make([]statements.Statement, 0)
+	// err = parser.Parse(modifiedData, variableStore, procedureStore, referencedValueStore, &statements.NoOpCollector{})
 
-	// err := parser.Parse(data, variableStore, procedureStore, commandHandlingStore, func(c commands.Command) {})
+	err = parser.Parse(modifiedData, variableStore, procedureStore, referencedValueStore, &statements.ASTCollector{Target: &ast})
 
 	if err != nil {
 		log.Fatalln(err)
@@ -100,12 +100,10 @@ func main() {
 		fmt.Printf("- Procedure: %s\n", name)
 	}
 
-	services.Logger.Println("Commands:", commandHandlingStore.CommandInvocationStore.Commands)
-
-	// for _, block := range ast {
-	// 	if _, err := block.Execute(variableStore, commandHandlingStore); err != nil {
-	// 		log.Fatalln(err)
-	// 	}
-	// }
+	for _, block := range ast {
+		if _, err := block.Execute(variableStore, referencedValueStore); err != nil {
+			log.Fatalln(err)
+		}
+	}
 	services.Logger.Println("Execution completed successfully")
 }

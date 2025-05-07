@@ -9,7 +9,7 @@ func StatementFactory(
 	blocks []Statement,
 	tree []*models.TreeNode,
 	procedureStore *models.ProcedureStore,
-	CommandInvocationStore *models.CommandInvocationStore,
+	referencedValueStore *models.ReferencedValueStore,
 ) (Statement, error) {
 	switch id {
 	case "if":
@@ -93,17 +93,8 @@ func StatementFactory(
 		}, nil
 	// Default case to handle device commands
 	default:
-		deviceId, deviceCommand, err := models.FromReferencedTarget(id)
-		if err != nil {
-			return nil, err
-		}
-		CommandInvocationStore.AddCommand(models.DeviceCommand{
-			DeviceUID:         deviceId,
-			CommandDenotation: deviceCommand,
-			Arguments:         models.TypeValue{Type: tree[0].Type, Value: tree[0].Value},
-		})
 		return &DeviceCommand{
-			Id:        deviceId,
+			Id:        id,
 			Arguments: tree[0],
 		}, nil
 	}

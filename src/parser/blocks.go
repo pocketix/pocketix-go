@@ -99,7 +99,7 @@ func ParseBlocks(
 		}
 		return statementList, nil
 	}
-	statement, err := statements.StatementFactory(block.Id, *collector.GetTarget(), argumentTree, procedureStore)
+	statement, err := statements.StatementFactory(block.Id, *collector.GetTarget(), argumentTree, procedureStore, referencedValueStore)
 	if err != nil {
 		services.Logger.Println("Error creating statement", err)
 		return nil, err

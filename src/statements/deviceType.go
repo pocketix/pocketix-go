@@ -13,7 +13,7 @@ type DeviceType struct {
 }
 
 // Execute implements the Statement interface
-func (d *DeviceType) Execute(variableStore *models.VariableStore, commandHandlingStore *models.CommandsHandlingStore) (bool, error) {
+func (d *DeviceType) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error) {
 	services.Logger.Println("Executing deviceType with type:", d.Type)
 
 	return true, nil
