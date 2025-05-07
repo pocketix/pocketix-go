@@ -1,0 +1,34 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {
+            "d": [
+                {
+                    "id": "deviceType",
+                    "_uuid": "962842d1-7f42-4ff3-aabc-e88d3adbdae2",
+                    "arguments": [
+                        {
+                            "type": "string",
+                            "value": "P110"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "block": [
+        {
+            "_uuid": "ce94cd6b-bca8-4a3c-a219-4fda77cf6971",
+            "id": "d",
+            "devices": [
+                {
+                    "uuid": "962842d1-7f42-4ff3-aabc-e88d3adbdae2",
+                    "deviceId": "Shelly Rellay.setRelay0",
+                    "values": [
+                        "ON"
+                    ]
+                }
+            ]
+        }
+    ]
+}

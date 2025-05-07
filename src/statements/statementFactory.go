@@ -9,6 +9,7 @@ func StatementFactory(
 	blocks []Statement,
 	tree []*models.TreeNode,
 	procedureStore *models.ProcedureStore,
+	referencedValueStore *models.ReferencedValueStore,
 ) (Statement, error) {
 	switch id {
 	case "if":
@@ -83,6 +84,12 @@ func StatementFactory(
 			ReceiverType: tree[1].Type,
 			Message:      tree[2].Value.(string),
 			MessageType:  tree[2].Type,
+		}, nil
+	case "deviceType":
+		return &DeviceType{
+			Id:       id,
+			Type:     tree[0].Value.(string),
+			TypeType: tree[0].Type,
 		}, nil
 	// Default case to handle device commands
 	default:
