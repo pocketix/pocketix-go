@@ -105,18 +105,34 @@ func Parse(
 		}
 		// If the ParseBlocks returns a list of statements, it means that the block is a procedure call,
 		// it appends the statements to the statement list and continues.
+
+		// Initialize device index counter for this block
+		deviceIndex := 0
+
 		if len(statementList) != 1 {
+			// Process multiple statements (procedure call)
 			for _, statement := range statementList {
-				collector.Collect(statement)
+				// Process the statement using the utility function
+				processedStatement, _ := HandleDeviceTypeStatement(statement, block.Devices, &deviceIndex)
+
+				// Collect the processed statement
+				collector.Collect(processedStatement)
 			}
 			continue
 		}
+
 		if statementList == nil {
 			continue
 		}
+
+		// Process single statement
 		statement := statementList[0]
 
-		err = HandleIfStatement(statement, &previousStatement, collector.Collect)
+		// Check if the statement is a deviceType and replace it if needed
+		processedStatement, _ := HandleDeviceTypeStatement(statement, block.Devices, &deviceIndex)
+
+		// Handle if statement with the processed statement
+		err = HandleIfStatement(processedStatement, &previousStatement, collector.Collect)
 		if err != nil {
 			services.Logger.Println("Error handling if statement", err)
 			return err
@@ -125,5 +141,6 @@ func Parse(
 	if previousStatement != nil {
 		collector.Collect(previousStatement)
 	}
+
 	return nil
 }

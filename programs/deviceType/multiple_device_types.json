@@ -1,0 +1,68 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {
+            "multipleDevices": [
+                {
+                    "id": "deviceType",
+                    "_uuid": "962842d1-7f42-4ff3-aabc-e88d3adbdae2",
+                    "arguments": [
+                        {
+                            "type": "string",
+                            "value": "P110"
+                        }
+                    ]
+                },
+                {
+                    "id": "deviceType",
+                    "_uuid": "a5b6c7d8-e9f0-1a2b-3c4d-5e6f7a8b9c0d",
+                    "arguments": [
+                        {
+                            "type": "string",
+                            "value": "SmartPlug"
+                        }
+                    ]
+                },
+                {
+                    "id": "deviceType",
+                    "_uuid": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                    "arguments": [
+                        {
+                            "type": "string",
+                            "value": "LightBulb"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "block": [
+        {
+            "_uuid": "ce94cd6b-bca8-4a3c-a219-4fda77cf6971",
+            "id": "multipleDevices",
+            "devices": [
+                {
+                    "uuid": "962842d1-7f42-4ff3-aabc-e88d3adbdae2",
+                    "deviceId": "Shelly.setRelay0",
+                    "values": [
+                        "ON"
+                    ]
+                },
+                {
+                    "uuid": "a5b6c7d8-e9f0-1a2b-3c4d-5e6f7a8b9c0d",
+                    "deviceId": "SmartPlug.setPower",
+                    "values": [
+                        "100"
+                    ]
+                },
+                {
+                    "uuid": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                    "deviceId": "LightBulb.setBrightness",
+                    "values": [
+                        "75"
+                    ]
+                }
+            ]
+        }
+    ]
+}
