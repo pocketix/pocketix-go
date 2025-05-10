@@ -44,7 +44,7 @@ func HandleIfStatement(
 }
 
 // HandleDeviceTypeStatement checks if a statement is a deviceType and replaces it with the corresponding device command.
-// It returns the processed statement (either the original or a new device command) and a boolean indicating if the statement was a deviceType.
+// It returns the processed statement (either the original or a new device command) and an error if any validation fails.
 //
 // Parameters:
 //   - statement: the statement to check
@@ -53,18 +53,29 @@ func HandleIfStatement(
 //
 // Returns:
 //   - the processed statement (either the original or a new device command)
-//   - a boolean indicating if the statement was a deviceType
+//   - an error if any validation fails, nil otherwise
 func HandleDeviceTypeStatement(
 	statement statements.Statement,
 	devices []types.Device,
 	deviceIndex *int,
-) (statements.Statement, bool) {
+) (statements.Statement, error) {
 	// Check if the statement is a deviceType
 	if _, ok := statement.(*statements.DeviceType); ok {
 		// If we have devices and the index is valid, replace the deviceType with the corresponding device
 		if len(devices) > 0 && *deviceIndex < len(devices) {
 			// Get the device at the current index
 			device := devices[*deviceIndex]
+
+			// Validate device ID is not empty
+			if device.ID == "" {
+				return statement, fmt.Errorf("device at index %d has empty ID", *deviceIndex)
+			}
+
+			// Validate device has values
+			if len(device.Values) == 0 {
+				return statement, fmt.Errorf("device %s at index %d has no values", device.ID, *deviceIndex)
+			}
+
 			// Create a device command statement from the device
 			deviceCommand := &statements.DeviceCommand{
 				Id: device.ID,
@@ -76,9 +87,9 @@ func HandleDeviceTypeStatement(
 			// Increment the device index for the next deviceType
 			*deviceIndex++
 			// Return the device command
-			return deviceCommand, true
+			return deviceCommand, nil
 		}
 	}
 	// Return the original statement if it's not a deviceType or no replacement was made
-	return statement, false
+	return statement, nil
 }

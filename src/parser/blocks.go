@@ -52,7 +52,11 @@ func ParseBlocks(
 		if len(statementList) != 1 {
 			for _, statement := range statementList {
 				// Process the statement using the utility function
-				processedStatement, _ := HandleDeviceTypeStatement(statement, block.Devices, &deviceIndex)
+				processedStatement, err := HandleDeviceTypeStatement(statement, block.Devices, &deviceIndex)
+				if err != nil {
+					services.Logger.Println("Error handling device type statement:", err)
+					return nil, err
+				}
 
 				// Collect the processed statement
 				collector.Collect(processedStatement)
@@ -64,7 +68,11 @@ func ParseBlocks(
 		statement := statementList[0]
 
 		// Check if the statement is a deviceType and replace it if needed
-		processedStatement, _ := HandleDeviceTypeStatement(statement, block.Devices, &deviceIndex)
+		processedStatement, err := HandleDeviceTypeStatement(statement, block.Devices, &deviceIndex)
+		if err != nil {
+			services.Logger.Println("Error handling device type statement:", err)
+			return nil, err
+		}
 
 		// Handle if statement with the processed statement
 		err = HandleIfStatement(processedStatement, &previousSubStatement, collector.Collect)
@@ -100,7 +108,11 @@ func ParseBlocks(
 	deviceIndex := 0
 
 	// Check if the statement is a deviceType and replace it if needed
-	processedStatement, _ := HandleDeviceTypeStatement(statement, block.Devices, &deviceIndex)
+	processedStatement, err := HandleDeviceTypeStatement(statement, block.Devices, &deviceIndex)
+	if err != nil {
+		services.Logger.Println("Error handling device type statement:", err)
+		return nil, err
+	}
 
 	err = processedStatement.Validate(variableStore, referencedValueStore)
 	return []statements.Statement{processedStatement}, err
