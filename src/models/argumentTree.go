@@ -97,12 +97,11 @@ func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, var
 			}
 
 			if argType == "variable" {
-				referencedValue, err := NewReferencedValue(argValue.(string))
-				if err == nil {
+				referencedValue, ok := NewReferencedValue(argValue.(string))
+				if ok {
 					referencedValueStore.AddReferencedValue(argValue.(string), referencedValue)
 					children = append(children, &TreeNode{Value: argValue, Type: argType, ResultValue: referencedValue.Value})
 				} else {
-					services.Logger.Println("Error creating referenced value:", err)
 					if variable, err := variableStore.GetVariable(argValue.(string)); err != nil {
 						return nil, err
 					} else {

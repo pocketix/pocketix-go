@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -42,25 +41,33 @@ type SDInformationFromBackend struct {
 	Command   SDCommand           `json:"sdCommand"`           // SD command
 }
 
-func FromReferencedTarget(referencedTarget string) (string, string, error) {
-	parts := strings.Split(referencedTarget, ".")
-	if len(parts) != 2 {
-		return "", "", fmt.Errorf("invalid referenced target: %s", referencedTarget)
+func FromReferencedTarget(referencedTarget string) (string, string, bool) {
+	lastDot := strings.LastIndex(referencedTarget, ".")
+	if lastDot == -1 {
+		return "", "", false
 	}
-	return parts[0], parts[1], nil
+
+	prefix := referencedTarget[:lastDot]
+	last := referencedTarget[lastDot+1:]
+
+	if prefix == "" || last == "" {
+		return "", "", false
+	}
+
+	return prefix, last, true
 }
 
-func NewReferencedValue(referencedTarget string) (*ReferencedValue, error) {
-	deviceID, parameterName, err := FromReferencedTarget(referencedTarget)
-	if err != nil {
-		return nil, err
+func NewReferencedValue(referencedTarget string) (*ReferencedValue, bool) {
+	deviceID, parameterName, ok := FromReferencedTarget(referencedTarget)
+	if !ok {
+		return nil, ok
 	}
 	return &ReferencedValue{
 		DeviceID:      deviceID,
 		ParameterName: parameterName,
 		Type:          "",
 		Value:         nil,
-	}, nil
+	}, true
 }
 
 func (rv *ReferencedValue) ToReferenceTarget() string {
