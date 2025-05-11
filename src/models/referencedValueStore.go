@@ -21,12 +21,12 @@ func (rvStore *ReferencedValueStore) GetReferencedValues() map[string]Referenced
 	return rvStore.ReferencedValues
 }
 
-func (rvStore *ReferencedValueStore) GetReferencedValueFromStore(referencedTarget string) (*ReferencedValue, error) {
+func (rvStore *ReferencedValueStore) GetReferencedValueFromStore(referencedTarget string) (*ReferencedValue, bool) {
 	referencedValue, ok := rvStore.ReferencedValues[referencedTarget]
 	if !ok {
-		return nil, fmt.Errorf("referenced value %s not found", referencedTarget)
+		return nil, false
 	}
-	return &referencedValue, nil
+	return &referencedValue, true
 }
 
 func (rvStore *ReferencedValueStore) SetReferencedValue(referenceTarget string, snapshot SDParameterSnapshot) (any, error) {
@@ -46,6 +46,7 @@ func (rvStore *ReferencedValueStore) SetReferencedValue(referenceTarget string, 
 	} else {
 		return nil, fmt.Errorf("no valid value found in the snapshot")
 	}
+	referencedValue.IsSet = true
 	rvStore.ReferencedValues[referenceTarget] = referencedValue
 	return referencedValue.Value, nil
 }

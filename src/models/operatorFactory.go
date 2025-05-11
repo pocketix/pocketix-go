@@ -235,8 +235,8 @@ func (o *OperatorFactory) ValidateOperator(node TreeNode) error {
 func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, variableStore *VariableStore, referenceValueStore *ReferencedValueStore) (any, error) {
 	if len(child.Children) == 0 {
 		if child.Type == "variable" {
-			referencedValue, err := referenceValueStore.GetReferencedValueFromStore(child.Value.(string))
-			if err == nil {
+			referencedValue, ok := referenceValueStore.GetReferencedValueFromStore(child.Value.(string))
+			if ok {
 				sdInformation, err := referenceValueStore.ResolveDeviceInformationFunction(referencedValue.DeviceID, referencedValue.ParameterName, "sdParameter")
 				if err != nil {
 					return nil, err

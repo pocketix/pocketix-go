@@ -1,7 +1,6 @@
 package statements
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/pocketix/pocketix-go/src/models"
@@ -28,18 +27,25 @@ func (d *DeviceCommand) Validate(variableStore *models.VariableStore, referenced
 	return nil
 }
 
-func (d *DeviceCommand) DeviceCommand2ModelsDeviceCommand() (models.DeviceCommand, error) {
-	splittedDeviceId := strings.Split(d.Id, ".")
-	if len(splittedDeviceId) != 2 {
-		return models.DeviceCommand{}, fmt.Errorf("invalid device command id %s", d.Id)
+func (d *DeviceCommand) DeviceCommand2ModelsDeviceCommand() (models.DeviceCommand, bool) {
+	lastDot := strings.LastIndex(d.Id, ".")
+	if lastDot == -1 {
+		return models.DeviceCommand{}, false
+	}
+
+	prefix := d.Id[:lastDot]
+	last := d.Id[lastDot+1:]
+
+	if prefix == "" || last == "" {
+		return models.DeviceCommand{}, false
 	}
 
 	return models.DeviceCommand{
-		DeviceUID:         splittedDeviceId[0],
-		CommandDenotation: splittedDeviceId[1],
+		DeviceUID:         prefix,
+		CommandDenotation: last,
 		Arguments: models.TypeValue{
 			Type:  d.Arguments.Type,
 			Value: d.Arguments.Value,
 		},
-	}, nil
+	}, true
 }

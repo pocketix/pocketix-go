@@ -62,8 +62,8 @@ func TestExecuteProgramWithReferencedValue(t *testing.T) {
 		assert.Nil(err, "Error should be nil, but got: %v", err)
 	}
 
-	referencedValue, err := referencedValueStore.GetReferencedValueFromStore("DistanceSensor-1.waterLevel")
-	assert.Nil(err, "Error should be nil, but got: %v", err)
+	referencedValue, ok := referencedValueStore.GetReferencedValueFromStore("DistanceSensor-1.waterLevel")
+	assert.True(ok, "Referenced value should be found, but got: %v", ok)
 	assert.Equal("DistanceSensor-1", referencedValue.DeviceID, "Device ID should be DistanceSensor-1, but got: %v", referencedValue.DeviceID)
 	assert.Equal("waterLevel", referencedValue.ParameterName, "Parameter name should be waterLevel, but got: %v", referencedValue.ParameterName)
 	assert.Equal("number", referencedValue.Type, "Type should be number, but got: %v", referencedValue.Type)

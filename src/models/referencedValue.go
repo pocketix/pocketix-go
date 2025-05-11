@@ -33,6 +33,7 @@ type ReferencedValue struct {
 	ParameterName string // Parameter name
 	Type          string // Type of the value
 	Value         any    // Value of the referenced value
+	IsSet         bool   // Indicates if the referenced value is set
 }
 
 type SDInformationFromBackend struct {
