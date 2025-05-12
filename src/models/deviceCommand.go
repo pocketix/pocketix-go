@@ -13,7 +13,9 @@ type SDCommand struct {
 }
 
 type SDCommandInvocation struct {
-	DeviceID          string `json:"deviceId"`          // Device CommandID
+	InstanceID        uint32 `json:"instanceId"`        // Instance ID
+	InstanceUID       string `json:"instanceUID"`       // Instance ID
+	CommandID         uint32 `json:"commandId"`         // Command ID
 	CommandDenotation string `json:"commandDenotation"` // Command
 	Payload           string `json:"payload,omitempty"` // Payload
 	InvocationTime    string `json:"invocationTime"`    // Invocation time
@@ -36,7 +38,9 @@ func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation SDInformatio
 
 	if command.Payload == "" {
 		return &SDCommandInvocation{
-			DeviceID:          sdInstanceInformation.DeviceUID,
+			InstanceID:        sdInstanceInformation.DeviceID,
+			InstanceUID:       sdInstanceInformation.DeviceUID,
+			CommandID:         command.CommandID,
 			CommandDenotation: command.CommandDenotation,
 			InvocationTime:    time.Now().Format(time.RFC3339),
 		}, nil
@@ -58,7 +62,9 @@ func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation SDInformatio
 		return nil, err
 	}
 	return &SDCommandInvocation{
-		DeviceID:          sdInstanceInformation.DeviceUID,
+		InstanceID:        sdInstanceInformation.DeviceID,
+		InstanceUID:       sdInstanceInformation.DeviceUID,
+		CommandID:         command.CommandID,
 		CommandDenotation: command.CommandDenotation,
 		Payload:           string(serializedPayload),
 		InvocationTime:    time.Now().Format(time.RFC3339),
