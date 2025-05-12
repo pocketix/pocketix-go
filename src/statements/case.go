@@ -14,9 +14,14 @@ type Case struct {
 	Value any
 }
 
-func (c *Case) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, deviceCommands []models.SDInformationFromBackend) (any, bool, error) {
+func (c *Case) Execute(
+	variableStore *models.VariableStore,
+	referencedValueStore *models.ReferencedValueStore,
+	deviceCommands []models.SDInformationFromBackend,
+	callback func(deviceCommand models.SDCommandInvocation),
+) (bool, error) {
 	services.Logger.Println("Executing case", c.Value)
-	return ExecuteStatements(c.Block, variableStore, referencedValueStore, deviceCommands)
+	return ExecuteStatements(c.Block, variableStore, referencedValueStore, deviceCommands, callback)
 }
 
 func (c *Case) GetId() string {

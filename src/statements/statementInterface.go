@@ -5,7 +5,12 @@ import (
 )
 
 type Statement interface {
-	Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, deviceCommands []models.SDInformationFromBackend) (any, bool, error)
+	Execute(
+		variableStore *models.VariableStore,
+		referencedValueStore *models.ReferencedValueStore,
+		deviceCommands []models.SDInformationFromBackend,
+		callback func(deviceCommand models.SDCommandInvocation),
+	) (bool, error)
 	GetId() string
 	Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error
 }

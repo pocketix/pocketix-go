@@ -12,12 +12,17 @@ type DeviceCommand struct {
 	Arguments *models.TreeNode
 }
 
-func (d *DeviceCommand) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, deviceCommands []models.SDInformationFromBackend) (any, bool, error) {
+func (d *DeviceCommand) Execute(
+	variableStore *models.VariableStore,
+	referencedValueStore *models.ReferencedValueStore,
+	deviceCommands []models.SDInformationFromBackend,
+	callback func(deviceCommand models.SDCommandInvocation),
+) (bool, error) {
 	// informationFromBackend, err := referencedValueStore.ResolveDeviceInformationFunction(deviceUID, commandDenotation, "sdCommand", deviceCommands)
 
 	deviceCommand, ok := d.DeviceCommand2ModelsDeviceCommand()
 	if !ok {
-		return nil, false, fmt.Errorf("failed to convert DeviceCommand to models.DeviceCommand")
+		return false, fmt.Errorf("failed to convert DeviceCommand to models.DeviceCommand")
 	}
 
 	var sdCommandInformation models.SDInformationFromBackend
@@ -26,16 +31,17 @@ func (d *DeviceCommand) Execute(variableStore *models.VariableStore, referencedV
 	} else {
 		sdCommandInfo, err := referencedValueStore.ResolveDeviceInformationFunction(deviceCommand.DeviceUID, deviceCommand.CommandDenotation, "sdCommand", &deviceCommands)
 		if err != nil {
-			return nil, false, err
+			return false, err
 		}
 		sdCommandInformation = sdCommandInfo
 	}
 
 	sdCommandInvocation, err := deviceCommand.PrepareCommandToSend(sdCommandInformation)
 	if err != nil {
-		return nil, false, err
+		return false, err
 	}
-	return sdCommandInvocation, true, nil
+	callback(*sdCommandInvocation)
+	return true, nil
 }
 
 func (d *DeviceCommand) GetId() string {

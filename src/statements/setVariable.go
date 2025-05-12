@@ -13,13 +13,18 @@ type SetVariable struct {
 	RValType string
 }
 
-func (s *SetVariable) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, _ []models.SDInformationFromBackend) (any, bool, error) {
+func (s *SetVariable) Execute(
+	variableStore *models.VariableStore,
+	referencedValueStore *models.ReferencedValueStore,
+	_ []models.SDInformationFromBackend,
+	_ func(deviceCommand models.SDCommandInvocation),
+) (bool, error) {
 	services.Logger.Println("Setting variable", s.LVal)
 	err := variableStore.SetVariable(s.LVal, s.RVal, s.RValType, referencedValueStore)
 	if err != nil {
-		return nil, false, err
+		return false, err
 	}
-	return s, true, nil
+	return true, nil
 }
 
 func (s *SetVariable) GetId() string {

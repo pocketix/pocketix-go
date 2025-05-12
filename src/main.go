@@ -101,8 +101,11 @@ func main() {
 		fmt.Printf("- Procedure: %s\n", name)
 	}
 
+	var interpretInvocationsToSend []models.SDCommandInvocation
 	for _, block := range ast {
-		if _, _, err := block.Execute(variableStore, referencedValueStore, collector.DeviceCommands); err != nil {
+		if _, err := block.Execute(variableStore, referencedValueStore, collector.DeviceCommands, func(deviceCommand models.SDCommandInvocation) {
+			interpretInvocationsToSend = append(interpretInvocationsToSend, deviceCommand)
+		}); err != nil {
 			log.Fatalln(err)
 		}
 	}

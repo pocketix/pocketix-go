@@ -30,7 +30,7 @@ func MockSwitchExecute(variableStore *models.VariableStore, s statements.Switch)
 			caseValue = variable.Value
 		}
 		if caseValue == selectorValue {
-			caseCommand.Execute(variableStore, nil, nil)
+			caseCommand.Execute(variableStore, nil, nil, nil)
 			return true, caseValue, nil
 		}
 	}

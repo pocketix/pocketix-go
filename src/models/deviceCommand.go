@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 )
 
@@ -40,7 +41,9 @@ func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation SDInformatio
 		}, nil
 	}
 
-	err := json.Unmarshal([]byte(command.Payload), &payload)
+	cleanedPlayload := strings.ReplaceAll(command.Payload, "\n", "")
+
+	err := json.Unmarshal([]byte(cleanedPlayload), &payload)
 	if err != nil {
 		return nil, err
 	}

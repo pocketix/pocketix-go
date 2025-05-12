@@ -14,7 +14,12 @@ type Repeat struct {
 	Block     []Statement
 }
 
-func (r *Repeat) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, deviceCommands []models.SDInformationFromBackend) (any, bool, error) {
+func (r *Repeat) Execute(
+	variableStore *models.VariableStore,
+	referencedValueStore *models.ReferencedValueStore,
+	deviceCommands []models.SDInformationFromBackend,
+	callback func(deviceCommand models.SDCommandInvocation),
+) (bool, error) {
 	services.Logger.Println("Executing repeat")
 
 	var count int
@@ -26,21 +31,21 @@ func (r *Repeat) Execute(variableStore *models.VariableStore, referencedValueSto
 	case string:
 		variable, err := variableStore.GetVariable(r.Count.(string))
 		if err != nil {
-			return nil, false, err
+			return false, err
 		}
 		count = int(variable.Value.Value.(float64))
 	}
 
 	if count < 0 {
-		return nil, false, fmt.Errorf("count cannot be negative")
+		return false, fmt.Errorf("count cannot be negative")
 	}
 
 	for range count {
-		if _, result, err := ExecuteStatements(r.Block, variableStore, referencedValueStore, deviceCommands); err != nil {
-			return nil, result, err
+		if result, err := ExecuteStatements(r.Block, variableStore, referencedValueStore, deviceCommands, callback); err != nil {
+			return result, err
 		}
 	}
-	return r, true, nil
+	return true, nil
 }
 
 func (r *Repeat) GetId() string {

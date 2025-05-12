@@ -12,22 +12,27 @@ type While struct {
 	Arguments *models.TreeNode
 }
 
-func (w *While) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, deviceCommands []models.SDInformationFromBackend) (any, bool, error) {
+func (w *While) Execute(
+	variableStore *models.VariableStore,
+	referencedValueStore *models.ReferencedValueStore,
+	deviceCommands []models.SDInformationFromBackend,
+	callback func(deviceCommand models.SDCommandInvocation),
+) (bool, error) {
 	services.Logger.Println("Executing while")
 
 	for {
 		result, err := w.Arguments.Evaluate(variableStore, referencedValueStore)
 		if err != nil {
 			services.Logger.Println("Error executing while arguments", err)
-			return nil, false, err
+			return false, err
 		}
 		if boolResult, boolErr := utils.ToBool(result); boolErr != nil {
 			services.Logger.Println("Error converting while result to bool", boolErr)
-			return nil, false, boolErr
+			return false, boolErr
 		} else if boolResult {
 			services.Logger.Println("While is true, can execute body")
-			if _, success, err := ExecuteStatements(w.Block, variableStore, referencedValueStore, deviceCommands); err != nil {
-				return nil, success, err
+			if success, err := ExecuteStatements(w.Block, variableStore, referencedValueStore, deviceCommands, callback); err != nil {
+				return success, err
 			}
 		} else {
 			services.Logger.Println("While is false, breaking")
@@ -35,7 +40,7 @@ func (w *While) Execute(variableStore *models.VariableStore, referencedValueStor
 		}
 	}
 
-	return w, true, nil
+	return true, nil
 }
 
 func (w *While) GetId() string {

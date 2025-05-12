@@ -10,9 +10,14 @@ type Else struct {
 	Block []Statement
 }
 
-func (e *Else) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, deviceCommands []models.SDInformationFromBackend) (any, bool, error) {
+func (e *Else) Execute(
+	variableStore *models.VariableStore,
+	referencedValueStore *models.ReferencedValueStore,
+	deviceCommands []models.SDInformationFromBackend,
+	callback func(deviceCommand models.SDCommandInvocation),
+) (bool, error) {
 	services.Logger.Println("Executing else")
-	return ExecuteStatements(e.Block, variableStore, referencedValueStore, deviceCommands)
+	return ExecuteStatements(e.Block, variableStore, referencedValueStore, deviceCommands, callback)
 }
 
 func (e *Else) GetId() string {

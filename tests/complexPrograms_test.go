@@ -24,7 +24,7 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	assert.NotNil(statementAST, "Commands list should not be nil")
 
 	for _, statement := range statementAST {
-		_, _, err := statement.Execute(variableStore, referencedValueStore, nil)
+		_, err := statement.Execute(variableStore, referencedValueStore, nil, nil)
 		assert.Nil(err, "Error should be nil, but got: %v", err)
 	}
 
@@ -58,7 +58,7 @@ func TestExecuteProgramWithReferencedValue(t *testing.T) {
 	assert.NotNil(statementAST, "Commands list should not be nil")
 
 	for _, statement := range statementAST {
-		_, _, err := statement.Execute(variableStore, referencedValueStore, nil)
+		_, err := statement.Execute(variableStore, referencedValueStore, nil, nil)
 		assert.Nil(err, "Error should be nil, but got: %v", err)
 	}
 

@@ -102,13 +102,17 @@ func TestRepeatedCommandInvocation(t *testing.T) {
 	referencedValueStore := models.NewReferencedValueStore()
 	referencedValueStore.SetResolveParameterFunction(MockResolveCommandFunction)
 
+	var interpretInvocationsToSend []models.SDCommandInvocation
+	callback := func(deviceCommand models.SDCommandInvocation) {
+		interpretInvocationsToSend = append(interpretInvocationsToSend, deviceCommand)
+	}
 	statementList := make([]statements.Statement, 0)
 	collector := &statements.ASTCollector{Target: &statementList, DeviceCommands: make([]models.SDInformationFromBackend, 0)}
 
 	err := parser.Parse([]byte(program), variableStore, procedureStore, referencedValueStore, collector)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
-	info, _, err := statementList[0].Execute(variableStore, referencedValueStore, collector.DeviceCommands)
+	_, err = statementList[0].Execute(variableStore, referencedValueStore, collector.DeviceCommands, callback)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 
 	deviceCommand, ok := statementList[0].(*statements.DeviceCommand)
@@ -120,8 +124,6 @@ func TestRepeatedCommandInvocation(t *testing.T) {
 	_, isIn := statements.Contains(collector.DeviceCommands, deviceCommand2)
 	assert.False(isIn)
 
-	info2, _, err := statementList[1].Execute(variableStore, referencedValueStore, collector.DeviceCommands)
+	_, err = statementList[1].Execute(variableStore, referencedValueStore, collector.DeviceCommands, callback)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
-
-	assert.Equal(info, info2, "Expected device command to be the same")
 }
