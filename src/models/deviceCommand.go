@@ -7,6 +7,7 @@ import (
 )
 
 type SDCommand struct {
+	CommandID         uint32 `json:"commandId"`         // Command ID
 	CommandDenotation string `json:"commandDenotation"` // Command
 	Payload           string `json:"payload"`           // Payload
 }

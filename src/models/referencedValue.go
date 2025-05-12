@@ -36,7 +36,8 @@ type ReferencedValue struct {
 }
 
 type SDInformationFromBackend struct {
-	DeviceUID string              `json:"deviceId"`            // Device ID
+	DeviceID  uint32              `json:"deviceId"`            // Device ID
+	DeviceUID string              `json:"deviceUID"`           // Device ID
 	Snapshot  SDParameterSnapshot `json:"sdParameterSnapshot"` // SD parameter snapshot
 	Command   SDCommand           `json:"sdCommand"`           // SD command
 }
