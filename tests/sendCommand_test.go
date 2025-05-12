@@ -28,7 +28,7 @@ func TestSimpleCommandWithoutArguments(t *testing.T) {
 
 	dc, err := deviceCommand.PrepareCommandToSend(*response)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
-	assert.Equal("Device-1", dc.DeviceID, "Device ID should be 'Device-1', but got: %s", dc.DeviceID)
+	assert.Equal("Device-1", dc.InstanceUID, "Device ID should be 'Device-1', but got: %s", dc.InstanceUID)
 	assert.Equal("Command", dc.CommandDenotation, "Command should be 'Command', but got: %s", dc.CommandDenotation)
 	assert.Equal("", dc.Payload, "Payload should be empty, but got: %s", dc.Payload)
 	assert.Equal(time.Now().Format(time.RFC3339), dc.InvocationTime, "Invocation time should be current time, but got: %s", dc.InvocationTime)
@@ -56,7 +56,7 @@ func TestCommandWithArguments(t *testing.T) {
 
 	dc, err := deviceCommand.PrepareCommandToSend(*response)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
-	assert.Equal("Device-1", dc.DeviceID, "Device ID should be 'Device-1', but got: %s", dc.DeviceID)
+	assert.Equal("Device-1", dc.InstanceUID, "Device ID should be 'Device-1', but got: %s", dc.InstanceUID)
 	assert.Equal("Command", dc.CommandDenotation, "Command should be 'Command', but got: %s", dc.CommandDenotation)
 	assert.Equal(`{"name":"testing","value":"Test"}`, dc.Payload, "Payload should be `{\"name\":\"testing\",\"value\":\"Test\"}`, but got: %s", dc.Payload)
 	assert.Equal(time.Now().Format(time.RFC3339), dc.InvocationTime, "Invocation time should be current time, but got: %s", dc.InvocationTime)
