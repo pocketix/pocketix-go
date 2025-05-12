@@ -237,7 +237,7 @@ func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, vari
 		if child.Type == "variable" {
 			referencedValue, ok := referenceValueStore.GetReferencedValueFromStore(child.Value.(string))
 			if ok {
-				sdInformation, err := referenceValueStore.ResolveDeviceInformationFunction(referencedValue.DeviceID, referencedValue.ParameterName, "sdParameter")
+				sdInformation, err := referenceValueStore.ResolveDeviceInformationFunction(referencedValue.DeviceID, referencedValue.ParameterName, "sdParameter", nil)
 				if err != nil {
 					return nil, err
 				}

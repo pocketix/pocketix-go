@@ -35,7 +35,7 @@ func MockRepeatExecute(r statements.Repeat, variableStore *models.VariableStore)
 
 	for range count {
 		iterations++
-		result, err := statements.ExecuteStatements(r.Block, nil, nil)
+		_, result, err := statements.ExecuteStatements(r.Block, nil, nil, nil)
 		if err != nil {
 			return result, -1, err
 		}
@@ -53,7 +53,7 @@ func TestRepeatZeroTimes(t *testing.T) {
 		Block: []statements.Statement{},
 	}
 
-	result, err := repeatStatement.Execute(nil, nil)
+	_, result, err := repeatStatement.Execute(nil, nil, nil)
 	assert.True(result)
 	assert.Nil(err)
 }
@@ -82,7 +82,7 @@ func TestRepeatNegativeCount(t *testing.T) {
 		Block: []statements.Statement{},
 	}
 
-	result, err := repeatStatement.Execute(nil, nil)
+	_, result, err := repeatStatement.Execute(nil, nil, nil)
 	assert.False(result)
 	assert.NotNil(err)
 	assert.Equal("count cannot be negative", err.Error())

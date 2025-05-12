@@ -86,9 +86,10 @@ func main() {
 	referencedValueStore := models.NewReferencedValueStore()
 
 	ast := make([]statements.Statement, 0)
+	collector := &statements.ASTCollector{Target: &ast}
 	// err = parser.Parse(modifiedData, variableStore, procedureStore, referencedValueStore, &statements.NoOpCollector{})
 
-	err = parser.Parse(modifiedData, variableStore, procedureStore, referencedValueStore, &statements.ASTCollector{Target: &ast})
+	err = parser.Parse(modifiedData, variableStore, procedureStore, referencedValueStore, collector)
 
 	if err != nil {
 		log.Fatalln(err)
@@ -101,7 +102,7 @@ func main() {
 	}
 
 	for _, block := range ast {
-		if _, err := block.Execute(variableStore, referencedValueStore); err != nil {
+		if _, _, err := block.Execute(variableStore, referencedValueStore, collector.DeviceCommands); err != nil {
 			log.Fatalln(err)
 		}
 	}

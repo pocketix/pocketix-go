@@ -14,7 +14,7 @@ type Switch struct {
 	Selector     any
 }
 
-func (s *Switch) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error) {
+func (s *Switch) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, deviceCommands []models.SDInformationFromBackend) (any, bool, error) {
 	services.Logger.Println("Executing switch")
 	for _, c := range s.Block {
 		caseStatement := c.(*Case)
@@ -24,7 +24,7 @@ func (s *Switch) Execute(variableStore *models.VariableStore, referencedValueSto
 		if s.SelectorType == "variable" {
 			variable, err := variableStore.GetVariable(s.Selector.(string))
 			if err != nil {
-				return false, err
+				return nil, false, err
 			}
 			selectorValue = variable.Value
 		}
@@ -32,16 +32,16 @@ func (s *Switch) Execute(variableStore *models.VariableStore, referencedValueSto
 		if caseStatement.Type == "variable" {
 			variable, err := variableStore.GetVariable(caseValue.(string))
 			if err != nil {
-				return false, err
+				return nil, false, err
 			}
 			caseValue = variable.Value
 		}
 		if caseValue == selectorValue {
-			caseStatement.Execute(variableStore, referencedValueStore)
-			return true, nil
+			caseStatement.Execute(variableStore, referencedValueStore, deviceCommands)
+			return nil, true, nil
 		}
 	}
-	return true, nil
+	return s, true, nil
 }
 
 func (s *Switch) GetId() string {

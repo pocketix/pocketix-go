@@ -24,7 +24,7 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	assert.NotNil(statementAST, "Commands list should not be nil")
 
 	for _, statement := range statementAST {
-		_, err := statement.Execute(variableStore, referencedValueStore)
+		_, _, err := statement.Execute(variableStore, referencedValueStore, nil)
 		assert.Nil(err, "Error should be nil, but got: %v", err)
 	}
 
@@ -33,7 +33,7 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	assert.Equal(float64(5), variable.Value.Value, "Variable value should be 5, but got: %v", variable.Value.Value)
 }
 
-func MockResolveParameterFunctionComplexProgram(deviceUID string, paramDenotation string, infoType string) (models.SDInformationFromBackend, error) {
+func MockResolveParameterFunctionComplexProgram(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]models.SDInformationFromBackend) (models.SDInformationFromBackend, error) {
 	return models.SDInformationFromBackend{
 		DeviceUID: deviceUID,
 		Snapshot: models.SDParameterSnapshot{
@@ -58,7 +58,7 @@ func TestExecuteProgramWithReferencedValue(t *testing.T) {
 	assert.NotNil(statementAST, "Commands list should not be nil")
 
 	for _, statement := range statementAST {
-		_, err := statement.Execute(variableStore, referencedValueStore)
+		_, _, err := statement.Execute(variableStore, referencedValueStore, nil)
 		assert.Nil(err, "Error should be nil, but got: %v", err)
 	}
 

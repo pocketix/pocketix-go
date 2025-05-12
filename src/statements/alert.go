@@ -16,11 +16,11 @@ type Alert struct {
 	MessageType  string
 }
 
-func (a *Alert) Execute(variableStore *models.VariableStore, _ *models.ReferencedValueStore) (bool, error) {
+func (a *Alert) Execute(variableStore *models.VariableStore, _ *models.ReferencedValueStore, _ []models.SDInformationFromBackend) (any, bool, error) {
 	services.Logger.Println("Executing alert")
 
 	if a.Method != "phone_number" && a.Method != "email" {
-		return false, fmt.Errorf("invalid alert method")
+		return nil, false, fmt.Errorf("invalid alert method")
 	}
 
 	receiver := a.Receiver
@@ -29,7 +29,7 @@ func (a *Alert) Execute(variableStore *models.VariableStore, _ *models.Reference
 	if a.ReceiverType == "variable" {
 		variable, err := variableStore.GetVariable(a.Receiver)
 		if err != nil {
-			return false, err
+			return nil, false, err
 		}
 		receiver = variable.Value.Value.(string)
 	}
@@ -37,13 +37,13 @@ func (a *Alert) Execute(variableStore *models.VariableStore, _ *models.Reference
 	if a.MessageType == "variable" {
 		variable, err := variableStore.GetVariable(a.Message)
 		if err != nil {
-			return false, err
+			return nil, false, err
 		}
 		message = variable.Value.Value.(string)
 	}
 
 	services.Logger.Println("Sending alert with method", a.Method, "to receiver", receiver, "with message", message)
-	return true, nil
+	return a, true, nil
 }
 
 func (a *Alert) GetId() string {

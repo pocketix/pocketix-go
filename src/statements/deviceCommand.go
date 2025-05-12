@@ -1,6 +1,7 @@
 package statements
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/pocketix/pocketix-go/src/models"
@@ -11,8 +12,30 @@ type DeviceCommand struct {
 	Arguments *models.TreeNode
 }
 
-func (d *DeviceCommand) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error) {
-	return true, nil
+func (d *DeviceCommand) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, deviceCommands []models.SDInformationFromBackend) (any, bool, error) {
+	// informationFromBackend, err := referencedValueStore.ResolveDeviceInformationFunction(deviceUID, commandDenotation, "sdCommand", deviceCommands)
+
+	deviceCommand, ok := d.DeviceCommand2ModelsDeviceCommand()
+	if !ok {
+		return nil, false, fmt.Errorf("failed to convert DeviceCommand to models.DeviceCommand")
+	}
+
+	var sdCommandInformation models.SDInformationFromBackend
+	if backendInformation, ok := Contains(deviceCommands, deviceCommand); ok {
+		sdCommandInformation = backendInformation
+	} else {
+		sdCommandInfo, err := referencedValueStore.ResolveDeviceInformationFunction(deviceCommand.DeviceUID, deviceCommand.CommandDenotation, "sdCommand", &deviceCommands)
+		if err != nil {
+			return nil, false, err
+		}
+		sdCommandInformation = sdCommandInfo
+	}
+
+	sdCommandInvocation, err := deviceCommand.PrepareCommandToSend(sdCommandInformation)
+	if err != nil {
+		return nil, false, err
+	}
+	return sdCommandInvocation, true, nil
 }
 
 func (d *DeviceCommand) GetId() string {
@@ -48,4 +71,13 @@ func (d *DeviceCommand) DeviceCommand2ModelsDeviceCommand() (models.DeviceComman
 			Value: d.Arguments.Value,
 		},
 	}, true
+}
+
+func Contains(slice []models.SDInformationFromBackend, item models.DeviceCommand) (models.SDInformationFromBackend, bool) {
+	for _, v := range slice {
+		if v.DeviceUID == item.DeviceUID && v.Command.CommandDenotation == item.CommandDenotation {
+			return v, true
+		}
+	}
+	return models.SDInformationFromBackend{}, false
 }

@@ -12,20 +12,20 @@ type ElseIf struct {
 	Arguments *models.TreeNode
 }
 
-func (e *ElseIf) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error) {
+func (e *ElseIf) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, deviceCommands []models.SDInformationFromBackend) (any, bool, error) {
 	services.Logger.Println("Executing else if")
 	if result, err := e.Arguments.Evaluate(variableStore, referencedValueStore); err != nil {
 		services.Logger.Println("Error executing else if arguments", err)
 	} else {
 		if boolResult, boolErr := utils.ToBool(result); boolErr != nil {
 			services.Logger.Println("Error converting else if result to bool", boolErr)
-			return false, boolErr
+			return nil, false, boolErr
 		} else if boolResult {
 			services.Logger.Println("Else if is true, can execute body")
-			return ExecuteStatements(e.Block, variableStore, referencedValueStore)
+			return ExecuteStatements(e.Block, variableStore, referencedValueStore, deviceCommands)
 		}
 	}
-	return false, nil
+	return e, false, nil
 }
 
 func (e *ElseIf) GetId() string {

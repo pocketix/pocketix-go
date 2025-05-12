@@ -4,7 +4,7 @@ import "fmt"
 
 type ReferencedValueStore struct {
 	ReferencedValues                 map[string]ReferencedValue
-	ResolveDeviceInformationFunction func(deviceUID string, paramDenotation string, infoType string) (SDInformationFromBackend, error)
+	ResolveDeviceInformationFunction func(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]SDInformationFromBackend) (SDInformationFromBackend, error)
 }
 
 func NewReferencedValueStore() *ReferencedValueStore {
@@ -51,6 +51,6 @@ func (rvStore *ReferencedValueStore) SetReferencedValue(referenceTarget string, 
 	return referencedValue.Value, nil
 }
 
-func (rvStore *ReferencedValueStore) SetResolveParameterFunction(fn func(deviceUID string, paramDenotation string, infoType string) (SDInformationFromBackend, error)) {
+func (rvStore *ReferencedValueStore) SetResolveParameterFunction(fn func(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]SDInformationFromBackend) (SDInformationFromBackend, error)) {
 	rvStore.ResolveDeviceInformationFunction = fn
 }

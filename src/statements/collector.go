@@ -7,8 +7,6 @@ type Collector interface {
 	Collect(statement Statement)
 	Type() Collector
 	GetTarget() *[]Statement
-	CollectDeviceCommand(deviceCommand models.SDInformationFromBackend)
-	IsDeviceCommandCollected(deviceCommand models.DeviceCommand) (models.SDInformationFromBackend, bool)
 }
 
 type NoOpCollector struct {
@@ -33,15 +31,6 @@ func (c *NoOpCollector) GetTarget() *[]Statement {
 	return &c.Target
 }
 
-func (c *NoOpCollector) CollectDeviceCommand(deviceCommand models.SDInformationFromBackend) {
-	// No operation for NoOpCollector
-}
-
-func (c *NoOpCollector) IsDeviceCommandCollected(deviceCommand models.DeviceCommand) (models.SDInformationFromBackend, bool) {
-	// No operation for NoOpCollector
-	return models.SDInformationFromBackend{}, false
-}
-
 type ASTCollector struct {
 	Target         *[]Statement
 	DeviceCommands []models.SDInformationFromBackend
@@ -64,17 +53,4 @@ func (c *ASTCollector) NewCollectorBasedOnType(collectorType Collector, target *
 
 func (c *ASTCollector) GetTarget() *[]Statement {
 	return c.Target
-}
-
-func (c *ASTCollector) CollectDeviceCommand(deviceCommand models.SDInformationFromBackend) {
-	c.DeviceCommands = append(c.DeviceCommands, deviceCommand)
-}
-
-func (c *ASTCollector) IsDeviceCommandCollected(deviceCommand models.DeviceCommand) (models.SDInformationFromBackend, bool) {
-	for _, cmd := range c.DeviceCommands {
-		if cmd.DeviceUID == deviceCommand.DeviceUID && cmd.Command.CommandDenotation == deviceCommand.CommandDenotation {
-			return cmd, true
-		}
-	}
-	return models.SDInformationFromBackend{}, false
 }

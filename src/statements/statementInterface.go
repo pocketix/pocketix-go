@@ -5,7 +5,7 @@ import (
 )
 
 type Statement interface {
-	Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error)
+	Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, deviceCommands []models.SDInformationFromBackend) (any, bool, error)
 	GetId() string
 	Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error
 }

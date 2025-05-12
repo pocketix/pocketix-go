@@ -10,7 +10,7 @@ import (
 )
 
 // func(deviceUID string, paramDenotation string) (any, error)
-func MockResolveParameterFunction(deviceUID string, paramDenotation string, infoType string) (models.SDInformationFromBackend, error) {
+func MockResolveParameterFunction(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]models.SDInformationFromBackend) (models.SDInformationFromBackend, error) {
 	return models.SDInformationFromBackend{
 		DeviceUID: deviceUID,
 		Snapshot: models.SDParameterSnapshot{
@@ -20,14 +20,18 @@ func MockResolveParameterFunction(deviceUID string, paramDenotation string, info
 	}, nil
 }
 
-func MockResolveCommandFunction(deviceUID string, commandDenotation string, infoType string) (models.SDInformationFromBackend, error) {
-	return models.SDInformationFromBackend{
+func MockResolveCommandFunction(deviceUID string, commandDenotation string, infoType string, deviceCommands *[]models.SDInformationFromBackend) (models.SDInformationFromBackend, error) {
+	info := models.SDInformationFromBackend{
 		DeviceUID: deviceUID,
 		Command: models.SDCommand{
 			CommandDenotation: commandDenotation,
 			Payload:           "",
 		},
-	}, nil
+	}
+
+	*deviceCommands = append(*deviceCommands, info)
+
+	return info, nil
 }
 
 func TestSetReferencedValues(t *testing.T) {
@@ -45,7 +49,7 @@ func TestSetReferencedValues(t *testing.T) {
 	assert.Equal("", referencedValueStore.GetReferencedValues()["Device-1.test"].Type)
 	assert.Equal(nil, referencedValueStore.GetReferencedValues()["Device-1.test"].Value)
 
-	sdInformation, err := referencedValueStore.ResolveDeviceInformationFunction("Device-1", "test", "sdParameter")
+	sdInformation, err := referencedValueStore.ResolveDeviceInformationFunction("Device-1", "test", "sdParameter", nil)
 	assert.Nil(err)
 	assert.Equal("Device-1", sdInformation.DeviceUID)
 	assert.Equal("test", sdInformation.Snapshot.SDParameter)
@@ -99,57 +103,25 @@ func TestRepeatedCommandInvocation(t *testing.T) {
 	referencedValueStore.SetResolveParameterFunction(MockResolveCommandFunction)
 
 	statementList := make([]statements.Statement, 0)
-	collector := &statements.ASTCollector{Target: &statementList}
+	collector := &statements.ASTCollector{Target: &statementList, DeviceCommands: make([]models.SDInformationFromBackend, 0)}
 
 	err := parser.Parse([]byte(program), variableStore, procedureStore, referencedValueStore, collector)
 	assert.Nil(err, "Error should be nil, but got: %v", err)
-	var wasCommandSet bool
 
-	if deviceCommand, ok := statementList[0].(*statements.DeviceCommand); ok {
-		dvcCommand, ok := deviceCommand.DeviceCommand2ModelsDeviceCommand()
-		assert.True(ok, "Expected DeviceCommand, but got: %T", deviceCommand)
+	info, _, err := statementList[0].Execute(variableStore, referencedValueStore, collector.DeviceCommands)
+	assert.Nil(err, "Error should be nil, but got: %v", err)
 
-		assert.Equal("TemperatureDevice-1", dvcCommand.DeviceUID, "Device ID should be 'TemperatureDevice-1', but got: %s", dvcCommand.DeviceUID)
-		assert.Equal("setTemperature", dvcCommand.CommandDenotation, "Command should be 'setTemperature', but got: %s", dvcCommand.CommandDenotation)
+	deviceCommand, ok := statementList[0].(*statements.DeviceCommand)
+	assert.True(ok, "Expected DeviceCommand type, but got: %T", statementList[0])
 
-		var sdCommandInformation models.SDInformationFromBackend
-		if cmd, ok := collector.IsDeviceCommandCollected(dvcCommand); ok {
-			sdCommandInformation = cmd
-		} else {
-			sdCommandInfo, err2 := referencedValueStore.ResolveDeviceInformationFunction(dvcCommand.DeviceUID, dvcCommand.CommandDenotation, "sdCommand")
-			collector.CollectDeviceCommand(sdCommandInfo)
-			assert.Nil(err2, "Error should be nil, but got: %v", err2)
-			sdCommandInformation = sdCommandInfo
-			wasCommandSet = false
-		}
-		assert.False(wasCommandSet, "Expected command to be collected, but it was not")
-		assert.Equal("TemperatureDevice-1", sdCommandInformation.DeviceUID, "Device ID should be 'TemperatureDevice-1', but got: %s", sdCommandInformation.DeviceUID)
-		assert.Equal("setTemperature", sdCommandInformation.Command.CommandDenotation, "Command should be 'setTemperature', but got: %s", sdCommandInformation.Command.CommandDenotation)
+	deviceCommand2, ok := deviceCommand.DeviceCommand2ModelsDeviceCommand()
+	assert.True(ok, "Expected DeviceCommand2ModelsDeviceCommand type, but got: %T", deviceCommand)
 
-	} else {
-		t.Errorf("Expected DeviceCommand, got %T", statementList[0])
-	}
+	_, isIn := statements.Contains(collector.DeviceCommands, deviceCommand2)
+	assert.False(isIn)
 
-	if deviceCommand, ok := statementList[1].(*statements.DeviceCommand); ok {
-		dvcCommand, ok := deviceCommand.DeviceCommand2ModelsDeviceCommand()
-		assert.True(ok, "Expected DeviceCommand, but got: %T", deviceCommand)
+	info2, _, err := statementList[1].Execute(variableStore, referencedValueStore, collector.DeviceCommands)
+	assert.Nil(err, "Error should be nil, but got: %v", err)
 
-		assert.Equal("TemperatureDevice-1", dvcCommand.DeviceUID, "Device ID should be 'TemperatureDevice-1', but got: %s", dvcCommand.DeviceUID)
-		assert.Equal("setTemperature", dvcCommand.CommandDenotation, "Command should be 'setTemperature', but got: %s", dvcCommand.CommandDenotation)
-
-		var sdCommandInformation models.SDInformationFromBackend
-		if cmd, ok := collector.IsDeviceCommandCollected(dvcCommand); ok {
-			sdCommandInformation = cmd
-			wasCommandSet = true
-		} else {
-			sdCommandInfo, err2 := referencedValueStore.ResolveDeviceInformationFunction(dvcCommand.DeviceUID, dvcCommand.CommandDenotation, "sdCommand")
-			assert.Nil(err2, "Error should be nil, but got: %v", err2)
-			sdCommandInformation = sdCommandInfo
-		}
-		assert.True(wasCommandSet, "Expected command to be collected, but it was not")
-		assert.Equal("TemperatureDevice-1", sdCommandInformation.DeviceUID, "Device ID should be 'TemperatureDevice-1', but got: %s", sdCommandInformation.DeviceUID)
-		assert.Equal("setTemperature", sdCommandInformation.Command.CommandDenotation, "Command should be 'setTemperature', but got: %s", sdCommandInformation.Command.CommandDenotation)
-	} else {
-		t.Errorf("Expected DeviceCommand, got %T", statementList[1])
-	}
+	assert.Equal(info, info2, "Expected device command to be the same")
 }

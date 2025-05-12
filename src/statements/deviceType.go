@@ -13,10 +13,10 @@ type DeviceType struct {
 }
 
 // Execute implements the Statement interface
-func (d *DeviceType) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) (bool, error) {
+func (d *DeviceType) Execute(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, _ []models.SDInformationFromBackend) (any, bool, error) {
 	services.Logger.Println("Executing deviceType with type:", d.Type)
 
-	return true, nil
+	return nil, true, nil
 }
 
 // GetId implements the Statement interface
