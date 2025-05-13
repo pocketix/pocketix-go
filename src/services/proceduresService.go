@@ -26,40 +26,65 @@ func AddProceduresToProgram(programData []byte, procedures json.RawMessage) ([]b
 		return nil, fmt.Errorf("header not found or invalid format")
 	}
 
-	// Get the userProcedures
-	var userProcedures map[string]interface{}
-	
-	// If userProcedures exists, unmarshal it
-	if userProcsRaw, exists := header["userProcedures"]; exists && userProcsRaw != nil {
-		// Convert to JSON first
-		userProcsJSON, err := json.Marshal(userProcsRaw)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal existing userProcedures: %w", err)
-		}
-		
-		// Then unmarshal to map
-		if err := json.Unmarshal(userProcsJSON, &userProcedures); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal existing userProcedures: %w", err)
-		}
-	} else {
-		// If userProcedures doesn't exist, create an empty map
-		userProcedures = make(map[string]interface{})
-	}
-
 	// Parse the procedures to add
 	var proceduresToAdd map[string]interface{}
 	if err := json.Unmarshal(procedures, &proceduresToAdd); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal procedures to add: %w", err)
 	}
 
-	// Add the procedures to userProcedures
+	// Update header.userProcedures
+	// Get the existing header.userProcedures or create an empty map
+	var headerProcedures map[string]interface{}
+	if userProcsRaw, exists := header["userProcedures"]; exists && userProcsRaw != nil {
+		// Convert to JSON first
+		userProcsJSON, err := json.Marshal(userProcsRaw)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal existing header procedures: %w", err)
+		}
+
+		// Then unmarshal to map
+		if err := json.Unmarshal(userProcsJSON, &headerProcedures); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal existing header procedures: %w", err)
+		}
+	} else {
+		headerProcedures = make(map[string]interface{})
+	}
+
+	// Add the procedures to header.userProcedures
 	for name, proc := range proceduresToAdd {
-		userProcedures[name] = proc
+		headerProcedures[name] = proc
 	}
 
 	// Update the header with the modified userProcedures
-	header["userProcedures"] = userProcedures
+	header["userProcedures"] = headerProcedures
 	program["header"] = header
+
+	// Update the top-level userProcedures field (which is always present in the program structure)
+	// Get the existing userProcedures or create an empty map if it doesn't exist
+	var topLevelProcedures map[string]interface{}
+	if topLevelProcs, exists := program["userProcedures"]; exists && topLevelProcs != nil {
+		// Convert to JSON first
+		topLevelProcsJSON, err := json.Marshal(topLevelProcs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal existing top-level procedures: %w", err)
+		}
+
+		// Then unmarshal to map
+		if err := json.Unmarshal(topLevelProcsJSON, &topLevelProcedures); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal existing top-level procedures: %w", err)
+		}
+	} else {
+		// Create an empty map if userProcedures doesn't exist
+		topLevelProcedures = make(map[string]interface{})
+	}
+
+	// Add the procedures to top-level userProcedures
+	for name, proc := range proceduresToAdd {
+		topLevelProcedures[name] = proc
+	}
+
+	// Update the top-level userProcedures
+	program["userProcedures"] = topLevelProcedures
 
 	// Marshal the program back to JSON
 	modifiedProgram, err := json.Marshal(program)
