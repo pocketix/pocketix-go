@@ -28,7 +28,7 @@ Then to parse the program using:
 
 ```go
 err = parser.Parse(
-    modifiedData, 
+    data, 
     variableStore, 
     procedureStore, 
     referencedValueStore, 
