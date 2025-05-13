@@ -92,6 +92,12 @@ func StatementFactory(
 		}, nil
 	// Default case to handle device commands
 	default:
+		if len(tree) == 0 {
+			return &DeviceCommand{
+				Id: id,
+			}, nil
+		}
+
 		return &DeviceCommand{
 			Id:        id,
 			Arguments: tree[0],

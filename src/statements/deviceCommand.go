@@ -22,7 +22,7 @@ func (d *DeviceCommand) Execute(
 
 	deviceCommand, ok := d.DeviceCommand2ModelsDeviceCommand()
 	if !ok {
-		return false, fmt.Errorf("failed to convert DeviceCommand to models.DeviceCommand")
+		return false, fmt.Errorf("failed to convert DeviceCommand to models.DeviceCommand, probably due to missing procedure %s", d.Id)
 	}
 
 	var sdCommandInformation models.SDInformationFromBackend
@@ -67,6 +67,13 @@ func (d *DeviceCommand) DeviceCommand2ModelsDeviceCommand() (models.DeviceComman
 
 	if prefix == "" || last == "" {
 		return models.DeviceCommand{}, false
+	}
+
+	if d.Arguments == nil {
+		return models.DeviceCommand{
+			DeviceUID:         prefix,
+			CommandDenotation: last,
+		}, true
 	}
 
 	return models.DeviceCommand{
