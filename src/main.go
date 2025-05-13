@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 
 	"github.com/pocketix/pocketix-go/src/models"
@@ -12,6 +10,25 @@ import (
 	"github.com/pocketix/pocketix-go/src/statements"
 )
 
+func MockResolveDeviceInformationFunction(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]models.SDInformationFromBackend) (models.SDInformationFromBackend, error) {
+	// Mock implementation: return a dummy SDInformationFromBackend
+	return models.SDInformationFromBackend{
+		DeviceID:  1,
+		DeviceUID: deviceUID,
+		Snapshot: models.SDParameterSnapshot{
+			SDParameter: paramDenotation,
+			Number:      func() *float64 { v := 42.0; return &v }(),
+			String:      func() *string { v := "mocked"; return &v }(),
+			Boolean:     func() *bool { v := true; return &v }(),
+		},
+		Command: models.SDCommand{
+			CommandID:         1,
+			CommandDenotation: paramDenotation,
+			Payload:           "mocked payload",
+		},
+	}, nil
+}
+
 func main() {
 	path := flag.String("path", "programs/basic/empty_block.json", "path to the program file")
 	flag.Parse()
@@ -19,86 +36,20 @@ func main() {
 	// Load the original program
 	data := services.OpenFile(*path)
 
-	// Simulate procedures coming from backend/RabbitMQ
-	// This would be the procedures[] entry from the payload
-	testProcedures := []byte(`{
-		"testProcedure": [
-			{
-				"id": "alert",
-				"arguments": [
-					{
-						"type": "str_opt",
-						"value": "phone_number"
-					},
-					{
-						"type": "string",
-						"value": "123456789"
-					},
-					{
-						"type": "string",
-						"value": "This is a test procedure"
-					}
-				]
-			},
-			{
-				"id": "alert",
-				"arguments": [
-					{
-						"type": "str_opt",
-						"value": "email"
-					},
-					{
-						"type": "string",
-						"value": "test@example.com"
-					},
-					{
-						"type": "string",
-						"value": "Email from procedure"
-					}
-				]
-			}
-		]
-	}`)
-
-	// Print original program for debugging
-	fmt.Println("Original Program:")
-	var originalProgram map[string]interface{}
-	json.Unmarshal(data, &originalProgram)
-	originalJSON, _ := json.MarshalIndent(originalProgram, "", "  ")
-	fmt.Println(string(originalJSON))
-
-	// Add procedures to the program
-	modifiedData, err := services.AddProceduresToProgram(data, testProcedures)
-	if err != nil {
-		log.Fatalf("Failed to add procedures to program: %v", err)
-	}
-
-	// Print modified program for debugging
-	fmt.Println("\nModified Program with Added Procedures:")
-	var modifiedProgram map[string]interface{}
-	json.Unmarshal(modifiedData, &modifiedProgram)
-	modifiedJSON, _ := json.MarshalIndent(modifiedProgram, "", "  ")
-	fmt.Println(string(modifiedJSON))
-
 	// Parse the modified program
 	variableStore := models.NewVariableStore()
 	procedureStore := models.NewProcedureStore()
 	referencedValueStore := models.NewReferencedValueStore()
+	referencedValueStore.SetResolveParameterFunction(MockResolveDeviceInformationFunction)
 
 	ast := make([]statements.Statement, 0)
 	collector := &statements.ASTCollector{Target: &ast}
 	// err = parser.Parse(modifiedData, variableStore, procedureStore, referencedValueStore, &statements.NoOpCollector{})
 
-	err = parser.Parse(modifiedData, variableStore, procedureStore, referencedValueStore, collector)
+	err := parser.Parse(data, variableStore, procedureStore, referencedValueStore, collector)
 
 	if err != nil {
 		log.Fatalln(err)
-	}
-
-	// Check if the procedure was added to the store
-	fmt.Println("\nProcedure Store Contents:")
-	for name := range procedureStore.Procedures {
-		fmt.Printf("- Procedure: %s\n", name)
 	}
 
 	var interpretInvocationsToSend []models.SDCommandInvocation
