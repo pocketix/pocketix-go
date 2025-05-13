@@ -18,9 +18,10 @@ A bachelor thesis project that deals with the backend processing of visual progr
 
 To get started, create instances of the following:
 
-- **models.VariableStore**: Handles user variables in the program
-- **models.ProcedureStore**: Handles user procedures in the program
-- **models.ReferencedValueStore**: Handles referenced values to the devices parameters
+- **models.VariableStore**: handles user variables in the program
+- **models.ProcedureStore**: handles user procedures in the program
+- **models.ReferencedValueStore**: handles referenced values to the devices parameters
+- **SetResolveParameterFunction**: set resolver device information callback to referencedValueStore
 - **ast**: slices of program statements
 - **statements.Collector**: collector for the program statements
 
