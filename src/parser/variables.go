@@ -7,6 +7,7 @@ import (
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
 func ParseVariables(data json.RawMessage, variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) error {
@@ -17,13 +18,13 @@ func ParseVariables(data json.RawMessage, variableStore *models.VariableStore, r
 		services.Logger.Println("Error parsing variables", err)
 	}
 
-	type ExpressionVariable struct {
-		Name  string
-		Type  string
-		Value any
-	}
+	// type Argument struct {
+	// 	Name  string
+	// 	Type  string
+	// 	Value any
+	// }
 
-	expressionVariables := make([]ExpressionVariable, 0)
+	expressionVariables := make([]types.Argument, 0)
 
 	for varName, varData := range variables {
 		varType, varValue := varData.(map[string]any)["type"], varData.(map[string]any)["value"]
@@ -33,14 +34,20 @@ func ParseVariables(data json.RawMessage, variableStore *models.VariableStore, r
 		}
 
 		if varType == "boolean_expression" || varType == "variable" {
-			expressionVariables = append(expressionVariables, ExpressionVariable{
-				Name:  varName,
-				Type:  varType.(string),
-				Value: varValue,
+			expressionVariables = append(expressionVariables, types.Argument{
+				Reference: varName,
+				Type:      varType.(string),
+				Value:     varValue.(json.RawMessage),
 			})
 			continue
 		}
-		tree, err := models.InitTree(varType.(string), varValue, varValue, variableStore, referencedValueStore)
+
+		varData := types.Argument{
+			Reference: varName,
+			Type:      varType.(string),
+			Value:     varValue.(json.RawMessage),
+		}
+		tree, err := models.InitTree(varData, variableStore, referencedValueStore)
 		if err != nil {
 			return err
 		}
@@ -53,13 +60,13 @@ func ParseVariables(data json.RawMessage, variableStore *models.VariableStore, r
 	}
 
 	for _, expressionVariable := range expressionVariables {
-		tree, err := models.InitTree(expressionVariable.Type, expressionVariable.Value, expressionVariable.Value, variableStore, referencedValueStore)
+		tree, err := models.InitTree(expressionVariable, variableStore, referencedValueStore)
 		if err != nil {
 			return err
 		}
 
 		variableStore.AddVariable(models.Variable{
-			Name:  expressionVariable.Name,
+			Name:  expressionVariable.Reference,
 			Type:  expressionVariable.Type,
 			Value: tree,
 		})

@@ -21,14 +21,32 @@ type SDParameter struct {
 }
 
 type SDParameterSnapshot struct {
-	SDParameter string   `json:"sdParameter"`
-	String      *string  `json:"string,omitempty"`
-	Number      *float64 `json:"number,omitempty"`
-	Boolean     *bool    `json:"boolean,omitempty"`
+	DeviceID    uint32          `json:"deviceId"`
+	SDParameter uint32          `json:"sdParameter"`
+	String      SnapshotString  `json:"string,omitempty"`
+	Number      SnapshotNumber  `json:"number,omitempty"`
+	Boolean     SnapshotBoolean `json:"boolean,omitempty"`
+}
+
+type SnapshotString struct {
+	Value string
+	Set   bool
+}
+
+type SnapshotNumber struct {
+	Value float64
+	Set   bool
+}
+
+type SnapshotBoolean struct {
+	Value bool
+	Set   bool
 }
 
 type ReferencedValue struct {
-	DeviceID      string // Device ID
+	DeviceID      uint32 // Device ID
+	DeviceUID     string // Device UID
+	ParameterID   uint32 // Parameter ID
 	ParameterName string // Parameter name
 	Type          string // Type of the value
 	Value         any    // Value of the referenced value
@@ -64,7 +82,7 @@ func NewReferencedValue(referencedTarget string) (*ReferencedValue, bool) {
 		return nil, ok
 	}
 	return &ReferencedValue{
-		DeviceID:      deviceID,
+		DeviceUID:     deviceID,
 		ParameterName: parameterName,
 		Type:          "",
 		Value:         nil,
@@ -72,5 +90,5 @@ func NewReferencedValue(referencedTarget string) (*ReferencedValue, bool) {
 }
 
 func (rv *ReferencedValue) ToReferenceTarget() string {
-	return rv.DeviceID + "." + rv.ParameterName
+	return rv.DeviceUID + "." + rv.ParameterName
 }

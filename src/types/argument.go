@@ -5,6 +5,7 @@ import (
 )
 
 type Argument struct {
-	Type  string          `json:"type"`
-	Value json.RawMessage `json:"value"`
+	Reference string          `json:"reference"`
+	Type      string          `json:"type"`
+	Value     json.RawMessage `json:"value"`
 }

@@ -34,7 +34,7 @@ type DeviceCommand struct {
 
 func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation SDInformationFromBackend) (*SDCommandInvocation, error) {
 	command := sdInstanceInformation.Command
-	var payload map[string]any
+	var payload []map[string]any
 
 	if command.Payload == "" {
 		return &SDCommandInvocation{
@@ -54,7 +54,7 @@ func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation SDInformatio
 	}
 	// TODO check for possible values
 	newPayload := map[string]any{
-		"name":  payload["name"],
+		"name":  payload[0]["name"],
 		"value": dc.Arguments.Value,
 	}
 	serializedPayload, err := json.Marshal(newPayload)

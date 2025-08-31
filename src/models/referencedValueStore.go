@@ -1,6 +1,10 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/pocketix/pocketix-go/src/services"
+)
 
 type ReferencedValueStore struct {
 	ReferencedValues                 map[string]ReferencedValue
@@ -30,27 +34,43 @@ func (rvStore *ReferencedValueStore) GetReferencedValueFromStore(referencedTarge
 }
 
 func (rvStore *ReferencedValueStore) SetReferencedValue(referenceTarget string, snapshot SDParameterSnapshot) (any, error) {
+	services.Logger.Printf("Setting referenced value for %s: %v", referenceTarget, snapshot)
 	referencedValue, ok := rvStore.ReferencedValues[referenceTarget]
 	if !ok {
 		return nil, fmt.Errorf("referenced value %s not found", referenceTarget)
 	}
-	if snapshot.String != nil {
-		referencedValue.Value = *snapshot.String
+	if snapshot.String.Set {
+		referencedValue.Value = snapshot.String
 		referencedValue.Type = "string"
-	} else if snapshot.Number != nil {
-		referencedValue.Value = *snapshot.Number
+	} else if snapshot.Number.Set {
+		referencedValue.Value = snapshot.Number
 		referencedValue.Type = "number"
-	} else if snapshot.Boolean != nil {
-		referencedValue.Value = *snapshot.Boolean
+	} else if snapshot.Boolean.Set {
+		referencedValue.Value = snapshot.Boolean
 		referencedValue.Type = "boolean"
 	} else {
 		return nil, fmt.Errorf("no valid value found in the snapshot")
 	}
+
 	referencedValue.IsSet = true
+	referencedValue.DeviceID = snapshot.DeviceID
+	referencedValue.ParameterID = snapshot.SDParameter
+
 	rvStore.ReferencedValues[referenceTarget] = referencedValue
+	services.Logger.Printf("Set referenced value for %s: %v", referenceTarget, referencedValue)
 	return referencedValue.Value, nil
 }
 
 func (rvStore *ReferencedValueStore) SetResolveParameterFunction(fn func(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]SDInformationFromBackend) (SDInformationFromBackend, error)) {
 	rvStore.ResolveDeviceInformationFunction = fn
+}
+
+func (rvStore *ReferencedValueStore) GetSetReferencedValues() map[string]ReferencedValue {
+	setValues := make(map[string]ReferencedValue)
+	for key, value := range rvStore.ReferencedValues {
+		if value.IsSet {
+			setValues[key] = value
+		}
+	}
+	return setValues
 }

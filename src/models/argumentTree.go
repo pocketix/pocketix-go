@@ -1,15 +1,18 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"slices"
 
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
 type TreeNode struct {
 	Type        string      // Type of the argument
 	Value       any         // Value of the argument
+	Reference   string      // Reference name, if applicable
 	Children    []*TreeNode // Children of the argument
 	ResultValue any         // Result of the expression
 }
@@ -37,12 +40,18 @@ var typeValidators = map[string]func(any) error{
 	},
 }
 
-func InitTree(argumentType string, argumentValue any, args any, variableStore *VariableStore, referencedValueStore *ReferencedValueStore) (*TreeNode, error) {
+func InitTree(arg types.Argument, variableStore *VariableStore, referencedValueStore *ReferencedValueStore) (*TreeNode, error) {
 	t := TreeNode{}
-	t.Type = argumentType
+	t.Type = arg.Type
+	t.Reference = arg.Reference
+
+	data, err := json.Marshal(arg.Value)
+	if err != nil {
+		return nil, err
+	}
 
 	factory := NewOperatorFactory()
-	parsedChildren, err := t.ParseChildren(args, factory, variableStore, referencedValueStore)
+	parsedChildren, err := t.ParseChildren(string(data), factory, variableStore, referencedValueStore)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +104,8 @@ func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, var
 			if err := ValidateType(argType, argValue); err != nil {
 				return nil, err
 			}
+
+			services.Logger.Printf("Validated argument of type %s with value %v", argType, argValue)
 
 			if argType == "variable" {
 				referencedValue, ok := NewReferencedValue(argValue.(string))

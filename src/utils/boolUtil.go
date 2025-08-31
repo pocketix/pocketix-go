@@ -2,16 +2,14 @@ package utils
 
 import (
 	"fmt"
-	"reflect"
 )
 
-// TODO: Return error if the value is not convertible to bool
-func ToBool(value any) (bool, error) {
-	switch v := value.(type) {
-	case int, int8, int16, int32, int64:
-		return reflect.ValueOf(v).Int() != 0, nil
+func ToBool[T any](value T) (bool, error) {
+	switch v := any(value).(type) {
+	case int32, int64:
+		return v != 0, nil
 	case float32, float64:
-		return reflect.ValueOf(v).Float() != 0, nil
+		return v != 0.0, nil
 	case string:
 		if v == "true" {
 			return true, nil

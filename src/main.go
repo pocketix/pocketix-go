@@ -16,15 +16,15 @@ func MockResolveDeviceInformationFunction(deviceUID string, paramDenotation stri
 		DeviceID:  1,
 		DeviceUID: deviceUID,
 		Snapshot: models.SDParameterSnapshot{
-			SDParameter: paramDenotation,
-			Number:      func() *float64 { v := 42.0; return &v }(),
-			String:      func() *string { v := "mocked"; return &v }(),
-			Boolean:     func() *bool { v := true; return &v }(),
+			SDParameter: 1,
+			Number:      models.SnapshotNumber{Value: 42, Set: true},
+			String:      models.SnapshotString{Value: "mocked", Set: true},
+			Boolean:     models.SnapshotBoolean{Value: true, Set: true},
 		},
 		Command: models.SDCommand{
 			CommandID:         1,
 			CommandDenotation: paramDenotation,
-			Payload:           "mocked payload",
+			Payload:           "",
 		},
 	}, nil
 }

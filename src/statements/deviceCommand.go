@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/pocketix/pocketix-go/src/models"
+	"github.com/pocketix/pocketix-go/src/services"
 )
 
 type DeviceCommand struct {
@@ -19,7 +20,7 @@ func (d *DeviceCommand) Execute(
 	callback func(deviceCommand models.SDCommandInvocation),
 ) (bool, error) {
 	// informationFromBackend, err := referencedValueStore.ResolveDeviceInformationFunction(deviceUID, commandDenotation, "sdCommand", deviceCommands)
-
+	services.Logger.Printf("Executing device command: %v", d.Id)
 	deviceCommand, ok := d.DeviceCommand2ModelsDeviceCommand()
 	if !ok {
 		return false, fmt.Errorf("failed to convert DeviceCommand to models.DeviceCommand, probably due to missing procedure %s", d.Id)
@@ -30,7 +31,9 @@ func (d *DeviceCommand) Execute(
 		sdCommandInformation = backendInformation
 	} else {
 		sdCommandInfo, err := referencedValueStore.ResolveDeviceInformationFunction(deviceCommand.DeviceUID, deviceCommand.CommandDenotation, "sdCommand", &deviceCommands)
+		services.Logger.Printf("Resolved device information for command %s: %v", d.Id, sdCommandInfo)
 		if err != nil {
+			services.Logger.Printf("Failed to resolve device information for command %s: %v", d.Id, err)
 			return false, err
 		}
 		sdCommandInformation = sdCommandInfo

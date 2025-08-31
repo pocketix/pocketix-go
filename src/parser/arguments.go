@@ -20,7 +20,7 @@ func ParseArguments(rawArguments []types.Argument, argumentTree []*models.TreeNo
 		if err := json.Unmarshal(arg.Value, &args); err != nil {
 			return err
 		}
-		tree, err := models.InitTree(arg.Type, arg.Value, args, variableStore, referencedValueStore)
+		tree, err := models.InitTree(arg, variableStore, referencedValueStore)
 		if err != nil {
 			return err
 		}

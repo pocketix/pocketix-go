@@ -90,6 +90,11 @@ func StatementFactory(
 			Type:     tree[0].Value.(string),
 			TypeType: tree[0].Type,
 		}, nil
+	case "write":
+		return &Write{
+			Id:        id,
+			Arguments: tree[0],
+		}, nil
 	// Default case to handle device commands
 	default:
 		if len(tree) == 0 {
