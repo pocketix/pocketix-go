@@ -12,6 +12,16 @@
                     "value": "ideal"
                 }
             ]
+        },
+        {
+            "id": "write",
+            "arguments": [
+                {
+                    "reference": "TemperatureDevice-1.temperature",
+                    "type": "string",
+                    "value": "ideal"
+                }
+            ]
         }
     ]
 }
