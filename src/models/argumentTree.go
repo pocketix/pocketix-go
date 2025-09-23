@@ -45,13 +45,13 @@ func InitTree(arg types.Argument, variableStore *VariableStore, referencedValueS
 	t.Type = arg.Type
 	t.Reference = arg.Reference
 
-	data, err := json.Marshal(arg.Value)
-	if err != nil {
+	var data any
+	if err := json.Unmarshal(arg.Value, &data); err != nil {
 		return nil, err
 	}
 
 	factory := NewOperatorFactory()
-	parsedChildren, err := t.ParseChildren(string(data), factory, variableStore, referencedValueStore)
+	parsedChildren, err := t.ParseChildren(data, factory, variableStore, referencedValueStore)
 	if err != nil {
 		return nil, err
 	}
