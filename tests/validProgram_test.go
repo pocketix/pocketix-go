@@ -1815,7 +1815,7 @@ func TestValidProgramWithReferencedValue(t *testing.T) {
 
 	referencedValue := referencedValues["DistanceSensor-1.waterLevel"]
 	assert.NotNil(referencedValue, "Expected referenced value to be not nil, but got: %v", referencedValue)
-	assert.Equal("DistanceSensor-1", referencedValue.DeviceID, "Expected device name to be 'DistanceSensor-1', but got: %s", referencedValue.DeviceID)
+	assert.Equal("DistanceSensor-1", referencedValue.DeviceUID, "Expected device name to be 'DistanceSensor-1', but got: %s", referencedValue.DeviceUID)
 	assert.Equal("waterLevel", referencedValue.ParameterName, "Expected referenced value name to be 'waterLevel', but got: %s", referencedValue.ParameterName)
 
 	variableStore = models.NewVariableStore()
@@ -1887,7 +1887,7 @@ func TestValidProgramWithReferencedValue(t *testing.T) {
 	assert.Equal(1, len(referencedValues), "Expected 1 referenced value, but got: %d", len(referencedValues))
 	referencedValue = referencedValues["DistanceSensor-1.waterLevel"]
 	assert.NotNil(referencedValue, "Expected referenced value to be not nil, but got: %v", referencedValue)
-	assert.Equal("DistanceSensor-1", referencedValue.DeviceID, "Expected device name to be 'DistanceSensor-1', but got: %s", referencedValue.DeviceID)
+	assert.Equal("DistanceSensor-1", referencedValue.DeviceUID, "Expected device name to be 'DistanceSensor-1', but got: %s", referencedValue.DeviceUID)
 	assert.Equal("waterLevel", referencedValue.ParameterName, "Expected referenced value name to be 'waterLevel', but got: %s", referencedValue.ParameterName)
 }
 
