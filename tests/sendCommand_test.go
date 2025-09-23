@@ -50,7 +50,7 @@ func TestCommandWithArguments(t *testing.T) {
 		DeviceUID: "Device-1",
 		Command: models.SDCommand{
 			CommandDenotation: "Command",
-			Payload:           `{"name":"testing", "possibleValues":["Test", "Test2"]}`,
+			Payload:           `[{"name":"testing", "possibleValues":["Test", "Test2"]}]`,
 		},
 	}
 
