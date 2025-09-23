@@ -34,18 +34,29 @@ func ParseVariables(data json.RawMessage, variableStore *models.VariableStore, r
 		}
 
 		if varType == "boolean_expression" || varType == "variable" {
+
+			marshaledValue, err := json.Marshal(varValue)
+			if err != nil {
+				return fmt.Errorf("error marshaling variable value: %v", err)
+			}
+
 			expressionVariables = append(expressionVariables, types.Argument{
 				Reference: varName,
 				Type:      varType.(string),
-				Value:     varValue.(json.RawMessage),
+				Value:     marshaledValue,
 			})
 			continue
+		}
+
+		marshaledValue, err := json.Marshal(varValue)
+		if err != nil {
+			return fmt.Errorf("error marshaling variable value: %v", err)
 		}
 
 		varData := types.Argument{
 			Reference: varName,
 			Type:      varType.(string),
-			Value:     varValue.(json.RawMessage),
+			Value:     marshaledValue,
 		}
 		tree, err := models.InitTree(varData, variableStore, referencedValueStore)
 		if err != nil {
