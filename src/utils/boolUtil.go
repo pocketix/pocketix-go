@@ -6,7 +6,7 @@ import (
 
 func ToBool[T any](value T) (bool, error) {
 	switch v := any(value).(type) {
-	case int32, int64:
+	case int, int32, int64:
 		return v != 0, nil
 	case float32, float64:
 		return v != 0.0, nil
