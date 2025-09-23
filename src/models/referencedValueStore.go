@@ -40,13 +40,13 @@ func (rvStore *ReferencedValueStore) SetReferencedValue(referenceTarget string, 
 		return nil, fmt.Errorf("referenced value %s not found", referenceTarget)
 	}
 	if snapshot.String.Set {
-		referencedValue.Value = snapshot.String
+		referencedValue.Value = snapshot.String.Value
 		referencedValue.Type = "string"
 	} else if snapshot.Number.Set {
-		referencedValue.Value = snapshot.Number
+		referencedValue.Value = snapshot.Number.Value
 		referencedValue.Type = "number"
 	} else if snapshot.Boolean.Set {
-		referencedValue.Value = snapshot.Boolean
+		referencedValue.Value = snapshot.Boolean.Value
 		referencedValue.Type = "boolean"
 	} else {
 		return nil, fmt.Errorf("no valid value found in the snapshot")
