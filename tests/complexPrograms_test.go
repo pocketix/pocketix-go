@@ -37,8 +37,8 @@ func MockResolveParameterFunctionComplexProgram(deviceUID string, paramDenotatio
 	return models.SDInformationFromBackend{
 		DeviceUID: deviceUID,
 		Snapshot: models.SDParameterSnapshot{
-			SDParameter: paramDenotation,
-			Number:      func(v float64) *float64 { return &v }(230.0),
+			SDParameter: 1,
+			Number:      models.SnapshotNumber{Value: 230, Set: true},
 		},
 	}, nil
 }
@@ -64,7 +64,7 @@ func TestExecuteProgramWithReferencedValue(t *testing.T) {
 
 	referencedValue, ok := referencedValueStore.GetReferencedValueFromStore("DistanceSensor-1.waterLevel")
 	assert.True(ok, "Referenced value should be found, but got: %v", ok)
-	assert.Equal("DistanceSensor-1", referencedValue.DeviceID, "Device ID should be DistanceSensor-1, but got: %v", referencedValue.DeviceID)
+	assert.Equal("DistanceSensor-1", referencedValue.DeviceUID, "Device ID should be DistanceSensor-1, but got: %v", referencedValue.DeviceID)
 	assert.Equal("waterLevel", referencedValue.ParameterName, "Parameter name should be waterLevel, but got: %v", referencedValue.ParameterName)
 	assert.Equal("number", referencedValue.Type, "Type should be number, but got: %v", referencedValue.Type)
 	assert.Equal(230.0, referencedValue.Value, "Value should be 230.0, but got: %v", referencedValue.Value)
