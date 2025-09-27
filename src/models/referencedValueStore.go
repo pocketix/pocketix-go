@@ -33,32 +33,33 @@ func (rvStore *ReferencedValueStore) GetReferencedValueFromStore(referencedTarge
 	return &referencedValue, true
 }
 
-func (rvStore *ReferencedValueStore) SetReferencedValue(referenceTarget string, snapshot SDParameterSnapshot) (any, error) {
+func (rvStore *ReferencedValueStore) SetReferencedValue(referencedValue *ReferencedValue, snapshot SDParameterSnapshot, isSet bool) (any, error) {
+	referenceTarget := referencedValue.ToReferenceTarget()
 	services.Logger.Printf("Setting referenced value for %s: %v", referenceTarget, snapshot)
-	referencedValue, ok := rvStore.ReferencedValues[referenceTarget]
+
+	valueFromStore, ok := rvStore.ReferencedValues[referenceTarget]
 	if !ok {
 		return nil, fmt.Errorf("referenced value %s not found", referenceTarget)
 	}
+
 	if snapshot.String.Set {
-		referencedValue.Value = snapshot.String.Value
-		referencedValue.Type = "string"
+		valueFromStore.Value = snapshot.String.Value
+		valueFromStore.Type = "string"
 	} else if snapshot.Number.Set {
-		referencedValue.Value = snapshot.Number.Value
-		referencedValue.Type = "number"
+		valueFromStore.Value = snapshot.Number.Value
+		valueFromStore.Type = "number"
 	} else if snapshot.Boolean.Set {
-		referencedValue.Value = snapshot.Boolean.Value
-		referencedValue.Type = "boolean"
-	} else {
-		return nil, fmt.Errorf("no valid value found in the snapshot")
+		valueFromStore.Value = snapshot.Boolean.Value
+		valueFromStore.Type = "boolean"
 	}
 
-	referencedValue.IsSet = true
-	referencedValue.DeviceID = snapshot.DeviceID
-	referencedValue.ParameterID = snapshot.SDParameter
+	valueFromStore.IsSet = isSet
+	valueFromStore.DeviceID = snapshot.DeviceID
+	valueFromStore.ParameterID = snapshot.SDParameter
 
-	rvStore.ReferencedValues[referenceTarget] = referencedValue
-	services.Logger.Printf("Set referenced value for %s: %v", referenceTarget, referencedValue)
-	return referencedValue.Value, nil
+	rvStore.ReferencedValues[referenceTarget] = valueFromStore
+	services.Logger.Printf("Set referenced value for %s: %v", referenceTarget, valueFromStore)
+	return valueFromStore.Value, nil
 }
 
 func (rvStore *ReferencedValueStore) SetResolveParameterFunction(fn func(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]SDInformationFromBackend) (SDInformationFromBackend, error)) {
