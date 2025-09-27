@@ -39,11 +39,12 @@ func TestSetReferencedValues(t *testing.T) {
 
 	referencedValueStore := models.NewReferencedValueStore()
 	referencedValueStore.SetResolveParameterFunction(MockResolveParameterFunction)
-	referencedValueStore.AddReferencedValue("Device-1.test", &models.ReferencedValue{
+	referencedValue := &models.ReferencedValue{
 		DeviceUID:     "Device-1",
 		ParameterID:   1,
 		ParameterName: "test",
-	})
+	}
+	referencedValueStore.AddReferencedValue("Device-1.test", referencedValue)
 	assert.Equal(1, len(referencedValueStore.GetReferencedValues()))
 	assert.Equal("Device-1", referencedValueStore.GetReferencedValues()["Device-1.test"].DeviceUID)
 	assert.Equal(uint32(1), referencedValueStore.GetReferencedValues()["Device-1.test"].ParameterID)
@@ -55,7 +56,7 @@ func TestSetReferencedValues(t *testing.T) {
 	assert.Equal("Device-1", sdInformation.DeviceUID)
 	assert.Equal(10.0, sdInformation.Snapshot.Number.Value)
 
-	value, err := referencedValueStore.SetReferencedValue("Device-1.test", sdInformation.Snapshot)
+	value, err := referencedValueStore.SetReferencedValue(referencedValue, sdInformation.Snapshot, false)
 	assert.Nil(err)
 	assert.Equal(10.0, value)
 
