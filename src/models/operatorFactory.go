@@ -241,7 +241,7 @@ func (o *OperatorFactory) EvaluateOperator(operator string, child TreeNode, vari
 				if err != nil {
 					return nil, err
 				}
-				value, err := referenceValueStore.SetReferencedValue(child.Value.(string), sdInformation.Snapshot)
+				value, err := referenceValueStore.SetReferencedValue(referencedValue, sdInformation.Snapshot, false)
 				if err != nil {
 					return nil, err
 				}
