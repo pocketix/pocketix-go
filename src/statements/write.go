@@ -19,6 +19,10 @@ func (w *Write) Execute(
 	callback func(deviceCommand models.SDCommandInvocation),
 ) (bool, error) {
 	services.Logger.Println("Executing write statement")
+	result, err := w.Arguments.Evaluate(variableStore, referencedValueStore)
+	if err != nil {
+		return false, err
+	}
 
 	uid, parameter, ok := models.FromReferencedTarget(w.Arguments.Reference)
 	if !ok {
@@ -34,10 +38,13 @@ func (w *Write) Execute(
 	referencedValue, ok := models.NewReferencedValue(w.Arguments.Reference)
 	if ok {
 		referencedValueStore.AddReferencedValue(w.Arguments.Reference, referencedValue)
-		referencedValueStore.SetReferencedValue(w.Arguments.Reference, sdParameterInfo.Snapshot)
-	}
 
-	if !ok {
+		snapshot, err := createSDParameterSnapshot(w.Arguments.Type, result, sdParameterInfo)
+		if err != nil {
+			return false, err
+		}
+		referencedValueStore.SetReferencedValue(referencedValue, snapshot, true)
+	} else {
 		services.Logger.Printf("Failed to create referenced value for %s", w.Arguments.Reference)
 	}
 
@@ -55,4 +62,46 @@ func (w *Write) Validate(variableStore *models.VariableStore, referencedValueSto
 
 func (w *Write) GetArguments() *models.TreeNode {
 	return w.Arguments
+}
+
+func createSDParameterSnapshot(snapshotType string, value any, sdParameterInfo models.SDInformationFromBackend) (models.SDParameterSnapshot, error) {
+	sdParameterSnapshot := models.SDParameterSnapshot{
+		DeviceID:    sdParameterInfo.Snapshot.DeviceID,
+		SDParameter: sdParameterInfo.Snapshot.SDParameter,
+	}
+
+	switch snapshotType {
+	case "string":
+		strValue, ok := value.(string)
+		if !ok {
+			return models.SDParameterSnapshot{}, fmt.Errorf("expected string value, got %T", value)
+		}
+		sdParameterSnapshot.String = models.SnapshotString{
+			Set:   true,
+			Value: strValue,
+		}
+		return sdParameterSnapshot, nil
+	case "number":
+		numValue, ok := value.(float64)
+		if !ok {
+			return models.SDParameterSnapshot{}, fmt.Errorf("expected number value, got %T", value)
+		}
+		sdParameterSnapshot.Number = models.SnapshotNumber{
+			Set:   true,
+			Value: numValue,
+		}
+		return sdParameterSnapshot, nil
+	case "boolean":
+		boolValue, ok := value.(bool)
+		if !ok {
+			return models.SDParameterSnapshot{}, fmt.Errorf("expected boolean value, got %T", value)
+		}
+		sdParameterSnapshot.Boolean = models.SnapshotBoolean{
+			Set:   true,
+			Value: boolValue,
+		}
+		return sdParameterSnapshot, nil
+	default:
+		return models.SDParameterSnapshot{}, fmt.Errorf("unsupported snapshot type: %s", snapshotType)
+	}
 }
