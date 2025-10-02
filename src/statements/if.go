@@ -3,6 +3,7 @@ package statements
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 	"github.com/pocketix/pocketix-go/src/utils"
 )
 
@@ -17,8 +18,8 @@ type If struct {
 func (i *If) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
-	deviceCommands []models.SDInformationFromBackend,
-	callback func(deviceCommand models.SDCommandInvocation),
+	deviceCommands []types.SDInformationFromBackend,
+	callback func(deviceCommand types.SDCommandInvocation),
 ) (bool, error) {
 	services.Logger.Println("Executing if")
 	result, err := i.Arguments.Evaluate(variableStore, referencedValueStore)

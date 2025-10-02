@@ -8,20 +8,21 @@ import (
 	"github.com/pocketix/pocketix-go/src/parser"
 	"github.com/pocketix/pocketix-go/src/services"
 	"github.com/pocketix/pocketix-go/src/statements"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
-func MockResolveDeviceInformationFunction(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]models.SDInformationFromBackend) (models.SDInformationFromBackend, error) {
+func MockResolveDeviceInformationFunction(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]types.SDInformationFromBackend) (types.SDInformationFromBackend, error) {
 	// Mock implementation: return a dummy SDInformationFromBackend
-	return models.SDInformationFromBackend{
+	return types.SDInformationFromBackend{
 		DeviceID:  1,
 		DeviceUID: deviceUID,
-		Snapshot: models.SDParameterSnapshot{
+		Snapshot: types.SDParameterSnapshot{
 			SDParameter: 1,
-			Number:      models.SnapshotNumber{Value: 42, Set: true},
-			String:      models.SnapshotString{Value: "mocked", Set: true},
-			Boolean:     models.SnapshotBoolean{Value: true, Set: true},
+			Number:      types.SnapshotNumber{Value: 42, Set: true},
+			String:      types.SnapshotString{Value: "mocked", Set: true},
+			Boolean:     types.SnapshotBoolean{Value: true, Set: true},
 		},
-		Command: models.SDCommand{
+		Command: types.SDCommand{
 			CommandID:         1,
 			CommandDenotation: paramDenotation,
 			Payload:           "",
@@ -52,9 +53,9 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	var interpretInvocationsToSend []models.SDCommandInvocation
+	var interpretInvocationsToSend []types.SDCommandInvocation
 	for _, block := range ast {
-		if _, err := block.Execute(variableStore, referencedValueStore, collector.DeviceCommands, func(deviceCommand models.SDCommandInvocation) {
+		if _, err := block.Execute(variableStore, referencedValueStore, collector.DeviceCommands, func(deviceCommand types.SDCommandInvocation) {
 			interpretInvocationsToSend = append(interpretInvocationsToSend, deviceCommand)
 		}); err != nil {
 			log.Fatalln(err)

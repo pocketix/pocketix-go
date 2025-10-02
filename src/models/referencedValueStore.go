@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
 type ReferencedValueStore struct {
 	ReferencedValues                 map[string]ReferencedValue
-	ResolveDeviceInformationFunction func(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]SDInformationFromBackend) (SDInformationFromBackend, error)
+	ResolveDeviceInformationFunction func(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]types.SDInformationFromBackend) (types.SDInformationFromBackend, error)
 }
 
 func NewReferencedValueStore() *ReferencedValueStore {
@@ -33,7 +34,7 @@ func (rvStore *ReferencedValueStore) GetReferencedValueFromStore(referencedTarge
 	return &referencedValue, true
 }
 
-func (rvStore *ReferencedValueStore) SetReferencedValue(referencedValue *ReferencedValue, snapshot SDParameterSnapshot, isSet bool) (any, error) {
+func (rvStore *ReferencedValueStore) SetReferencedValue(referencedValue *ReferencedValue, snapshot types.SDParameterSnapshot, isSet bool) (any, error) {
 	referenceTarget := referencedValue.ToReferenceTarget()
 	services.Logger.Printf("Setting referenced value for %s: %v", referenceTarget, snapshot)
 
@@ -62,7 +63,7 @@ func (rvStore *ReferencedValueStore) SetReferencedValue(referencedValue *Referen
 	return valueFromStore.Value, nil
 }
 
-func (rvStore *ReferencedValueStore) SetResolveParameterFunction(fn func(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]SDInformationFromBackend) (SDInformationFromBackend, error)) {
+func (rvStore *ReferencedValueStore) SetResolveParameterFunction(fn func(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]types.SDInformationFromBackend) (types.SDInformationFromBackend, error)) {
 	rvStore.ResolveDeviceInformationFunction = fn
 }
 

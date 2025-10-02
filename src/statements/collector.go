@@ -1,6 +1,8 @@
 package statements
 
-import "github.com/pocketix/pocketix-go/src/models"
+import (
+	"github.com/pocketix/pocketix-go/src/types"
+)
 
 type Collector interface {
 	NewCollectorBasedOnType(collectorType Collector, target *[]Statement) Collector
@@ -33,7 +35,7 @@ func (c *NoOpCollector) GetTarget() *[]Statement {
 
 type ASTCollector struct {
 	Target         *[]Statement
-	DeviceCommands []models.SDInformationFromBackend
+	DeviceCommands []types.SDInformationFromBackend
 }
 
 func (c *ASTCollector) Collect(statement Statement) {
@@ -47,7 +49,7 @@ func (c *ASTCollector) Type() Collector {
 func (c *ASTCollector) NewCollectorBasedOnType(collectorType Collector, target *[]Statement) Collector {
 	return &ASTCollector{
 		Target:         target,
-		DeviceCommands: []models.SDInformationFromBackend{},
+		DeviceCommands: []types.SDInformationFromBackend{},
 	}
 }
 

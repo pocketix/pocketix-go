@@ -6,6 +6,7 @@ import (
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
 type DeviceCommand struct {
@@ -16,8 +17,8 @@ type DeviceCommand struct {
 func (d *DeviceCommand) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
-	deviceCommands []models.SDInformationFromBackend,
-	callback func(deviceCommand models.SDCommandInvocation),
+	deviceCommands []types.SDInformationFromBackend,
+	callback func(deviceCommand types.SDCommandInvocation),
 ) (bool, error) {
 	// informationFromBackend, err := referencedValueStore.ResolveDeviceInformationFunction(deviceUID, commandDenotation, "sdCommand", deviceCommands)
 	services.Logger.Printf("Executing device command: %v", d.Id)
@@ -26,7 +27,7 @@ func (d *DeviceCommand) Execute(
 		return false, fmt.Errorf("failed to convert DeviceCommand to models.DeviceCommand, probably due to missing procedure %s", d.Id)
 	}
 
-	var sdCommandInformation models.SDInformationFromBackend
+	var sdCommandInformation types.SDInformationFromBackend
 	if backendInformation, ok := Contains(deviceCommands, deviceCommand); ok {
 		sdCommandInformation = backendInformation
 	} else {
@@ -82,18 +83,18 @@ func (d *DeviceCommand) DeviceCommand2ModelsDeviceCommand() (models.DeviceComman
 	return models.DeviceCommand{
 		DeviceUID:         prefix,
 		CommandDenotation: last,
-		Arguments: models.TypeValue{
+		Arguments: types.TypeValue{
 			Type:  d.Arguments.Type,
 			Value: d.Arguments.Value,
 		},
 	}, true
 }
 
-func Contains(slice []models.SDInformationFromBackend, item models.DeviceCommand) (models.SDInformationFromBackend, bool) {
+func Contains(slice []types.SDInformationFromBackend, item models.DeviceCommand) (types.SDInformationFromBackend, bool) {
 	for _, v := range slice {
 		if v.DeviceUID == item.DeviceUID && v.Command.CommandDenotation == item.CommandDenotation {
 			return v, true
 		}
 	}
-	return models.SDInformationFromBackend{}, false
+	return types.SDInformationFromBackend{}, false
 }

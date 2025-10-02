@@ -5,6 +5,7 @@ import (
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
 type Case struct {
@@ -17,8 +18,8 @@ type Case struct {
 func (c *Case) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
-	deviceCommands []models.SDInformationFromBackend,
-	callback func(deviceCommand models.SDCommandInvocation),
+	deviceCommands []types.SDInformationFromBackend,
+	callback func(deviceCommand types.SDCommandInvocation),
 ) (bool, error) {
 	services.Logger.Println("Executing case", c.Value)
 	return ExecuteStatements(c.Block, variableStore, referencedValueStore, deviceCommands, callback)

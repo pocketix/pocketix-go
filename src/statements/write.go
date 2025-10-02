@@ -5,6 +5,7 @@ import (
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
 type Write struct {
@@ -15,8 +16,8 @@ type Write struct {
 func (w *Write) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
-	deviceCommands []models.SDInformationFromBackend,
-	callback func(deviceCommand models.SDCommandInvocation),
+	deviceCommands []types.SDInformationFromBackend,
+	callback func(deviceCommand types.SDCommandInvocation),
 ) (bool, error) {
 	services.Logger.Println("Executing write statement")
 	result, err := w.Arguments.Evaluate(variableStore, referencedValueStore)
@@ -64,8 +65,8 @@ func (w *Write) GetArguments() *models.TreeNode {
 	return w.Arguments
 }
 
-func createSDParameterSnapshot(snapshotType string, value any, sdParameterInfo models.SDInformationFromBackend) (models.SDParameterSnapshot, error) {
-	sdParameterSnapshot := models.SDParameterSnapshot{
+func createSDParameterSnapshot(snapshotType string, value any, sdParameterInfo types.SDInformationFromBackend) (types.SDParameterSnapshot, error) {
+	sdParameterSnapshot := types.SDParameterSnapshot{
 		DeviceID:    sdParameterInfo.Snapshot.DeviceID,
 		SDParameter: sdParameterInfo.Snapshot.SDParameter,
 	}
@@ -74,9 +75,9 @@ func createSDParameterSnapshot(snapshotType string, value any, sdParameterInfo m
 	case "string":
 		strValue, ok := value.(string)
 		if !ok {
-			return models.SDParameterSnapshot{}, fmt.Errorf("expected string value, got %T", value)
+			return types.SDParameterSnapshot{}, fmt.Errorf("expected string value, got %T", value)
 		}
-		sdParameterSnapshot.String = models.SnapshotString{
+		sdParameterSnapshot.String = types.SnapshotString{
 			Set:   true,
 			Value: strValue,
 		}
@@ -84,9 +85,9 @@ func createSDParameterSnapshot(snapshotType string, value any, sdParameterInfo m
 	case "number":
 		numValue, ok := value.(float64)
 		if !ok {
-			return models.SDParameterSnapshot{}, fmt.Errorf("expected number value, got %T", value)
+			return types.SDParameterSnapshot{}, fmt.Errorf("expected number value, got %T", value)
 		}
-		sdParameterSnapshot.Number = models.SnapshotNumber{
+		sdParameterSnapshot.Number = types.SnapshotNumber{
 			Set:   true,
 			Value: numValue,
 		}
@@ -94,14 +95,14 @@ func createSDParameterSnapshot(snapshotType string, value any, sdParameterInfo m
 	case "boolean":
 		boolValue, ok := value.(bool)
 		if !ok {
-			return models.SDParameterSnapshot{}, fmt.Errorf("expected boolean value, got %T", value)
+			return types.SDParameterSnapshot{}, fmt.Errorf("expected boolean value, got %T", value)
 		}
-		sdParameterSnapshot.Boolean = models.SnapshotBoolean{
+		sdParameterSnapshot.Boolean = types.SnapshotBoolean{
 			Set:   true,
 			Value: boolValue,
 		}
 		return sdParameterSnapshot, nil
 	default:
-		return models.SDParameterSnapshot{}, fmt.Errorf("unsupported snapshot type: %s", snapshotType)
+		return types.SDParameterSnapshot{}, fmt.Errorf("unsupported snapshot type: %s", snapshotType)
 	}
 }
