@@ -1,55 +1,35 @@
 package models
 
 import (
+	"log"
 	"strings"
 	"time"
 
+	"github.com/pocketix/pocketix-go/src/types"
 	"github.com/pocketix/pocketix-go/src/utils"
 )
-
-type SDCommand struct {
-	CommandID         uint32 `json:"commandId"`         // Command ID
-	CommandDenotation string `json:"commandDenotation"` // Command
-	Payload           string `json:"payload"`           // Payload
-}
-
-type SDCommandInvocation struct {
-	InstanceID        uint32 `json:"instanceId"`        // Instance ID
-	InstanceUID       string `json:"instanceUID"`       // Instance ID
-	CommandID         uint32 `json:"commandId"`         // Command ID
-	CommandDenotation string `json:"commandDenotation"` // Command
-	Payload           string `json:"payload,omitempty"` // Payload
-	InvocationTime    string `json:"invocationTime"`    // Invocation time
-}
-
-type TypeValue struct {
-	Type  string
-	Value any
-}
-
-type CommandPayload struct {
-	Name  string `json:"name"`
-	Value any    `json:"value"`
-}
 
 type DeviceCommand struct {
 	DeviceUID         string
 	CommandDenotation string
-	Arguments         TypeValue
+	Arguments         types.TypeValue
 }
 
-func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation SDInformationFromBackend) (*SDCommandInvocation, error) {
+func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation types.SDInformationFromBackend) (*types.SDCommandInvocation, error) {
 	command := sdInstanceInformation.Command
 
 	if command.Payload == "" {
 		return createSDCommandInvocationWithoutPayload(sdInstanceInformation, command)
 	}
 	cleanedPlayload := cleanPayloadString(command.Payload)
+	log.Printf("Cleaned Payload: %s", cleanedPlayload)
 
-	payload, err := utils.UnmarshalData[[]map[string]any]([]byte(cleanedPlayload))
+	payload, err := utils.UnmarshalData[[]types.CommandPayload]([]byte(cleanedPlayload))
 	if err != nil {
 		return nil, err
 	}
+	dc.checkPayloadValues(*payload)
+	log.Printf("----------------- Command: %+v", command)
 
 	// err := json.Unmarshal([]byte(cleanedPlayload), &payload)
 	// if err != nil {
@@ -64,7 +44,7 @@ func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation SDInformatio
 	// if err != nil {
 	// 	return nil, err
 	// }
-	return &SDCommandInvocation{
+	return &types.SDCommandInvocation{
 		InstanceID:        sdInstanceInformation.DeviceID,
 		InstanceUID:       sdInstanceInformation.DeviceUID,
 		CommandID:         command.CommandID,
@@ -74,8 +54,8 @@ func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation SDInformatio
 	}, nil
 }
 
-func createSDCommandInvocationWithoutPayload(sdInstanceInformation SDInformationFromBackend, command SDCommand) (*SDCommandInvocation, error) {
-	return &SDCommandInvocation{
+func createSDCommandInvocationWithoutPayload(sdInstanceInformation types.SDInformationFromBackend, command types.SDCommand) (*types.SDCommandInvocation, error) {
+	return &types.SDCommandInvocation{
 		InstanceID:        sdInstanceInformation.DeviceID,
 		InstanceUID:       sdInstanceInformation.DeviceUID,
 		CommandID:         command.CommandID,
@@ -86,4 +66,18 @@ func createSDCommandInvocationWithoutPayload(sdInstanceInformation SDInformation
 
 func cleanPayloadString(payload string) string {
 	return strings.ReplaceAll(payload, "\n", "")
+}
+
+func (dc *DeviceCommand) checkPayloadValues(payload []types.CommandPayload) error {
+	for _, p := range payload {
+		if p.Type != dc.Arguments.Type {
+			return &utils.PayloadTypeMismatchError{
+				CommandDenotation: dc.CommandDenotation,
+				ExpectedType:      dc.Arguments.Type,
+				ActualType:        p.Type,
+			}
+		}
+
+	}
+	return nil
 }
