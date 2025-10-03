@@ -3,6 +3,7 @@ package statements
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 	"github.com/pocketix/pocketix-go/src/utils"
 )
 
@@ -15,8 +16,8 @@ type While struct {
 func (w *While) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
-	deviceCommands []models.SDInformationFromBackend,
-	callback func(deviceCommand models.SDCommandInvocation),
+	deviceCommands []types.SDInformationFromBackend,
+	callback func(deviceCommand types.SDCommandInvocation),
 ) (bool, error) {
 	services.Logger.Println("Executing while")
 

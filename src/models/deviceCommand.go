@@ -1,72 +1,89 @@
 package models
 
 import (
-	"encoding/json"
+	"log"
+	"regexp"
 	"strings"
 	"time"
+
+	"github.com/pocketix/pocketix-go/src/types"
+	"github.com/pocketix/pocketix-go/src/utils"
 )
-
-type SDCommand struct {
-	CommandID         uint32 `json:"commandId"`         // Command ID
-	CommandDenotation string `json:"commandDenotation"` // Command
-	Payload           string `json:"payload"`           // Payload
-}
-
-type SDCommandInvocation struct {
-	InstanceID        uint32 `json:"instanceId"`        // Instance ID
-	InstanceUID       string `json:"instanceUID"`       // Instance ID
-	CommandID         uint32 `json:"commandId"`         // Command ID
-	CommandDenotation string `json:"commandDenotation"` // Command
-	Payload           string `json:"payload,omitempty"` // Payload
-	InvocationTime    string `json:"invocationTime"`    // Invocation time
-}
-
-type TypeValue struct {
-	Type  string
-	Value any
-}
 
 type DeviceCommand struct {
 	DeviceUID         string
 	CommandDenotation string
-	Arguments         TypeValue
+	Arguments         types.TypeValue
 }
 
-func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation SDInformationFromBackend) (*SDCommandInvocation, error) {
+func (dc *DeviceCommand) PrepareCommandToSend(sdInstanceInformation types.SDInformationFromBackend) (*types.SDCommandInvocation, error) {
 	command := sdInstanceInformation.Command
-	var payload []map[string]any
 
 	if command.Payload == "" {
-		return &SDCommandInvocation{
-			InstanceID:        sdInstanceInformation.DeviceID,
-			InstanceUID:       sdInstanceInformation.DeviceUID,
-			CommandID:         command.CommandID,
-			CommandDenotation: command.CommandDenotation,
-			InvocationTime:    time.Now().Format(time.RFC3339),
-		}, nil
+		return createSDCommandInvocationWithoutPayload(sdInstanceInformation, command)
 	}
 
-	cleanedPlayload := strings.ReplaceAll(command.Payload, "\n", "")
+	cleanedPayload := normalizePossibleValues(command.Payload)
+	cleanedPayload = cleanPayloadString(cleanedPayload)
+	log.Printf("Cleaned Payload: %s", cleanedPayload)
 
-	err := json.Unmarshal([]byte(cleanedPlayload), &payload)
+	payload, err := utils.UnmarshalData[[]types.CommandPayload]([]byte(cleanedPayload))
 	if err != nil {
 		return nil, err
 	}
-	// TODO check for possible values
-	newPayload := map[string]any{
-		"name":  payload[0]["name"],
-		"value": dc.Arguments.Value,
+
+	payloadErr := dc.checkPayloadValues(*payload)
+	if payloadErr != nil {
+		return nil, payloadErr
 	}
-	serializedPayload, err := json.Marshal(newPayload)
-	if err != nil {
-		return nil, err
-	}
-	return &SDCommandInvocation{
+
+	return &types.SDCommandInvocation{
 		InstanceID:        sdInstanceInformation.DeviceID,
 		InstanceUID:       sdInstanceInformation.DeviceUID,
 		CommandID:         command.CommandID,
 		CommandDenotation: command.CommandDenotation,
-		Payload:           string(serializedPayload),
+		Payload:           command.Payload,
 		InvocationTime:    time.Now().Format(time.RFC3339),
 	}, nil
+}
+
+func createSDCommandInvocationWithoutPayload(sdInstanceInformation types.SDInformationFromBackend, command types.SDCommand) (*types.SDCommandInvocation, error) {
+	return &types.SDCommandInvocation{
+		InstanceID:        sdInstanceInformation.DeviceID,
+		InstanceUID:       sdInstanceInformation.DeviceUID,
+		CommandID:         command.CommandID,
+		CommandDenotation: command.CommandDenotation,
+		InvocationTime:    time.Now().Format(time.RFC3339),
+	}, nil
+}
+
+func cleanPayloadString(payload string) string {
+	return strings.ReplaceAll(payload, "\n", "")
+}
+
+func normalizePossibleValues(payload string) string {
+	re := regexp.MustCompile(`"possibleValues"\s*:\s*""`)
+	return re.ReplaceAllString(payload, `"possibleValues":[]`)
+}
+
+func (dc *DeviceCommand) checkPayloadValues(payload []types.CommandPayload) error {
+	for _, p := range payload {
+		payloadType := strings.ToLower(p.Type)
+		if payloadType != dc.Arguments.Type {
+			return utils.NewErrorOf[utils.PayloadTypeMismatchError](dc.CommandDenotation, payloadType, dc.Arguments.Type)
+		}
+		if len(p.Values) > 0 {
+			valueFound := false
+			for _, v := range p.Values {
+				if v == dc.Arguments.Value {
+					valueFound = true
+					break
+				}
+			}
+			if !valueFound {
+				return utils.NewErrorOf[utils.PayloadValueMissingError](dc.CommandDenotation, p.Values, dc.Arguments.Value)
+			}
+		}
+	}
+	return nil
 }

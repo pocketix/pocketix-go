@@ -5,6 +5,7 @@ import (
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
 type Alert struct {
@@ -19,8 +20,8 @@ type Alert struct {
 func (a *Alert) Execute(
 	variableStore *models.VariableStore,
 	_ *models.ReferencedValueStore,
-	_ []models.SDInformationFromBackend,
-	_ func(deviceCommand models.SDCommandInvocation),
+	_ []types.SDInformationFromBackend,
+	_ func(deviceCommand types.SDCommandInvocation),
 ) (bool, error) {
 	services.Logger.Println("Executing alert")
 

@@ -7,6 +7,7 @@ import (
 	"github.com/pocketix/pocketix-go/src/parser"
 	"github.com/pocketix/pocketix-go/src/services"
 	"github.com/pocketix/pocketix-go/src/statements"
+	"github.com/pocketix/pocketix-go/src/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,12 +34,12 @@ func TestExecuteWhileSetVar(t *testing.T) {
 	assert.Equal(float64(5), variable.Value.Value, "Variable value should be 5, but got: %v", variable.Value.Value)
 }
 
-func MockResolveParameterFunctionComplexProgram(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]models.SDInformationFromBackend) (models.SDInformationFromBackend, error) {
-	return models.SDInformationFromBackend{
+func MockResolveParameterFunctionComplexProgram(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]types.SDInformationFromBackend) (types.SDInformationFromBackend, error) {
+	return types.SDInformationFromBackend{
 		DeviceUID: deviceUID,
-		Snapshot: models.SDParameterSnapshot{
+		Snapshot: types.SDParameterSnapshot{
 			SDParameter: 1,
-			Number:      models.SnapshotNumber{Value: 230, Set: true},
+			Number:      types.SnapshotNumber{Value: 230, Set: true},
 		},
 	}, nil
 }

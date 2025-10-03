@@ -3,6 +3,7 @@ package statements
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
 // DeviceType represents a device type statement
@@ -16,8 +17,8 @@ type DeviceType struct {
 func (d *DeviceType) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
-	_ []models.SDInformationFromBackend,
-	_ func(deviceCommand models.SDCommandInvocation),
+	_ []types.SDInformationFromBackend,
+	_ func(deviceCommand types.SDCommandInvocation),
 ) (bool, error) {
 	services.Logger.Println("Executing deviceType with type:", d.Type)
 
