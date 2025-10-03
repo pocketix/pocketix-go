@@ -67,7 +67,7 @@ type TypeValue struct {
 }
 
 type CommandPayload struct {
-	Name   string `json:"name"`
-	Type   string `json:"type"`
-	Values any    `json:"possibleValues"`
+	Name   string   `json:"name"`
+	Type   string   `json:"type"`
+	Values []string `json:"possibleValues"`
 }
