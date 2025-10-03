@@ -3,6 +3,7 @@ package statements
 import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
+	"github.com/pocketix/pocketix-go/src/types"
 )
 
 type SetVariable struct {
@@ -16,8 +17,8 @@ type SetVariable struct {
 func (s *SetVariable) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
-	_ []models.SDInformationFromBackend,
-	_ func(deviceCommand models.SDCommandInvocation),
+	_ []types.SDInformationFromBackend,
+	_ func(deviceCommand types.SDCommandInvocation),
 ) (bool, error) {
 	services.Logger.Println("Setting variable", s.LVal)
 	err := variableStore.SetVariable(s.LVal, s.RVal, s.RValType, referencedValueStore)

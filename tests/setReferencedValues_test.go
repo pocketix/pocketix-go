@@ -6,24 +6,25 @@ import (
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/parser"
 	"github.com/pocketix/pocketix-go/src/statements"
+	"github.com/pocketix/pocketix-go/src/types"
 	"github.com/stretchr/testify/assert"
 )
 
 // func(deviceUID string, paramDenotation string) (any, error)
-func MockResolveParameterFunction(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]models.SDInformationFromBackend) (models.SDInformationFromBackend, error) {
-	return models.SDInformationFromBackend{
+func MockResolveParameterFunction(deviceUID string, paramDenotation string, infoType string, deviceCommands *[]types.SDInformationFromBackend) (types.SDInformationFromBackend, error) {
+	return types.SDInformationFromBackend{
 		DeviceUID: deviceUID,
-		Snapshot: models.SDParameterSnapshot{
+		Snapshot: types.SDParameterSnapshot{
 			SDParameter: 1,
-			Number:      models.SnapshotNumber{Value: 10, Set: true},
+			Number:      types.SnapshotNumber{Value: 10, Set: true},
 		},
 	}, nil
 }
 
-func MockResolveCommandFunction(deviceUID string, commandDenotation string, infoType string, deviceCommands *[]models.SDInformationFromBackend) (models.SDInformationFromBackend, error) {
-	info := models.SDInformationFromBackend{
+func MockResolveCommandFunction(deviceUID string, commandDenotation string, infoType string, deviceCommands *[]types.SDInformationFromBackend) (types.SDInformationFromBackend, error) {
+	info := types.SDInformationFromBackend{
 		DeviceUID: deviceUID,
-		Command: models.SDCommand{
+		Command: types.SDCommand{
 			CommandDenotation: commandDenotation,
 			Payload:           "",
 		},
@@ -103,12 +104,12 @@ func TestRepeatedCommandInvocation(t *testing.T) {
 	referencedValueStore := models.NewReferencedValueStore()
 	referencedValueStore.SetResolveParameterFunction(MockResolveCommandFunction)
 
-	var interpretInvocationsToSend []models.SDCommandInvocation
-	callback := func(deviceCommand models.SDCommandInvocation) {
+	var interpretInvocationsToSend []types.SDCommandInvocation
+	callback := func(deviceCommand types.SDCommandInvocation) {
 		interpretInvocationsToSend = append(interpretInvocationsToSend, deviceCommand)
 	}
 	statementList := make([]statements.Statement, 0)
-	collector := &statements.ASTCollector{Target: &statementList, DeviceCommands: make([]models.SDInformationFromBackend, 0)}
+	collector := &statements.ASTCollector{Target: &statementList, DeviceCommands: make([]types.SDInformationFromBackend, 0)}
 
 	err := parser.Parse([]byte(program), variableStore, procedureStore, referencedValueStore, collector)
 	assert.Nil(err, "Error should be nil, but got: %v", err)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/statements"
+	"github.com/pocketix/pocketix-go/src/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,12 +16,12 @@ func TestSimpleCommandWithoutArguments(t *testing.T) {
 	deviceCommand := &models.DeviceCommand{
 		DeviceUID:         "Device-1",
 		CommandDenotation: "Command",
-		Arguments:         models.TypeValue{},
+		Arguments:         types.TypeValue{},
 	}
 
-	response := &models.SDInformationFromBackend{
+	response := &types.SDInformationFromBackend{
 		DeviceUID: "Device-1",
-		Command: models.SDCommand{
+		Command: types.SDCommand{
 			CommandDenotation: "Command",
 			Payload:           "",
 		},
@@ -40,17 +41,17 @@ func TestCommandWithArguments(t *testing.T) {
 	deviceCommand := &models.DeviceCommand{
 		DeviceUID:         "Device-1",
 		CommandDenotation: "Command",
-		Arguments: models.TypeValue{
+		Arguments: types.TypeValue{
 			Type:  "string",
 			Value: "Test",
 		},
 	}
 
-	response := &models.SDInformationFromBackend{
+	response := &types.SDInformationFromBackend{
 		DeviceUID: "Device-1",
-		Command: models.SDCommand{
+		Command: types.SDCommand{
 			CommandDenotation: "Command",
-			Payload:           `[{"name":"testing", "possibleValues":["Test", "Test2"]}]`,
+			Payload:           `[{"name":"testing", "type":"string", "possibleValues":["Test", "Test2"]}]`,
 		},
 	}
 
@@ -58,7 +59,7 @@ func TestCommandWithArguments(t *testing.T) {
 	assert.Nil(err, "Error should be nil, but got: %v", err)
 	assert.Equal("Device-1", dc.InstanceUID, "Device ID should be 'Device-1', but got: %s", dc.InstanceUID)
 	assert.Equal("Command", dc.CommandDenotation, "Command should be 'Command', but got: %s", dc.CommandDenotation)
-	assert.Equal(`{"name":"testing","value":"Test"}`, dc.Payload, "Payload should be `{\"name\":\"testing\",\"value\":\"Test\"}`, but got: %s", dc.Payload)
+	assert.Equal(`[{"name":"testing", "type":"string", "possibleValues":["Test", "Test2"]}]`, dc.Payload, "Payload should be `[{\"name\":\"testing\", \"type\":\"string\", \"possibleValues\":[\"Test\", \"Test2\"]}]`, but got: %s", dc.Payload)
 	assert.Equal(time.Now().Format(time.RFC3339), dc.InvocationTime, "Invocation time should be current time, but got: %s", dc.InvocationTime)
 }
 
