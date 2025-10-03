@@ -68,8 +68,9 @@ func normalizePossibleValues(payload string) string {
 
 func (dc *DeviceCommand) checkPayloadValues(payload []types.CommandPayload) error {
 	for _, p := range payload {
-		if p.Type != dc.Arguments.Type {
-			return utils.NewErrorOf[utils.PayloadTypeMismatchError](dc.CommandDenotation, p.Type, dc.Arguments.Type)
+		payloadType := strings.ToLower(p.Type)
+		if payloadType != dc.Arguments.Type {
+			return utils.NewErrorOf[utils.PayloadTypeMismatchError](dc.CommandDenotation, payloadType, dc.Arguments.Type)
 		}
 		if len(p.Values) > 0 {
 			valueFound := false
