@@ -63,10 +63,6 @@ Tests are located in /tests/ directory, to execute them run:
 ```
 go test -v ./tests/...
 ```
-To execute tests with coverage, you can also run tests through Makefile:
-```
-make test
-```
 
 # License
 
