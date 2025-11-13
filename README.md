@@ -8,31 +8,30 @@ A bachelor thesis project that deals with the backend processing of visual progr
 
 # Features
 
-- **Visual Programming Language Support**: Execute programs created in the Pocketix v2 visual programming environment.
-- **Modular Design**: Organized into modules for parsing, statements, variables, and more.
-- **Extensive Testing**: Includes unit tests for key components to ensure reliability.
-- **Customizable**: Easily extendable for new program blocks, device types, and operations.
-
+-   **Visual Programming Language Support**: Execute programs created in the Pocketix v2 visual programming environment.
+-   **Modular Design**: Organized into modules for parsing, statements, variables, and more.
+-   **Extensive Testing**: Includes unit tests for key components to ensure reliability.
+-   **Customizable**: Easily extendable for new program blocks, device types, and operations.
 
 # Usage
 
 To get started, create instances of the following:
 
-- **models.VariableStore**: handles user variables in the program
-- **models.ProcedureStore**: handles user procedures in the program
-- **models.ReferencedValueStore**: handles referenced values to the devices parameters
-- **SetResolveParameterFunction**: set resolver device information callback to referencedValueStore
-- **ast**: slices of program statements
-- **statements.Collector**: collector for the program statements
+-   **models.VariableStore**: handles user variables in the program
+-   **models.ProcedureStore**: handles user procedures in the program
+-   **models.ReferencedValueStore**: handles referenced values to the devices parameters
+-   **SetResolveParameterFunction**: set resolver device information callback to referencedValueStore
+-   **ast**: slices of program statements
+-   **statements.Collector**: collector for the program statements
 
 Then to parse the program using:
 
 ```go
 err = parser.Parse(
-    data, 
-    variableStore, 
-    procedureStore, 
-    referencedValueStore, 
+    data,
+    variableStore,
+    procedureStore,
+    referencedValueStore,
     collector
 )
 ```
@@ -55,17 +54,15 @@ where the last argument in Execute function is a callback to collect device comm
 # Run
 
 To run the application, run the following command in root directory:
+
 ```
 go run src/main.go --path=<path_to_json_program>
 ```
 
 Tests are located in /tests/ directory, to execute them run:
+
 ```
 go test -v ./tests/...
-```
-To execute tests with coverage, you can also run tests through Makefile:
-```
-make test
 ```
 
 # License
