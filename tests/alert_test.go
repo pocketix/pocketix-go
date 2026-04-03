@@ -54,7 +54,7 @@ func TestExecuteAlertVariableAddressee(t *testing.T) {
 	alert := &statements.Alert{
 		Id:        "alert",
 		Method:    "WEBPUSH",
-		Addressee: "addressee",
+		Addressee: "1",
 		Content:   "Test content",
 	}
 

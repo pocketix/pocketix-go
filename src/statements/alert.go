@@ -3,6 +3,7 @@ package statements
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -33,16 +34,20 @@ func (a *Alert) Execute(
 	}
 
 	addressee := a.Addressee
-	content := a.Content
-
 	if a.AddresseeType == "variable" {
 		variable, err := variableStore.GetVariable(a.Addressee)
 		if err != nil {
 			return false, err
 		}
-		addressee = variable.Value.Value.(string)
+		addressee = fmt.Sprint(variable.Value.Value)
 	}
+	addresseeUint, err := strconv.ParseUint(addressee, 10, 32)
+	if err != nil {
+		return false, fmt.Errorf("failed to parse addressee id: %w", err)
+	}
+	addresseeID := uint32(addresseeUint)
 
+	content := a.Content
 	if a.ContentType == "variable" {
 		variable, err := variableStore.GetVariable(a.Content)
 		if err != nil {
@@ -75,7 +80,7 @@ func (a *Alert) Execute(
 	})
 
 	notificationToSend := types.NotificationInvocation{
-		AddresseeID:    addressee,
+		AddresseeID:    addresseeID,
 		Content:        content,
 		EndpointType:   a.Method,
 		InvocationTime: time.Now().Format(time.RFC3339),
