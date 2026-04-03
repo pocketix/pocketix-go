@@ -72,7 +72,7 @@ func main() {
 		}
 	}
 	for _, notif := range notificationInvocationsToSend {
-		log.Println("sending notification through ", notif.EndpointType, " to ", notif.AddresseeID, ` "`, notif.Message, `"`)
+		log.Println("sending notification through ", notif.EndpointType, " to ", notif.AddresseeID, ` "`, notif.Content, `"`)
 	}
 	services.Logger.Println("Execution completed successfully")
 }

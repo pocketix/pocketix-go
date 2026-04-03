@@ -15,7 +15,7 @@ func TestExecuteAlertWebpush(t *testing.T) {
 		Id:        "alert",
 		Method:    "WEBPUSH",
 		Addressee: "1",
-		Message:   "{currentDate} {currentTime}: Alert!!!",
+		Content:   "{currentDate} {currentTime}: Alert!!!",
 	}
 
 	result, err := alert.Execute(nil, nil, nil, func(any) {})
@@ -31,7 +31,7 @@ func TestExecuteAlertWebpush(t *testing.T) {
 		Id:        "alert",
 		Method:    "EMAIL",
 		Addressee: "1",
-		Message:   "Test message",
+		Content:   "Test content",
 	}
 
 	result, err := alert.Execute(nil, nil, nil, func(any) {})
@@ -55,7 +55,7 @@ func TestExecuteAlertVariableAddressee(t *testing.T) {
 		Id:        "alert",
 		Method:    "WEBPUSH",
 		Addressee: "addressee",
-		Message:   "Test message",
+		Content:   "Test content",
 	}
 
 	result, err := alert.Execute(variableStore, nil, nil, func(any) {})
@@ -68,13 +68,13 @@ func TestExecuteAlertVariableAddressee(t *testing.T) {
 	assert.Equal("1234567890", addressee.Value.Value, "Addressee value should be 1234567890")
 }
 
-func TestExecuteAlertVariableMessage(t *testing.T) {
+func TestExecuteAlertVariableContent(t *testing.T) {
 	assert := assert.New(t)
 
 	variable := &models.Variable{
-		Name:  "message",
+		Name:  "content",
 		Type:  "string",
-		Value: &models.TreeNode{Type: "string", Value: "Test message", ResultValue: "Test message"},
+		Value: &models.TreeNode{Type: "string", Value: "Test content", ResultValue: "Test content"},
 	}
 	variableStore := models.NewVariableStore()
 	variableStore.AddVariable(*variable)
@@ -83,7 +83,7 @@ func TestExecuteAlertVariableMessage(t *testing.T) {
 		Id:        "alert",
 		Method:    "WEBPUSH",
 		Addressee: "1234567890",
-		Message:   "message",
+		Content:   "content",
 	}
 
 	result, err := alert.Execute(variableStore, nil, nil, func(any) {})
@@ -91,9 +91,9 @@ func TestExecuteAlertVariableMessage(t *testing.T) {
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
 
-	message, err := variableStore.GetVariable("message")
+	content, err := variableStore.GetVariable("content")
 	assert.Nil(err, "Error should be nil")
-	assert.Equal("Test message", message.Value.Value, "Message value should be Test message")
+	assert.Equal("Test content", content.Value.Value, "Content value should be Test content")
 }
 
 func TestExecuteAlertInvalidMethod(t *testing.T) {
@@ -103,7 +103,7 @@ func TestExecuteAlertInvalidMethod(t *testing.T) {
 		Id:        "alert",
 		Method:    "invalid_method",
 		Addressee: "1234567890",
-		Message:   "Test message",
+		Content:   "Test content",
 	}
 
 	result, err := alert.Execute(nil, nil, nil, func(any) {})

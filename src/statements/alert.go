@@ -16,8 +16,8 @@ type Alert struct {
 	Method        string
 	Addressee     string
 	AddresseeType string
-	Message       string
-	MessageType   string
+	Content       string
+	ContentType   string
 }
 
 func (a *Alert) Execute(
@@ -33,7 +33,7 @@ func (a *Alert) Execute(
 	}
 
 	addressee := a.Addressee
-	message := a.Message
+	content := a.Content
 
 	if a.AddresseeType == "variable" {
 		variable, err := variableStore.GetVariable(a.Addressee)
@@ -43,12 +43,12 @@ func (a *Alert) Execute(
 		addressee = variable.Value.Value.(string)
 	}
 
-	if a.MessageType == "variable" {
-		variable, err := variableStore.GetVariable(a.Message)
+	if a.ContentType == "variable" {
+		variable, err := variableStore.GetVariable(a.Content)
 		if err != nil {
 			return false, err
 		}
-		message = variable.Value.Value.(string)
+		content = variable.Value.Value.(string)
 	}
 
 	dynamicValues := map[string]string{
@@ -56,7 +56,7 @@ func (a *Alert) Execute(
 		"currentDate": time.Now().Format("2006-01-02"),
 	}
 	re := regexp.MustCompile(`\{([^{}]+)\}`)
-	message = re.ReplaceAllStringFunc(message, func(match string) string {
+	content = re.ReplaceAllStringFunc(content, func(match string) string {
 		matchTrimmed := strings.TrimSpace(match[1 : len(match)-1])
 		if len(matchTrimmed) > 0 {
 			if matchTrimmed[0] == '$' {
@@ -76,7 +76,7 @@ func (a *Alert) Execute(
 
 	notificationToSend := types.NotificationInvocation{
 		AddresseeID:    addressee,
-		Message:        message,
+		Content:        content,
 		EndpointType:   a.Method,
 		InvocationTime: time.Now().Format(time.RFC3339),
 	}
@@ -96,8 +96,8 @@ func (a *Alert) GetAddressee() (string, string) {
 	return a.Addressee, a.AddresseeType
 }
 
-func (a *Alert) GetMessage() (string, string) {
-	return a.Message, a.MessageType
+func (a *Alert) GetContent() (string, string) {
+	return a.Content, a.ContentType
 }
 
 func (a *Alert) Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error {

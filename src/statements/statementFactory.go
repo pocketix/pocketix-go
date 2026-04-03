@@ -81,8 +81,8 @@ func StatementFactory(
 			Method:        tree[0].Value.(string),
 			Addressee:     tree[1].Value.(string),
 			AddresseeType: tree[1].Type,
-			Message:       tree[2].Value.(string),
-			MessageType:   tree[2].Type,
+			Content:       tree[2].Value.(string),
+			ContentType:   tree[2].Type,
 		}, nil
 	case "deviceType":
 		return &DeviceType{

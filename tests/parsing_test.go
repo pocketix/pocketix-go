@@ -531,7 +531,7 @@ func TestParseAlert(t *testing.T) {
 	assert.Equal(addressee, "1", "Expected 1, got %v", addressee)
 	assert.Equal(addresseeType, "string", "Expected string, got %v", addresseeType)
 
-	message, messageType := alertStatement.GetMessage()
-	assert.Equal(message, "Hello, World!", "Expected Hello, World!, got %v", message)
-	assert.Equal(messageType, "string", "Expected string, got %v", messageType)
+	content, contentType := alertStatement.GetContent()
+	assert.Equal(content, "Hello, World!", "Expected Hello, World!, got %v", content)
+	assert.Equal(contentType, "string", "Expected string, got %v", contentType)
 }
