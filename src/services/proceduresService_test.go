@@ -20,7 +20,7 @@ func TestAddProceduresToProgram(t *testing.T) {
 							"arguments": [
 								{
 									"type": "str_opt",
-									"value": "phone_number"
+									"value": "WEBPUSH"
 								}
 							]
 						}
@@ -149,7 +149,7 @@ func TestAddProceduresToProgram(t *testing.T) {
 							"arguments": [
 								{
 									"type": "str_opt",
-									"value": "phone_number"
+									"value": "WEBPUSH"
 								}
 							]
 						}
@@ -194,7 +194,7 @@ func TestAddProceduresToProgram(t *testing.T) {
 					"arguments": [
 						{
 							"type": "str_opt",
-							"value": "phone_number"
+							"value": "WEBPUSH"
 						}
 					]
 				}

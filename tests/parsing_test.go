@@ -504,11 +504,11 @@ func TestParseAlert(t *testing.T) {
 		Arguments: []types.Argument{
 			{
 				Type:  "str_opt",
-				Value: json.RawMessage(`"phone_number"`),
+				Value: json.RawMessage(`"WEBPUSH"`),
 			},
 			{
 				Type:  "string",
-				Value: json.RawMessage(`"1234567890"`),
+				Value: json.RawMessage(`"1"`),
 			},
 			{
 				Type:  "string",
@@ -525,11 +525,11 @@ func TestParseAlert(t *testing.T) {
 	alertStatement := cmd[0].(*statements.Alert)
 
 	method := alertStatement.GetMethod()
-	assert.Equal(method, "phone_number", "Expected phone_number, got %v", method)
+	assert.Equal(method, "WEBPUSH", "Expected WEBPUSH, got %v", method)
 
-	receiver, receiverType := alertStatement.GetReceiver()
-	assert.Equal(receiver, "1234567890", "Expected 1234567890, got %v", receiver)
-	assert.Equal(receiverType, "string", "Expected string, got %v", receiverType)
+	addressee, addresseeType := alertStatement.GetAddressee()
+	assert.Equal(addressee, "1", "Expected 1, got %v", addressee)
+	assert.Equal(addresseeType, "string", "Expected string, got %v", addresseeType)
 
 	message, messageType := alertStatement.GetMessage()
 	assert.Equal(message, "Hello, World!", "Expected Hello, World!, got %v", message)

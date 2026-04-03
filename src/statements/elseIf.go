@@ -17,7 +17,7 @@ func (e *ElseIf) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
 	deviceCommands []types.SDInformationFromBackend,
-	callback func(deviceCommand types.SDCommandInvocation),
+	callback func(invocation any),
 ) (bool, error) {
 	services.Logger.Println("Executing else if")
 	if result, err := e.Arguments.Evaluate(variableStore, referencedValueStore); err != nil {

@@ -19,7 +19,7 @@ func (s *Switch) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
 	deviceCommands []types.SDInformationFromBackend,
-	callback func(deviceCommand types.SDCommandInvocation),
+	callback func(invocation any),
 ) (bool, error) {
 	services.Logger.Println("Executing switch")
 	for _, c := range s.Block {

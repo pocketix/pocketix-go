@@ -22,7 +22,7 @@ func TestAddProceduresToProgram(t *testing.T) {
 						"arguments": [
 							{
 								"type": "str_opt",
-								"value": "phone_number"
+								"value": "WEBPUSH"
 							},
 							{
 								"type": "string",
@@ -47,11 +47,11 @@ func TestAddProceduresToProgram(t *testing.T) {
 				"arguments": [
 					{
 						"type": "str_opt",
-						"value": "email"
+						"value": "WEBPUSH"
 					},
 					{
 						"type": "string",
-						"value": "test@example.com"
+						"value": "1"
 					},
 					{
 						"type": "string",
@@ -73,7 +73,7 @@ func TestAddProceduresToProgram(t *testing.T) {
 
 	header := program["header"].(map[string]interface{})
 	userProcedures := header["userProcedures"].(map[string]interface{})
-	
+
 	assert.Contains(userProcedures, "existingProc", "Modified program should contain existing procedure")
 	assert.Contains(userProcedures, "newProc", "Modified program should contain new procedure")
 
@@ -95,6 +95,6 @@ func TestAddProceduresToProgram(t *testing.T) {
 
 	header = program["header"].(map[string]interface{})
 	userProcedures = header["userProcedures"].(map[string]interface{})
-	
+
 	assert.Contains(userProcedures, "newProc", "Modified program should contain new procedure")
 }

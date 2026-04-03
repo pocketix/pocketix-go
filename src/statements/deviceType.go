@@ -18,7 +18,7 @@ func (d *DeviceType) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
 	_ []types.SDInformationFromBackend,
-	_ func(deviceCommand types.SDCommandInvocation),
+	_ func(invocation any),
 ) (bool, error) {
 	services.Logger.Println("Executing deviceType with type:", d.Type)
 

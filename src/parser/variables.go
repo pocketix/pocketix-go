@@ -12,7 +12,7 @@ import (
 
 func ParseVariables(data json.RawMessage, variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) error {
 	var variables map[string]any
-	argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt"}
+	argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt", "rich_text"}
 
 	if err := json.Unmarshal(data, &variables); err != nil {
 		services.Logger.Println("Error parsing variables", err)

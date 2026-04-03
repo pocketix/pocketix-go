@@ -2,6 +2,9 @@ package statements
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+	"time"
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
@@ -9,35 +12,35 @@ import (
 )
 
 type Alert struct {
-	Id           string
-	Method       string
-	Receiver     string
-	ReceiverType string
-	Message      string
-	MessageType  string
+	Id            string
+	Method        string
+	Addressee     string
+	AddresseeType string
+	Message       string
+	MessageType   string
 }
 
 func (a *Alert) Execute(
 	variableStore *models.VariableStore,
 	_ *models.ReferencedValueStore,
 	_ []types.SDInformationFromBackend,
-	_ func(deviceCommand types.SDCommandInvocation),
+	callback func(invocation any),
 ) (bool, error) {
 	services.Logger.Println("Executing alert")
 
-	if a.Method != "phone_number" && a.Method != "email" {
+	if a.Method != "WEBPUSH" {
 		return false, fmt.Errorf("invalid alert method")
 	}
 
-	receiver := a.Receiver
+	addressee := a.Addressee
 	message := a.Message
 
-	if a.ReceiverType == "variable" {
-		variable, err := variableStore.GetVariable(a.Receiver)
+	if a.AddresseeType == "variable" {
+		variable, err := variableStore.GetVariable(a.Addressee)
 		if err != nil {
 			return false, err
 		}
-		receiver = variable.Value.Value.(string)
+		addressee = variable.Value.Value.(string)
 	}
 
 	if a.MessageType == "variable" {
@@ -48,7 +51,36 @@ func (a *Alert) Execute(
 		message = variable.Value.Value.(string)
 	}
 
-	services.Logger.Println("Sending alert with method", a.Method, "to receiver", receiver, "with message", message)
+	dynamicValues := map[string]string{
+		"currentTime": time.Now().Format("15:04:05"),
+		"currentDate": time.Now().Format("2006-01-02"),
+	}
+	re := regexp.MustCompile(`\{([^{}]+)\}`)
+	message = re.ReplaceAllStringFunc(message, func(match string) string {
+		matchTrimmed := strings.TrimSpace(match[1 : len(match)-1])
+		if len(matchTrimmed) > 0 {
+			if matchTrimmed[0] == '$' {
+				variableName := matchTrimmed[1:]
+				variable, err := variableStore.GetVariable(variableName)
+				if err == nil && variable != nil {
+					return fmt.Sprint(variable.Value.Value)
+				}
+			} else {
+				if value, ok := dynamicValues[matchTrimmed]; ok {
+					return value
+				}
+			}
+		}
+		return match
+	})
+
+	notificationToSend := types.NotificationInvocation{
+		AddresseeID:    addressee,
+		Message:        message,
+		EndpointType:   a.Method,
+		InvocationTime: time.Now().Format(time.RFC3339),
+	}
+	callback(notificationToSend)
 	return true, nil
 }
 
@@ -60,8 +92,8 @@ func (a *Alert) GetMethod() string {
 	return a.Method
 }
 
-func (a *Alert) GetReceiver() (string, string) {
-	return a.Receiver, a.ReceiverType
+func (a *Alert) GetAddressee() (string, string) {
+	return a.Addressee, a.AddresseeType
 }
 
 func (a *Alert) GetMessage() (string, string) {

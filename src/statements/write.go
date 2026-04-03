@@ -17,7 +17,7 @@ func (w *Write) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
 	deviceCommands []types.SDInformationFromBackend,
-	callback func(deviceCommand types.SDCommandInvocation),
+	callback func(invocation any),
 ) (bool, error) {
 	services.Logger.Println("Executing write statement")
 	result, err := w.Arguments.Evaluate(variableStore, referencedValueStore)

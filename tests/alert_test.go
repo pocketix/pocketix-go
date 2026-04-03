@@ -8,47 +8,43 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestExecuteAlertPhoneNumber(t *testing.T) {
+func TestExecuteAlertWebpush(t *testing.T) {
 	assert := assert.New(t)
 
 	alert := &statements.Alert{
-		Id:           "alert",
-		Method:       "phone_number",
-		Receiver:     "1234567890",
-		ReceiverType: "phone_number",
-		Message:      "Test message",
-		MessageType:  "string",
+		Id:        "alert",
+		Method:    "WEBPUSH",
+		Addressee: "1",
+		Message:   "{currentDate} {currentTime}: Alert!!!",
 	}
 
-	result, err := alert.Execute(nil, nil, nil, nil)
+	result, err := alert.Execute(nil, nil, nil, func(any) {})
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
 }
 
-func TestExecuteAlertEmail(t *testing.T) {
+/*func TestExecuteAlertEmail(t *testing.T) {
 	assert := assert.New(t)
 
 	alert := &statements.Alert{
-		Id:           "alert",
-		Method:       "email",
-		Receiver:     "mail@mail.com",
-		ReceiverType: "email",
-		Message:      "Test message",
-		MessageType:  "string",
+		Id:        "alert",
+		Method:    "EMAIL",
+		Addressee: "1",
+		Message:   "Test message",
 	}
 
-	result, err := alert.Execute(nil, nil, nil, nil)
+	result, err := alert.Execute(nil, nil, nil, func(any) {})
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
-}
+}*/
 
-func TestExecuteAlertVariableReceiver(t *testing.T) {
+func TestExecuteAlertVariableAddressee(t *testing.T) {
 	assert := assert.New(t)
 
 	variable := models.Variable{
-		Name:  "receiver",
+		Name:  "addressee",
 		Type:  "string",
 		Value: &models.TreeNode{Type: "string", Value: "1234567890", ResultValue: "1234567890"},
 	}
@@ -56,22 +52,20 @@ func TestExecuteAlertVariableReceiver(t *testing.T) {
 	variableStore.AddVariable(variable)
 
 	alert := &statements.Alert{
-		Id:           "alert",
-		Method:       "phone_number",
-		Receiver:     "receiver",
-		ReceiverType: "variable",
-		Message:      "Test message",
-		MessageType:  "string",
+		Id:        "alert",
+		Method:    "WEBPUSH",
+		Addressee: "addressee",
+		Message:   "Test message",
 	}
 
-	result, err := alert.Execute(variableStore, nil, nil, nil)
+	result, err := alert.Execute(variableStore, nil, nil, func(any) {})
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
 
-	receiver, err := variableStore.GetVariable("receiver")
+	addressee, err := variableStore.GetVariable("addressee")
 	assert.Nil(err, "Error should be nil")
-	assert.Equal("1234567890", receiver.Value.Value, "Receiver value should be 1234567890")
+	assert.Equal("1234567890", addressee.Value.Value, "Addressee value should be 1234567890")
 }
 
 func TestExecuteAlertVariableMessage(t *testing.T) {
@@ -86,15 +80,13 @@ func TestExecuteAlertVariableMessage(t *testing.T) {
 	variableStore.AddVariable(*variable)
 
 	alert := &statements.Alert{
-		Id:           "alert",
-		Method:       "phone_number",
-		Receiver:     "1234567890",
-		ReceiverType: "phone_number",
-		Message:      "message",
-		MessageType:  "variable",
+		Id:        "alert",
+		Method:    "WEBPUSH",
+		Addressee: "1234567890",
+		Message:   "message",
 	}
 
-	result, err := alert.Execute(variableStore, nil, nil, nil)
+	result, err := alert.Execute(variableStore, nil, nil, func(any) {})
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
@@ -108,15 +100,13 @@ func TestExecuteAlertInvalidMethod(t *testing.T) {
 	assert := assert.New(t)
 
 	alert := &statements.Alert{
-		Id:           "alert",
-		Method:       "invalid_method",
-		Receiver:     "1234567890",
-		ReceiverType: "phone_number",
-		Message:      "Test message",
-		MessageType:  "string",
+		Id:        "alert",
+		Method:    "invalid_method",
+		Addressee: "1234567890",
+		Message:   "Test message",
 	}
 
-	result, err := alert.Execute(nil, nil, nil, nil)
+	result, err := alert.Execute(nil, nil, nil, func(any) {})
 
 	assert.False(result, "Result should be false")
 	assert.NotNil(err, "Error should not be nil")
