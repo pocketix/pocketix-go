@@ -1,0 +1,17 @@
+{
+    "header": {
+        "userVariables": {},
+        "userProcedures": {}
+    },
+    "block": [
+        {
+            "id": "log",
+            "arguments": [
+                {
+                    "type": "rich_text",
+                    "value": "{currentDate} {currentTime}: Log event!!!"
+                }
+            ]
+        }
+    ]
+}

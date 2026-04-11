@@ -84,6 +84,12 @@ func StatementFactory(
 			Content:       tree[2].Value.(string),
 			ContentType:   tree[2].Type,
 		}, nil
+	case "log":
+		return &Log{
+			Id:          id,
+			Content:     tree[0].Value.(string),
+			ContentType: tree[0].Type,
+		}, nil
 	case "deviceType":
 		return &DeviceType{
 			Id:       id,
