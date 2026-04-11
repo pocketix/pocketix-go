@@ -1,10 +1,12 @@
 package tests
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/statements"
+	"github.com/pocketix/pocketix-go/src/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,30 +17,22 @@ func TestExecuteAlertWebpush(t *testing.T) {
 		Id:        "alert",
 		Method:    "WEBPUSH",
 		Addressee: "1",
-		Content:   "{currentDate} {currentTime}: Alert!!!",
+		Content:   "message",
 	}
 
-	result, err := alert.Execute(nil, nil, nil, func(any) {})
+	var invocation any
+	result, err := alert.Execute(nil, nil, nil, func(inv any) {
+		invocation = inv
+	})
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
+
+	// Check that the invocation is a NotificationInvocation
+	_, ok := invocation.(types.NotificationInvocation)
+	assert.True(ok, "Invocation should be a NotificationInvocation")
+
 }
-
-/*func TestExecuteAlertEmail(t *testing.T) {
-	assert := assert.New(t)
-
-	alert := &statements.Alert{
-		Id:        "alert",
-		Method:    "EMAIL",
-		Addressee: "1",
-		Content:   "Test content",
-	}
-
-	result, err := alert.Execute(nil, nil, nil, func(any) {})
-
-	assert.True(result, "Result should be true")
-	assert.Nil(err, "Error should be nil")
-}*/
 
 func TestExecuteAlertVariableAddressee(t *testing.T) {
 	assert := assert.New(t)
@@ -83,17 +77,26 @@ func TestExecuteAlertVariableContent(t *testing.T) {
 		Id:        "alert",
 		Method:    "WEBPUSH",
 		Addressee: "1234567890",
-		Content:   "content",
+		Content:   "{currentDate} {currentTime}: Alert!!!",
 	}
 
-	result, err := alert.Execute(variableStore, nil, nil, func(any) {})
+	var invocation any
+	result, err := alert.Execute(nil, nil, nil, func(inv any) {
+		invocation = inv
+	})
 
 	assert.True(result, "Result should be true")
 	assert.Nil(err, "Error should be nil")
 
-	content, err := variableStore.GetVariable("content")
-	assert.Nil(err, "Error should be nil")
-	assert.Equal("Test content", content.Value.Value, "Content value should be Test content")
+	notificationInvocation, ok := invocation.(types.NotificationInvocation)
+	assert.True(ok, "Invocation should be a NotificationInvocation")
+
+	assert.NotContains(notificationInvocation.Content, "{", "Content should not contain unformatted placeholders")
+	assert.NotContains(notificationInvocation.Content, "}", "Content should not contain unformatted placeholders")
+
+	dateTimeRegex := regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}: Alert!!!$`)
+	assert.True(dateTimeRegex.MatchString(notificationInvocation.Content), "Content should match the expected date and time format")
+
 }
 
 func TestExecuteAlertInvalidMethod(t *testing.T) {
