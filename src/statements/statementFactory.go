@@ -1,6 +1,8 @@
 package statements
 
 import (
+	"fmt"
+
 	"github.com/pocketix/pocketix-go/src/models"
 )
 
@@ -79,7 +81,7 @@ func StatementFactory(
 		return &Alert{
 			Id:            id,
 			Method:        tree[0].Value.(string),
-			Addressee:     tree[1].Value,
+			Addressee:     fmt.Sprint(tree[1].Value),
 			AddresseeType: tree[1].Type,
 			Content:       tree[2].Value.(string),
 			ContentType:   tree[2].Type,
