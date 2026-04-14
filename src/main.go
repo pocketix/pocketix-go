@@ -55,7 +55,6 @@ func main() {
 
 	var interpretInvocationsToSend []types.SDCommandInvocation
 	var notificationInvocationsToSend []types.NotificationInvocation
-	var logInvocationsToSave []types.LogInvocation
 	for _, block := range ast {
 		if _, err := block.Execute(variableStore,
 			referencedValueStore,
@@ -66,8 +65,6 @@ func main() {
 					interpretInvocationsToSend = append(interpretInvocationsToSend, invocationTyped)
 				case types.NotificationInvocation:
 					notificationInvocationsToSend = append(notificationInvocationsToSend, invocationTyped)
-				case types.LogInvocation:
-					logInvocationsToSave = append(logInvocationsToSave, invocationTyped)
 				}
 			},
 		); err != nil {
