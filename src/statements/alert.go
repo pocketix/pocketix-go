@@ -15,7 +15,7 @@ import (
 type Alert struct {
 	Id            string
 	Method        string
-	Addressee     string
+	Addressee     any
 	AddresseeType string
 	Content       string
 	ContentType   string
@@ -33,9 +33,9 @@ func (a *Alert) Execute(
 		return false, fmt.Errorf("invalid alert method")
 	}
 
-	addressee := a.Addressee
+	addressee := fmt.Sprint(a.Addressee)
 	if a.AddresseeType == "variable" {
-		variable, err := variableStore.GetVariable(a.Addressee)
+		variable, err := variableStore.GetVariable(addressee)
 		if err != nil {
 			return false, err
 		}
@@ -98,7 +98,7 @@ func (a *Alert) GetMethod() string {
 }
 
 func (a *Alert) GetAddressee() (string, string) {
-	return a.Addressee, a.AddresseeType
+	return fmt.Sprint(a.Addressee), a.AddresseeType
 }
 
 func (a *Alert) GetContent() (string, string) {
