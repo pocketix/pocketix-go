@@ -97,8 +97,8 @@ func (a *Alert) GetMethod() string {
 	return a.Method
 }
 
-func (a *Alert) GetAddressee() (string, string) {
-	return fmt.Sprint(a.Addressee), a.AddresseeType
+func (a *Alert) GetAddressee() (any, string) {
+	return a.Addressee, a.AddresseeType
 }
 
 func (a *Alert) GetContent() (string, string) {
