@@ -15,7 +15,7 @@ func (e *Else) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
 	deviceCommands []types.SDInformationFromBackend,
-	callback func(deviceCommand types.SDCommandInvocation),
+	callback func(invocation any),
 ) (bool, error) {
 	services.Logger.Println("Executing else")
 	return ExecuteStatements(e.Block, variableStore, referencedValueStore, deviceCommands, callback)

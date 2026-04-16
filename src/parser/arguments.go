@@ -11,7 +11,7 @@ import (
 
 func ParseArguments(rawArguments []types.Argument, argumentTree []*models.TreeNode, variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore) error {
 	var args any
-	argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt"}
+	argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt", "rich_text"}
 
 	for i, arg := range rawArguments {
 		if !slices.Contains(argTypes, arg.Type) {

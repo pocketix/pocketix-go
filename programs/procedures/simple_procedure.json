@@ -12,7 +12,7 @@
                         },
                         {
                             "type": "string",
-                            "value": "awd"
+                            "value": "1"
                         },
                         {
                             "type": "string",
@@ -25,11 +25,11 @@
                     "arguments": [
                         {
                             "type": "str_opt",
-                            "value": "phone_number"
+                            "value": "WEBPUSH"
                         },
                         {
                             "type": "string",
-                            "value": "awd"
+                            "value": "1"
                         },
                         {
                             "type": "string",

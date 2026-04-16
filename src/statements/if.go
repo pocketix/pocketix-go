@@ -19,7 +19,7 @@ func (i *If) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
 	deviceCommands []types.SDInformationFromBackend,
-	callback func(deviceCommand types.SDCommandInvocation),
+	callback func(invocation any),
 ) (bool, error) {
 	services.Logger.Println("Executing if")
 	result, err := i.Arguments.Evaluate(variableStore, referencedValueStore)

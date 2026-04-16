@@ -18,7 +18,7 @@ func (s *SetVariable) Execute(
 	variableStore *models.VariableStore,
 	referencedValueStore *models.ReferencedValueStore,
 	_ []types.SDInformationFromBackend,
-	_ func(deviceCommand types.SDCommandInvocation),
+	_ func(invocation any),
 ) (bool, error) {
 	services.Logger.Println("Setting variable", s.LVal)
 	err := variableStore.SetVariable(s.LVal, s.RVal, s.RValType, referencedValueStore)

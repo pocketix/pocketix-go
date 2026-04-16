@@ -10,7 +10,7 @@ type Statement interface {
 		variableStore *models.VariableStore,
 		referencedValueStore *models.ReferencedValueStore,
 		deviceCommands []types.SDInformationFromBackend,
-		callback func(deviceCommand types.SDCommandInvocation),
+		callback func(invocation any),
 	) (bool, error)
 	GetId() string
 	Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error

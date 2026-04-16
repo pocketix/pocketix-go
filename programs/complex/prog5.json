@@ -12,7 +12,7 @@
                     "arguments": [
                         {
                             "type": "str_opt",
-                            "value": "phone_number"
+                            "value": "WEBPUSH"
                         },
                         {
                             "type": "string",

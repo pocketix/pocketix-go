@@ -96,7 +96,7 @@ func (a *TreeNode) ParseChildren(args any, operatorFactory *OperatorFactory, var
 		} else {
 			services.Logger.Println("Argument is a single value:", argValue, "of type:", argType)
 
-			argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt"} // insert "device_variable" type later
+			argTypes := []string{"string", "number", "boolean", "variable", "boolean_expression", "str_opt", "rich_text"} // insert "device_variable" type later
 			if !slices.Contains(argTypes, argType) {
 				return nil, fmt.Errorf("argument type %s is not supported", argType)
 			}

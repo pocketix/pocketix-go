@@ -105,8 +105,10 @@ func TestRepeatedCommandInvocation(t *testing.T) {
 	referencedValueStore.SetResolveParameterFunction(MockResolveCommandFunction)
 
 	var interpretInvocationsToSend []types.SDCommandInvocation
-	callback := func(deviceCommand types.SDCommandInvocation) {
-		interpretInvocationsToSend = append(interpretInvocationsToSend, deviceCommand)
+	callback := func(invocation any) {
+		if deviceCommand, ok := invocation.(types.SDCommandInvocation); ok {
+			interpretInvocationsToSend = append(interpretInvocationsToSend, deviceCommand)
+		}
 	}
 	statementList := make([]statements.Statement, 0)
 	collector := &statements.ASTCollector{Target: &statementList, DeviceCommands: make([]types.SDInformationFromBackend, 0)}

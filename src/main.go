@@ -54,12 +54,25 @@ func main() {
 	}
 
 	var interpretInvocationsToSend []types.SDCommandInvocation
+	var notificationInvocationsToSend []types.NotificationInvocation
 	for _, block := range ast {
-		if _, err := block.Execute(variableStore, referencedValueStore, collector.DeviceCommands, func(deviceCommand types.SDCommandInvocation) {
-			interpretInvocationsToSend = append(interpretInvocationsToSend, deviceCommand)
-		}); err != nil {
+		if _, err := block.Execute(variableStore,
+			referencedValueStore,
+			collector.DeviceCommands,
+			func(invocation any) {
+				switch invocationTyped := invocation.(type) {
+				case types.SDCommandInvocation:
+					interpretInvocationsToSend = append(interpretInvocationsToSend, invocationTyped)
+				case types.NotificationInvocation:
+					notificationInvocationsToSend = append(notificationInvocationsToSend, invocationTyped)
+				}
+			},
+		); err != nil {
 			log.Fatalln(err)
 		}
+	}
+	for _, notif := range notificationInvocationsToSend {
+		log.Println("sending notification through ", notif.EndpointType, " to ", notif.AddresseeID, ` "`, notif.Content, `"`)
 	}
 	services.Logger.Println("Execution completed successfully")
 }

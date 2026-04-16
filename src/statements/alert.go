@@ -2,6 +2,10 @@ package statements
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/pocketix/pocketix-go/src/models"
 	"github.com/pocketix/pocketix-go/src/services"
@@ -9,46 +13,79 @@ import (
 )
 
 type Alert struct {
-	Id           string
-	Method       string
-	Receiver     string
-	ReceiverType string
-	Message      string
-	MessageType  string
+	Id            string
+	Method        string
+	Addressee     any
+	AddresseeType string
+	Content       string
+	ContentType   string
 }
 
 func (a *Alert) Execute(
 	variableStore *models.VariableStore,
 	_ *models.ReferencedValueStore,
 	_ []types.SDInformationFromBackend,
-	_ func(deviceCommand types.SDCommandInvocation),
+	callback func(invocation any),
 ) (bool, error) {
 	services.Logger.Println("Executing alert")
 
-	if a.Method != "phone_number" && a.Method != "email" {
+	if a.Method != "WEBPUSH" {
 		return false, fmt.Errorf("invalid alert method")
 	}
 
-	receiver := a.Receiver
-	message := a.Message
-
-	if a.ReceiverType == "variable" {
-		variable, err := variableStore.GetVariable(a.Receiver)
+	addressee := fmt.Sprint(a.Addressee)
+	if a.AddresseeType == "variable" {
+		variable, err := variableStore.GetVariable(addressee)
 		if err != nil {
 			return false, err
 		}
-		receiver = variable.Value.Value.(string)
+		addressee = fmt.Sprint(variable.Value.Value)
 	}
+	addresseeUint, err := strconv.ParseUint(addressee, 10, 32)
+	if err != nil {
+		return false, fmt.Errorf("failed to parse addressee id: %w", err)
+	}
+	addresseeID := uint32(addresseeUint)
 
-	if a.MessageType == "variable" {
-		variable, err := variableStore.GetVariable(a.Message)
+	content := a.Content
+	if a.ContentType == "variable" {
+		variable, err := variableStore.GetVariable(a.Content)
 		if err != nil {
 			return false, err
 		}
-		message = variable.Value.Value.(string)
+		content = variable.Value.Value.(string)
 	}
 
-	services.Logger.Println("Sending alert with method", a.Method, "to receiver", receiver, "with message", message)
+	dynamicValues := map[string]string{
+		"currentTime": time.Now().Format("15:04:05"),
+		"currentDate": time.Now().Format("2006-01-02"),
+	}
+	re := regexp.MustCompile(`\{([^{}]+)\}`)
+	content = re.ReplaceAllStringFunc(content, func(match string) string {
+		matchTrimmed := strings.TrimSpace(match[1 : len(match)-1])
+		if len(matchTrimmed) > 0 {
+			if matchTrimmed[0] == '$' {
+				variableName := matchTrimmed[1:]
+				variable, err := variableStore.GetVariable(variableName)
+				if err == nil && variable != nil {
+					return fmt.Sprint(variable.Value.Value)
+				}
+			} else {
+				if value, ok := dynamicValues[matchTrimmed]; ok {
+					return value
+				}
+			}
+		}
+		return match
+	})
+
+	notificationToSend := types.NotificationInvocation{
+		AddresseeID:    addresseeID,
+		Content:        content,
+		EndpointType:   a.Method,
+		InvocationTime: time.Now().Format(time.RFC3339),
+	}
+	callback(notificationToSend)
 	return true, nil
 }
 
@@ -60,12 +97,12 @@ func (a *Alert) GetMethod() string {
 	return a.Method
 }
 
-func (a *Alert) GetReceiver() (string, string) {
-	return a.Receiver, a.ReceiverType
+func (a *Alert) GetAddressee() (any, string) {
+	return a.Addressee, a.AddresseeType
 }
 
-func (a *Alert) GetMessage() (string, string) {
-	return a.Message, a.MessageType
+func (a *Alert) GetContent() (string, string) {
+	return a.Content, a.ContentType
 }
 
 func (a *Alert) Validate(variableStore *models.VariableStore, referencedValueStore *models.ReferencedValueStore, args ...any) error {

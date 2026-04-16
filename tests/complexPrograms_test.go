@@ -59,7 +59,7 @@ func TestExecuteProgramWithReferencedValue(t *testing.T) {
 	assert.NotNil(statementAST, "Commands list should not be nil")
 
 	for _, statement := range statementAST {
-		_, err := statement.Execute(variableStore, referencedValueStore, nil, nil)
+		_, err := statement.Execute(variableStore, referencedValueStore, nil, func(any) {})
 		assert.Nil(err, "Error should be nil, but got: %v", err)
 	}
 
