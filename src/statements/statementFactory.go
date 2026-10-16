@@ -79,10 +79,16 @@ func StatementFactory(
 		return &Alert{
 			Id:            id,
 			Method:        tree[0].Value.(string),
-			Addressee:     tree[1].Value,
+			Addressee:     tree[1].Value.(string),
 			AddresseeType: tree[1].Type,
 			Content:       tree[2].Value.(string),
 			ContentType:   tree[2].Type,
+		}, nil
+	case "log":
+		return &Log{
+			Id:          id,
+			Content:     tree[0].Value.(string),
+			ContentType: tree[0].Type,
 		}, nil
 	case "deviceType":
 		return &DeviceType{
